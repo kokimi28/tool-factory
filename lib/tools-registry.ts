@@ -95,7 +95,7 @@ export const TOOLS: Tool[] = [
     description:
       "受給開始年齢ごとの年金総額と、繰上げ・繰下げの損益分岐となる年齢を試算。",
     cluster: "tax",
-    status: "planned",
+    status: "live",
   },
 ];
 
