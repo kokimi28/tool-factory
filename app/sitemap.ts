@@ -10,6 +10,7 @@ import type { MetadataRoute } from "next";
 import { SITE } from "@/lib/site";
 import { liveTools } from "@/lib/tools-registry";
 import { ARTICLES as TAISHOKUKIN_ARTICLES } from "@/lib/taishokukin/articles";
+import { ARTICLES as IDECO_ARTICLES } from "@/lib/ideco/articles";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const lastModified = new Date(SITE.lawCheckedAt);
@@ -21,21 +22,29 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.8,
   }));
 
-  // 各ツールの記事（トピッククラスタ）。移行/新規で記事を持つツールを増やしたら
-  // ここに1ブロック足す（当面は taishokukin のみ）。
-  const taishokukinArticles: MetadataRoute.Sitemap = [
+  // 各ツールの記事（トピッククラスタ）を1本に集約。記事を持つツールを移行/新規で
+  // 増やしたら、下の articleSets に1行足すだけ（一覧＋各記事が自動で載る）。
+  const articleEntries = (
+    slug: string,
+    articles: ReadonlyArray<{ slug: string; updated: string }>,
+  ): MetadataRoute.Sitemap => [
     {
-      url: `${SITE.url}/taishokukin/articles`,
+      url: `${SITE.url}/${slug}/articles`,
       lastModified,
       changeFrequency: "monthly",
       priority: 0.6,
     },
-    ...TAISHOKUKIN_ARTICLES.map((a) => ({
-      url: `${SITE.url}/taishokukin/articles/${a.slug}`,
+    ...articles.map((a) => ({
+      url: `${SITE.url}/${slug}/articles/${a.slug}`,
       lastModified: new Date(a.updated),
       changeFrequency: "yearly" as const,
       priority: 0.6,
     })),
+  ];
+
+  const articleSets: MetadataRoute.Sitemap = [
+    ...articleEntries("taishokukin", TAISHOKUKIN_ARTICLES),
+    ...articleEntries("ideco", IDECO_ARTICLES),
   ];
 
   return [
@@ -46,7 +55,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 1.0,
     },
     ...toolEntries,
-    ...taishokukinArticles,
+    ...articleSets,
     {
       url: `${SITE.url}/about`,
       lastModified,

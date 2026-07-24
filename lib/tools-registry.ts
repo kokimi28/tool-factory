@@ -50,7 +50,7 @@ export const TOOLS: Tool[] = [
     description:
       "iDeCo・企業型DCの一時金と退職金の受取順序・間隔による退職所得控除の重複調整と手取りを試算。",
     cluster: "tax",
-    status: "planned",
+    status: "live",
   },
   {
     slug: "tedori",
