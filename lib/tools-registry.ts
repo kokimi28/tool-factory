@@ -77,7 +77,7 @@ export const TOOLS: Tool[] = [
     description:
       "借入額・年収から住宅ローン控除の各年の控除額と期間総額を試算（省エネ要件・改正対応）。",
     cluster: "tax",
-    status: "planned",
+    status: "live",
   },
   {
     slug: "nenshu-kabe",
