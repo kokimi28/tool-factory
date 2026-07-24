@@ -11,6 +11,7 @@ import { SITE } from "@/lib/site";
 import { liveTools } from "@/lib/tools-registry";
 import { ARTICLES as TAISHOKUKIN_ARTICLES } from "@/lib/taishokukin/articles";
 import { ARTICLES as IDECO_ARTICLES } from "@/lib/ideco/articles";
+import { getAllArticles as tedoriArticles } from "@/lib/tedori/articles";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const lastModified = new Date(SITE.lawCheckedAt);
@@ -27,13 +28,19 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const articleEntries = (
     slug: string,
     articles: ReadonlyArray<{ slug: string; updated: string }>,
+    includeIndex: boolean,
   ): MetadataRoute.Sitemap => [
-    {
-      url: `${SITE.url}/${slug}/articles`,
-      lastModified,
-      changeFrequency: "monthly",
-      priority: 0.6,
-    },
+    // 記事一覧ページを持つツールだけ index URL を載せる（tedori は一覧ルート無し）。
+    ...(includeIndex
+      ? [
+          {
+            url: `${SITE.url}/${slug}/articles`,
+            lastModified,
+            changeFrequency: "monthly" as const,
+            priority: 0.6,
+          },
+        ]
+      : []),
     ...articles.map((a) => ({
       url: `${SITE.url}/${slug}/articles/${a.slug}`,
       lastModified: new Date(a.updated),
@@ -43,8 +50,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
   ];
 
   const articleSets: MetadataRoute.Sitemap = [
-    ...articleEntries("taishokukin", TAISHOKUKIN_ARTICLES),
-    ...articleEntries("ideco", IDECO_ARTICLES),
+    ...articleEntries("taishokukin", TAISHOKUKIN_ARTICLES, true),
+    ...articleEntries("ideco", IDECO_ARTICLES, true),
+    // tedori の Article は updatedAt を使う／一覧ルートは持たない
+    ...articleEntries(
+      "tedori",
+      tedoriArticles().map((a) => ({ slug: a.slug, updated: a.updatedAt })),
+      false,
+    ),
   ];
 
   return [

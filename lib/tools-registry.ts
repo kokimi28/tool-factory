@@ -59,7 +59,7 @@ export const TOOLS: Tool[] = [
     description:
       "年収から社会保険料・所得税・住民税を差し引いた手取り額を計算する単機能ツール。",
     cluster: "tax",
-    status: "planned",
+    status: "live",
   },
   {
     slug: "furusato",
