@@ -86,7 +86,7 @@ export const TOOLS: Tool[] = [
     description:
       "103・106・130・150万円の「壁」ごとに、超えた場合の手取りの逆転と回復ラインを可視化。",
     cluster: "tax",
-    status: "planned",
+    status: "live",
   },
   {
     slug: "nenkin-kuriage",
