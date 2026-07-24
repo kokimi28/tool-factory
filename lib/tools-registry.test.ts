@@ -53,13 +53,25 @@ describe("tools-registry の不変条件", () => {
     }
   });
 
-  it("taishokukin は公開済（C1 移行1本目）", () => {
-    // C1 以降、移行/新規で構築したツールから status を 'live' に切り替える。
-    expect(getTool("taishokukin")?.status).toBe("live");
+  it("税ツール7種がすべて公開済み（C1 移行3本＋P1〜P4 新規4本）", () => {
+    // 新規ツールを planned で追加したらこの一覧に足し、構築できたら live にする。
+    const liveSlugs = [
+      "taishokukin",
+      "ideco",
+      "tedori",
+      "furusato",
+      "jutaku-loan",
+      "nenshu-kabe",
+      "nenkin-kuriage",
+    ];
+    for (const slug of liveSlugs) {
+      expect(getTool(slug)?.status).toBe("live");
+    }
   });
 
-  it("未構築のツールは planned（ハブは準備中表示）", () => {
-    const statuses = new Set(TOOLS.map((t: Tool) => t.status));
-    expect(statuses.has("planned")).toBe(true);
+  it("planned のツールにはルートが未実装（ハブは準備中表示）＝現状は planned なし", () => {
+    // 現在は全ツール公開済み。将来 planned を足したらこの前提を見直す。
+    const planned = TOOLS.filter((t: Tool) => t.status === "planned");
+    expect(planned.length).toBe(0);
   });
 });
