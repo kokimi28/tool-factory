@@ -9,6 +9,7 @@
 import type { MetadataRoute } from "next";
 import { SITE } from "@/lib/site";
 import { liveTools } from "@/lib/tools-registry";
+import { ARTICLES as TAISHOKUKIN_ARTICLES } from "@/lib/taishokukin/articles";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const lastModified = new Date(SITE.lawCheckedAt);
@@ -20,6 +21,23 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.8,
   }));
 
+  // 各ツールの記事（トピッククラスタ）。移行/新規で記事を持つツールを増やしたら
+  // ここに1ブロック足す（当面は taishokukin のみ）。
+  const taishokukinArticles: MetadataRoute.Sitemap = [
+    {
+      url: `${SITE.url}/taishokukin/articles`,
+      lastModified,
+      changeFrequency: "monthly",
+      priority: 0.6,
+    },
+    ...TAISHOKUKIN_ARTICLES.map((a) => ({
+      url: `${SITE.url}/taishokukin/articles/${a.slug}`,
+      lastModified: new Date(a.updated),
+      changeFrequency: "yearly" as const,
+      priority: 0.6,
+    })),
+  ];
+
   return [
     {
       url: SITE.url,
@@ -28,6 +46,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 1.0,
     },
     ...toolEntries,
+    ...taishokukinArticles,
     {
       url: `${SITE.url}/about`,
       lastModified,
