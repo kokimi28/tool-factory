@@ -68,7 +68,7 @@ export const TOOLS: Tool[] = [
     description:
       "年収・家族構成から、自己負担2,000円で済むふるさと納税の控除上限額（目安）を計算。",
     cluster: "tax",
-    status: "planned",
+    status: "live",
   },
   {
     slug: "jutaku-loan",
