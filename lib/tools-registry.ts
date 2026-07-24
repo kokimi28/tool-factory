@@ -41,7 +41,7 @@ export const TOOLS: Tool[] = [
     description:
       "退職金額と勤続年数から退職所得控除・所得税・住民税・手取りを計算。役員退職金・短期勤続・iDeCo併用にも対応。",
     cluster: "tax",
-    status: "planned",
+    status: "live",
   },
   {
     slug: "ideco",

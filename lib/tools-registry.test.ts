@@ -53,8 +53,12 @@ describe("tools-registry の不変条件", () => {
     }
   });
 
-  it("C0 時点では全ツールが planned（ルート未構築＝ハブは準備中表示）", () => {
+  it("taishokukin は公開済（C1 移行1本目）", () => {
     // C1 以降、移行/新規で構築したツールから status を 'live' に切り替える。
+    expect(getTool("taishokukin")?.status).toBe("live");
+  });
+
+  it("未構築のツールは planned（ハブは準備中表示）", () => {
     const statuses = new Set(TOOLS.map((t: Tool) => t.status));
     expect(statuses.has("planned")).toBe(true);
   });
