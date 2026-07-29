@@ -80,6 +80,23 @@ describe("estimateTaxableIncomeFromSalary — 年収→課税総所得金額（�
   });
 });
 
+describe("記事 furusato-limit-shikumi（A0）の worked example の二重化", () => {
+  // 記事本文で使う2つの見出し数値を、結果オブジェクト全体で固定する
+  // （誤値が記事に載ると CI が赤 → 自走マージが止まる。auto-backlog §品質ゲート①）。
+  it("課税所得300万 → 住民税所得割30万・税率10%・上限77,197（記事の主計算）", () => {
+    expect(calcFurusatoLimit(3_000_000)).toEqual({
+      limit: 77_197,
+      residentLevy: 300_000,
+      marginalRate: 0.1,
+    });
+  });
+  it("年収600万・扶養なし → 課税所得299.5万・上限77,072（記事の年収概算）", () => {
+    const r = estimateFurusatoLimitFromSalary({ annualIncome: 6_000_000 });
+    expect(r.estimatedTaxableIncome).toBe(2_995_000);
+    expect(r.limit).toBe(77_072);
+  });
+});
+
 describe("estimateFurusatoLimitFromSalary — 年収→上限（概算）", () => {
   it("年収600万・扶養なし → 課税所得2,995,000・上限77,072", () => {
     const r = estimateFurusatoLimitFromSalary({ annualIncome: 6_000_000 });
