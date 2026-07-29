@@ -14,6 +14,7 @@ import { ARTICLES as IDECO_ARTICLES } from "@/lib/ideco/articles";
 import { getAllArticles as tedoriArticles } from "@/lib/tedori/articles";
 import { ARTICLES as FURUSATO_ARTICLES } from "@/lib/furusato/articles";
 import { ARTICLES as JUTAKU_LOAN_ARTICLES } from "@/lib/jutaku-loan/articles";
+import { ARTICLES as NENSHU_KABE_ARTICLES } from "@/lib/nenshu-kabe/articles";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const lastModified = new Date(SITE.lawCheckedAt);
@@ -56,6 +57,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ...articleEntries("ideco", IDECO_ARTICLES, true),
     ...articleEntries("furusato", FURUSATO_ARTICLES, true),
     ...articleEntries("jutaku-loan", JUTAKU_LOAN_ARTICLES, true),
+    ...articleEntries("nenshu-kabe", NENSHU_KABE_ARTICLES, true),
     // tedori の Article は updatedAt を使う／一覧ルートは持たない
     ...articleEntries(
       "tedori",
