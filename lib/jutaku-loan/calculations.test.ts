@@ -80,6 +80,22 @@ describe("calcHomeLoanDeduction — 各年・総額の控除見込み", () => {
     expect(r.totalDeduction).toBe(1_251_200);
     expect(r.schedule[0].deduction).toBe(140_000); // 2,000万×0.7%
   });
+  it("記事 jutaku-loan-shikumi（B0）の worked example: ZEH4,000万/0.8%/35年の主数値", () => {
+    // 記事本文の見出し数値（総額291万・1年目24.5万・13年目残高/控除）を固定。
+    // 誤値が記事に載ると CI が赤 → 自走マージが止まる（auto-backlog §品質ゲート①）。
+    const r = calcHomeLoanDeduction({
+      principal: 40_000_000,
+      annualRatePercent: 0.8,
+      years: 35,
+      housingType: "zeh",
+    });
+    expect(r.totalDeduction).toBe(2_915_500);
+    expect(r.schedule[0].deduction).toBe(245_000); // 1年目=限度3,500万×0.7%
+    expect(r.schedule[12].yearEndBalance).toBe(26_432_200); // 13年目残高
+    expect(r.schedule[12].deduction).toBe(185_000);
+    expect(monthlyPayment(30_000_000, 1.0, 35)).toBe(84_685); // 記事の毎月返済額の例
+  });
+
   it("子育て世帯フラグで新築の限度額が上がり控除も増える", () => {
     const base = calcHomeLoanDeduction({
       principal: 50_000_000,
