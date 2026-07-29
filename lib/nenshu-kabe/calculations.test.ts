@@ -40,6 +40,17 @@ describe("takeHomeWithWall — 130万の壁の前後", () => {
   });
 });
 
+describe("記事 nenshu-kabe-guide（C0）の worked example トレーサビリティ", () => {
+  // 記事本文の2つの見出し数値を1ケースで束ね、記事 slug に紐づけて固定する
+  // （誤値が記事に載ると CI が赤 → 自走マージが止まる。auto-backlog §品質ゲート①）。
+  it("130万=drop163,550/回復152万・106万=drop146,350/回復124万（記事の主数値）", () => {
+    const w130 = analyzeWallReversal(1_300_000);
+    const w106 = analyzeWallReversal(1_060_000);
+    expect([w130.dropAtWall, w130.recoveryIncome]).toEqual([163_550, 1_520_000]);
+    expect([w106.dropAtWall, w106.recoveryIncome]).toEqual([146_350, 1_240_000]);
+  });
+});
+
 describe("analyzeWallReversal — 逆転の谷と回復年収", () => {
   it("130万の壁: 手取り163,550円ダウン・回復年収152万円（+22万）", () => {
     const r = analyzeWallReversal(1_300_000);
