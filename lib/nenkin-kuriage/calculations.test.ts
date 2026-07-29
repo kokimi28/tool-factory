@@ -75,6 +75,20 @@ describe("cumulativePension — 累計受給額の逆転", () => {
   });
 });
 
+describe("記事 nenkin-kuriage-shikumi（D0）の worked example トレーサビリティ", () => {
+  // 記事本文の見出し数値（月額60=114,000/70=213,000/75=276,000・70歳損益分岐81歳11か月）を
+  // 記事 slug に紐づけて固定する（誤値が記事に載ると CI が赤・auto-backlog §品質ゲート①）。
+  it("65歳月15万 → 60歳114,000/70歳213,000/75歳276,000・70歳分岐81歳11か月", () => {
+    expect([
+      monthlyPension(150_000, 60),
+      monthlyPension(150_000, 70),
+      monthlyPension(150_000, 75),
+    ]).toEqual([114_000, 213_000, 276_000]);
+    const b70 = breakEvenAgeVs65(70);
+    expect([b70.years, b70.months]).toEqual([81, 11]);
+  });
+});
+
 describe("pensionScenario — 率・月額・年額", () => {
   it("70歳開始（65歳15万）: 率1.42・月213,000・年2,556,000", () => {
     const s = pensionScenario(150_000, 70);
