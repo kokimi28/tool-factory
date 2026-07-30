@@ -80,6 +80,16 @@ describe("estimateTaxableIncomeFromSalary — 年収→課税総所得金額（�
   });
 });
 
+describe("記事 furusato-tomobataraki-fuyou（A2）の家族構成別の二重化", () => {
+  // 記事の年収700万・家族構成別の限度額を固定（品質ゲート①）。
+  it("年収700万: 共働き107,978 / 配偶者97,056 / +扶養1 75,367 / +扶養2 65,842", () => {
+    expect(estimateFurusatoLimitFromSalary({ annualIncome: 7_000_000 }).limit).toBe(107_978);
+    expect(estimateFurusatoLimitFromSalary({ annualIncome: 7_000_000, hasSpouse: true }).limit).toBe(97_056);
+    expect(estimateFurusatoLimitFromSalary({ annualIncome: 7_000_000, hasSpouse: true, dependents: 1 }).limit).toBe(75_367);
+    expect(estimateFurusatoLimitFromSalary({ annualIncome: 7_000_000, hasSpouse: true, dependents: 2 }).limit).toBe(65_842);
+  });
+});
+
 describe("記事 furusato-limit-nenshu（A1）の年収別早見の二重化", () => {
   // 記事の早見表数値（扶養なし独身の概算・年収300/500/700/1000万）を固定。
   // 誤値が記事に載ると CI が赤 → 自走マージが止まる（auto-backlog §品質ゲート①）。
