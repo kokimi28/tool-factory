@@ -25,6 +25,15 @@ describe("takeHomeAtIncome — tedori と同一仕様（加入時）", () => {
   });
 });
 
+describe("記事 nenshu-kabe-103（C3）の税の壁は緩やかの二重化", () => {
+  // 記事の見出し数値（103万→手取り103万・110万→手取り109.3万＝税の壁は逆転しない）を固定。
+  it("103万→手取り1,030,000・106万→1,060,000・110万→1,093,000（未加入・税の壁）", () => {
+    expect(takeHomeAtIncome(1_030_000, false).takeHome).toBe(1_030_000);
+    expect(takeHomeAtIncome(1_060_000, false).takeHome).toBe(1_060_000);
+    expect(takeHomeAtIncome(1_100_000, false).takeHome).toBe(1_093_000);
+  });
+});
+
 describe("記事 nenshu-kabe-130（C2）の worked example: 130万の壁の逆転と回復", () => {
   // 記事本文の見出し数値（129万→130万の谷・135/150万・152万回復）を固定（品質ゲート①）。
   it("129万1,264,000 → 130万 社保191,750/手取り1,100,450 → 135万1,138,875/150万1,253,950/152万回復1,269,300", () => {
