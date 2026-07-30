@@ -25,6 +25,17 @@ describe("takeHomeAtIncome — tedori と同一仕様（加入時）", () => {
   });
 });
 
+describe("記事 nenshu-kabe-106（C1）の worked example: 106万の壁の前後", () => {
+  // 記事本文の見出し数値（105万→手取り105万・106万→社保156,350/手取り903,650・124万回復）を固定。
+  // 誤値が記事に載ると CI が赤 → 自走マージが止まる（auto-backlog §品質ゲート①）。
+  it("105万未加入1,050,000 → 106万加入 社保156,350/手取り903,650 → 124万回復1,057,100", () => {
+    expect(takeHomeWithWall(1_050_000, 1_060_000).takeHome).toBe(1_050_000);
+    const at106 = takeHomeWithWall(1_060_000, 1_060_000);
+    expect([at106.enrolled, at106.socialInsurance, at106.takeHome]).toEqual([true, 156_350, 903_650]);
+    expect(takeHomeWithWall(1_240_000, 1_060_000).takeHome).toBe(1_057_100);
+  });
+});
+
 describe("takeHomeWithWall — 130万の壁の前後", () => {
   it("129万は未加入・手取り1,264,000", () => {
     const r = takeHomeWithWall(1_290_000, 1_300_000);
