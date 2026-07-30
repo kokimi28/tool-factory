@@ -80,6 +80,16 @@ describe("calcHomeLoanDeduction — 各年・総額の控除見込み", () => {
     expect(r.totalDeduction).toBe(1_251_200);
     expect(r.schedule[0].deduction).toBe(140_000); // 2,000万×0.7%
   });
+  it("記事 jutaku-loan-genndo-hayami（B1）の控除総額上限の早見（子育て・新築）", () => {
+    // 残高が限度以上で推移する前提の13年総額を固定（記事の早見表数値・品質ゲート①）。
+    const lt = calcHomeLoanDeduction({ principal: 60_000_000, annualRatePercent: 1.0, years: 35, housingType: "long_term", childRearingHousehold: true });
+    const zeh = calcHomeLoanDeduction({ principal: 60_000_000, annualRatePercent: 1.0, years: 35, housingType: "zeh", childRearingHousehold: true });
+    const es = calcHomeLoanDeduction({ principal: 60_000_000, annualRatePercent: 1.0, years: 35, housingType: "energy_saving", childRearingHousehold: true });
+    expect([lt.limit, lt.schedule[0].deduction, lt.totalDeduction]).toEqual([50_000_000, 350_000, 4_300_300]);
+    expect([zeh.limit, zeh.schedule[0].deduction, zeh.totalDeduction]).toEqual([45_000_000, 315_000, 4_025_900]);
+    expect([es.limit, es.schedule[0].deduction, es.totalDeduction]).toEqual([40_000_000, 280_000, 3_640_000]);
+  });
+
   it("記事 jutaku-loan-shikumi（B0）の worked example: ZEH4,000万/0.8%/35年の主数値", () => {
     // 記事本文の見出し数値（総額291万・1年目24.5万・13年目残高/控除）を固定。
     // 誤値が記事に載ると CI が赤 → 自走マージが止まる（auto-backlog §品質ゲート①）。
