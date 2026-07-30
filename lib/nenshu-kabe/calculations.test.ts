@@ -25,6 +25,18 @@ describe("takeHomeAtIncome — tedori と同一仕様（加入時）", () => {
   });
 });
 
+describe("記事 nenshu-kabe-130（C2）の worked example: 130万の壁の逆転と回復", () => {
+  // 記事本文の見出し数値（129万→130万の谷・135/150万・152万回復）を固定（品質ゲート①）。
+  it("129万1,264,000 → 130万 社保191,750/手取り1,100,450 → 135万1,138,875/150万1,253,950/152万回復1,269,300", () => {
+    expect(takeHomeWithWall(1_290_000, 1_300_000).takeHome).toBe(1_264_000);
+    const at130 = takeHomeWithWall(1_300_000, 1_300_000);
+    expect([at130.socialInsurance, at130.takeHome]).toEqual([191_750, 1_100_450]);
+    expect(takeHomeWithWall(1_350_000, 1_300_000).takeHome).toBe(1_138_875);
+    expect(takeHomeWithWall(1_500_000, 1_300_000).takeHome).toBe(1_253_950);
+    expect(takeHomeWithWall(1_520_000, 1_300_000).takeHome).toBe(1_269_300);
+  });
+});
+
 describe("記事 nenshu-kabe-106（C1）の worked example: 106万の壁の前後", () => {
   // 記事本文の見出し数値（105万→手取り105万・106万→社保156,350/手取り903,650・124万回復）を固定。
   // 誤値が記事に載ると CI が赤 → 自走マージが止まる（auto-backlog §品質ゲート①）。
