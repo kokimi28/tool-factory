@@ -80,6 +80,17 @@ describe("estimateTaxableIncomeFromSalary — 年収→課税総所得金額（�
   });
 });
 
+describe("記事 furusato-limit-nenshu（A1）の年収別早見の二重化", () => {
+  // 記事の早見表数値（扶養なし独身の概算・年収300/500/700/1000万）を固定。
+  // 誤値が記事に載ると CI が赤 → 自走マージが止まる（auto-backlog §品質ゲート①）。
+  it("年収300万→27,843 / 500万→60,704 / 700万→107,978 / 1000万→177,194", () => {
+    expect(estimateFurusatoLimitFromSalary({ annualIncome: 3_000_000 }).limit).toBe(27_843);
+    expect(estimateFurusatoLimitFromSalary({ annualIncome: 5_000_000 }).limit).toBe(60_704);
+    expect(estimateFurusatoLimitFromSalary({ annualIncome: 7_000_000 }).limit).toBe(107_978);
+    expect(estimateFurusatoLimitFromSalary({ annualIncome: 10_000_000 }).limit).toBe(177_194);
+  });
+});
+
 describe("記事 furusato-limit-shikumi（A0）の worked example の二重化", () => {
   // 記事本文で使う2つの見出し数値を、結果オブジェクト全体で固定する
   // （誤値が記事に載ると CI が赤 → 自走マージが止まる。auto-backlog §品質ゲート①）。
