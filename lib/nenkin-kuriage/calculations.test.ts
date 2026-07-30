@@ -60,6 +60,19 @@ describe("breakEvenAgeVs65 — 65歳受給との損益分岐年齢", () => {
   });
 });
 
+describe("記事 nenkin-kuriage-demerit（D2）の繰上げ損益分岐の二重化", () => {
+  // 記事の見出し数値（60歳月114,000・分岐80歳10か月・75/85歳累計）を固定（品質ゲート①）。
+  it("60歳月114,000・分岐80歳10か月・75歳c60=2,052万/85歳c60=3,420万(65歳は3,600万)", () => {
+    expect(monthlyPension(150_000, 60)).toBe(114_000);
+    const b60 = breakEvenAgeVs65(60);
+    expect([b60.years, b60.months]).toEqual([80, 10]);
+    expect(cumulativePension(150_000, 60, 75)).toBe(20_520_000);
+    expect(cumulativePension(150_000, 65, 75)).toBe(18_000_000);
+    expect(cumulativePension(150_000, 60, 85)).toBe(34_200_000);
+    expect(cumulativePension(150_000, 65, 85)).toBe(36_000_000);
+  });
+});
+
 describe("記事 nenkin-kurisage-soneki（D1）の累計比較の二重化", () => {
   // 記事本文の見出し数値（85歳・90歳での累計と繰下げの差）を固定（品質ゲート①）。
   it("85歳: 65歳3,600万/70歳3,834万（差234万）・90歳: 4,500万/5,112万（差612万）", () => {
