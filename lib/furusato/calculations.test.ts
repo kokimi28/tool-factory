@@ -80,6 +80,18 @@ describe("estimateTaxableIncomeFromSalary — 年収→課税総所得金額（�
   });
 });
 
+describe("記事 furusato-limit-koeta（A3）の超過自己負担の二重化", () => {
+  // 記事の実額（上限77,197・10万寄付→超過22,803・自己負担24,803）を calc の上限から固定。
+  it("課税所得300万・10万寄付 → 超過22,803・自己負担24,803（上限77,197から）", () => {
+    const limit = calcFurusatoLimit(3_000_000).limit;
+    expect(limit).toBe(77_197);
+    const donation = 100_000;
+    const excess = donation - limit;
+    expect(excess).toBe(22_803);
+    expect(2_000 + excess).toBe(24_803);
+  });
+});
+
 describe("記事 furusato-tomobataraki-fuyou（A2）の家族構成別の二重化", () => {
   // 記事の年収700万・家族構成別の限度額を固定（品質ゲート①）。
   it("年収700万: 共働き107,978 / 配偶者97,056 / +扶養1 75,367 / +扶養2 65,842", () => {
