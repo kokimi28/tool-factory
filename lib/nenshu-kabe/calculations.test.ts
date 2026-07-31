@@ -25,6 +25,14 @@ describe("takeHomeAtIncome — tedori と同一仕様（加入時）", () => {
   });
 });
 
+describe("記事 nenshu-kabe-saiteki（C5）の回復ライン（最適年収）の二重化", () => {
+  // 記事の回復ライン（130万→152万・106万→124万）を固定（品質ゲート①）。
+  it("130万の壁 回復152万・106万の壁 回復124万（最適年収ライン）", () => {
+    expect(analyzeWallReversal(1_300_000).recoveryIncome).toBe(1_520_000);
+    expect(analyzeWallReversal(1_060_000).recoveryIncome).toBe(1_240_000);
+  });
+});
+
 describe("記事 nenshu-kabe-150-201（C4）の本人手取りは逆転しないの二重化", () => {
   // 記事の手取り（社保加入者・150/160/201万で増え続ける）を固定（品質ゲート①）。
   it("150万→1,253,950・160万→1,330,600・201万→1,640,868（逆転せず増加）", () => {
