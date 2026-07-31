@@ -80,6 +80,14 @@ describe("estimateTaxableIncomeFromSalary — 年収→課税総所得金額（�
   });
 });
 
+describe("記事 furusato-ideco-iryohi（A5）のiDeCo併用の二重化", () => {
+  // 記事の見出し数値（課税所得300万→272.4万で上限77,197→70,279）を固定（品質ゲート①）。
+  it("iDeCo年27.6万で課税所得300万→272.4万・上限77,197→70,279", () => {
+    expect(calcFurusatoLimit(3_000_000).limit).toBe(77_197);
+    expect(calcFurusatoLimit(2_724_000).limit).toBe(70_279);
+  });
+});
+
 describe("記事 furusato-onestop-kakutei（A4）の内訳説明の数値アンカー", () => {
   // 記事が使う課税所得300万の上限77,197・住民税所得割300,000を固定（内訳が変わっても総額は同じ）。
   it("課税所得300万 → 上限77,197・住民税所得割300,000", () => {
