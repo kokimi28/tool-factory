@@ -80,6 +80,16 @@ describe("calcHomeLoanDeduction — 各年・総額の控除見込み", () => {
     expect(r.totalDeduction).toBe(1_251_200);
     expect(r.schedule[0].deduction).toBe(140_000); // 2,000万×0.7%
   });
+  it("記事 jutaku-loan-kuriage-hensai（B5）の残高ベース控除と0.7%逆算", () => {
+    // 記事の schedule 値（ZEH4,000万/0.8%/35年の6/13年目）を固定し、繰上げ効果の 0.7% を検証。
+    const r = calcHomeLoanDeduction({ principal: 40_000_000, annualRatePercent: 0.8, years: 35, housingType: "zeh" });
+    expect(r.schedule[5].deduction).toBe(237_300); // 6年目（残高が限度未満・残高ベース）
+    expect(r.schedule[12].yearEndBalance).toBe(26_432_200);
+    expect(r.schedule[12].deduction).toBe(185_000);
+    // 繰上げ返済 500万円 → 控除は 500万×0.7% = 35,000円/年 減る（記事の目安）
+    expect(Math.floor(5_000_000 * 0.007)).toBe(35_000);
+  });
+
   it("記事 jutaku-loan-zeh-shouene（B4）の性能区分別の控除総額（一般世帯・6,000万/1%/35年）", () => {
     // 記事の性能区分別 総額を固定（品質ゲート①）。借入6,000万で残高が限度以上に推移する前提。
     const lt = calcHomeLoanDeduction({ principal: 60_000_000, annualRatePercent: 1.0, years: 35, housingType: "long_term" });
