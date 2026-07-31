@@ -80,6 +80,14 @@ describe("estimateTaxableIncomeFromSalary — 年収→課税総所得金額（�
   });
 });
 
+describe("記事 furusato-onestop-kakutei（A4）の内訳説明の数値アンカー", () => {
+  // 記事が使う課税所得300万の上限77,197・住民税所得割300,000を固定（内訳が変わっても総額は同じ）。
+  it("課税所得300万 → 上限77,197・住民税所得割300,000", () => {
+    expect(calcFurusatoLimit(3_000_000).limit).toBe(77_197);
+    expect(residentTaxLevy(3_000_000)).toBe(300_000);
+  });
+});
+
 describe("記事 furusato-limit-koeta（A3）の超過自己負担の二重化", () => {
   // 記事の実額（上限77,197・10万寄付→超過22,803・自己負担24,803）を calc の上限から固定。
   it("課税所得300万・10万寄付 → 超過22,803・自己負担24,803（上限77,197から）", () => {
