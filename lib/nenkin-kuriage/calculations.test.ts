@@ -60,6 +60,16 @@ describe("breakEvenAgeVs65 — 65歳受給との損益分岐年齢", () => {
   });
 });
 
+describe("記事 nenkin-ideco-juntai（D5）の公的年金額面の二重化", () => {
+  // 記事の公的年金 額面（65/70/75歳）を固定（品質ゲート①）。iDeCo一時金の重複調整は
+  // ideco ツールの領域のため本文でリンク誘導し、本記事は公的年金の額面を anchor にする。
+  it("公的年金 年額 65歳1,800,000 / 70歳2,556,000 / 75歳3,312,000", () => {
+    expect(pensionScenario(150_000, 65).annual).toBe(1_800_000);
+    expect(pensionScenario(150_000, 70).annual).toBe(2_556_000);
+    expect(pensionScenario(150_000, 75).annual).toBe(3_312_000);
+  });
+});
+
 describe("記事 nenkin-kurisage-tesudori（D4）の額面の二重化", () => {
   // 記事の額面（年金額そのもの・65/70/75歳）を固定（品質ゲート①）。
   // 税・社保・手取りは公的年金等控除や自治体で変わるため本文で定量化せず、額面を anchor にする。
