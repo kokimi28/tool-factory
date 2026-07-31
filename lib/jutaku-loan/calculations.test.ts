@@ -80,6 +80,16 @@ describe("calcHomeLoanDeduction — 各年・総額の控除見込み", () => {
     expect(r.totalDeduction).toBe(1_251_200);
     expect(r.schedule[0].deduction).toBe(140_000); // 2,000万×0.7%
   });
+  it("記事 jutaku-loan-zeh-shouene（B4）の性能区分別の控除総額（一般世帯・6,000万/1%/35年）", () => {
+    // 記事の性能区分別 総額を固定（品質ゲート①）。借入6,000万で残高が限度以上に推移する前提。
+    const lt = calcHomeLoanDeduction({ principal: 60_000_000, annualRatePercent: 1.0, years: 35, housingType: "long_term" });
+    const zeh = calcHomeLoanDeduction({ principal: 60_000_000, annualRatePercent: 1.0, years: 35, housingType: "zeh" });
+    const es = calcHomeLoanDeduction({ principal: 60_000_000, annualRatePercent: 1.0, years: 35, housingType: "energy_saving" });
+    expect([lt.limit, lt.schedule[0].deduction, lt.totalDeduction]).toEqual([45_000_000, 315_000, 4_025_900]);
+    expect([zeh.limit, zeh.schedule[0].deduction, zeh.totalDeduction]).toEqual([35_000_000, 245_000, 3_185_000]);
+    expect([es.limit, es.schedule[0].deduction, es.totalDeduction]).toEqual([30_000_000, 210_000, 2_730_000]);
+  });
+
   it("記事 jutaku-loan-juminzei（B3）の中古2,000万の控除額（住民税枠の説明用）", () => {
     // 記事の控除額（中古2,000万・1年目136,600・10年総額1,209,100）を固定（品質ゲート①）。
     // 住民税からの控除上限97,500円は法定値（国税庁 No.1211-1）で計算対象外のため本文で明記。
