@@ -80,6 +80,23 @@ describe("estimateTaxableIncomeFromSalary — 年収→課税総所得金額（�
   });
 });
 
+describe("記事 furusato-keisan-shiki（A10）の20%の壁の二重化", () => {
+  // 記事の分解（特例分＝住民税所得割の20%）と限度額を固定（品質ゲート①）。
+  // 300万: 所得割300,000・特例分上限60,000・限度額77,197 / 700万: 700,000・140,000・212,472。
+  it("課税所得300万: 所得割300,000×20%=60,000・限度額77,197（率10%）", () => {
+    expect(residentTaxLevy(3_000_000)).toBe(300_000);
+    expect(residentTaxLevy(3_000_000) * 0.2).toBe(60_000);
+    expect(marginalIncomeTaxRate(3_000_000)).toBe(0.1);
+    expect(calcFurusatoLimit(3_000_000).limit).toBe(77_197);
+  });
+  it("課税所得700万: 所得割700,000×20%=140,000・限度額212,472（率23%）", () => {
+    expect(residentTaxLevy(7_000_000)).toBe(700_000);
+    expect(residentTaxLevy(7_000_000) * 0.2).toBe(140_000);
+    expect(marginalIncomeTaxRate(7_000_000)).toBe(0.23);
+    expect(calcFurusatoLimit(7_000_000).limit).toBe(212_472);
+  });
+});
+
 describe("記事 furusato-jutaku-loan（A6）の所得税取り合いの数値アンカー", () => {
   // 記事が使う課税所得300万の上限77,197・住民税所得割300,000を固定（住宅ローン控除との併用説明用）。
   it("課税所得300万 → 上限77,197・住民税所得割300,000", () => {
