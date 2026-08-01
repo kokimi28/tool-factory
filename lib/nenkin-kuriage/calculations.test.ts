@@ -60,6 +60,22 @@ describe("breakEvenAgeVs65 — 65歳受給との損益分岐年齢", () => {
   });
 });
 
+describe("記事 nenkin-fufu-kurisage-senryaku（D8）の世帯額面の二重化", () => {
+  // 記事の夫婦別 年金額面（夫月18万・妻月8万の65/70歳）を固定（品質ゲート①）。
+  // 加給年金・遺族年金は法定・世帯依存で計算対象外のため本文で定性的に扱い、額面を anchor にする。
+  it("夫 65歳年216万/70歳年306.72万・妻 65歳年96万/70歳年136.32万・世帯合算", () => {
+    expect(pensionScenario(180_000, 65).annual).toBe(2_160_000);
+    expect(pensionScenario(180_000, 70).annual).toBe(3_067_200);
+    expect(pensionScenario(80_000, 65).annual).toBe(960_000);
+    expect(pensionScenario(80_000, 70).annual).toBe(1_363_200);
+    // 世帯合算（記事の早見）
+    expect(pensionScenario(180_000, 65).annual + pensionScenario(80_000, 65).annual).toBe(3_120_000);
+    expect(pensionScenario(180_000, 70).annual + pensionScenario(80_000, 65).annual).toBe(4_027_200);
+    expect(pensionScenario(180_000, 65).annual + pensionScenario(80_000, 70).annual).toBe(3_523_200);
+    expect(pensionScenario(180_000, 70).annual + pensionScenario(80_000, 70).annual).toBe(4_430_400);
+  });
+});
+
 describe("記事 nenkin-nansai-kara-saiteki（D10）の寿命別最多開始年齢の二重化", () => {
   // 記事の寿命別 累計（最多になる開始年齢が入れ替わる）と損益分岐年齢を固定（品質ゲート①）。
   // 75/80歳没=60繰上げ最多 / 85/90歳没=70繰下げ最多 / 95/100歳没=75繰下げ最多。
