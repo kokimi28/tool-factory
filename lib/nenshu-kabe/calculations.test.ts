@@ -25,6 +25,17 @@ describe("takeHomeAtIncome — tedori と同一仕様（加入時）", () => {
   });
 });
 
+describe("記事 nenshu-kabe-double-work（C10）のダブルワーク合算の二重化", () => {
+  // 記事の合算収入の手取り（未加入・税のみ）を固定（品質ゲート①）。
+  // 扶養130万は合算判定、社保加入は勤務先ごと要件で calc 未モデルのため本文で明記。
+  it("合算100万→手取り1,000,000（税0）・合算160万→手取り1,543,000（税57,000）", () => {
+    expect(takeHomeAtIncome(1_000_000, false).takeHome).toBe(1_000_000);
+    const c160 = takeHomeAtIncome(1_600_000, false);
+    expect(c160.takeHome).toBe(1_543_000);
+    expect(1_600_000 - c160.takeHome).toBe(57_000);
+  });
+});
+
 describe("記事 nenshu-kabe-hatarakikata（C8）の働き方別 手取り比較の二重化", () => {
   // 記事の働き方別 手取り（106万の壁を跨ぐ/跨がない）を固定（品質ゲート①）。
   // 105万抑える=1,050,000 / 106万加入=903,650（逆転）/ 125万で105万時を上回る=1,065,625。
