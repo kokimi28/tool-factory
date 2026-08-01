@@ -60,6 +60,44 @@ describe("breakEvenAgeVs65 — 65歳受給との損益分岐年齢", () => {
   });
 });
 
+describe("記事 nenkin-nansai-kara-saiteki（D10）の寿命別最多開始年齢の二重化", () => {
+  // 記事の寿命別 累計（最多になる開始年齢が入れ替わる）と損益分岐年齢を固定（品質ゲート①）。
+  // 75/80歳没=60繰上げ最多 / 85/90歳没=70繰下げ最多 / 95/100歳没=75繰下げ最多。
+  const base = 150_000;
+  const maxStart = (death: number): string => {
+    const arr: [string, number][] = [
+      ["60", cumulativePension(base, 60, death)],
+      ["65", cumulativePension(base, 65, death)],
+      ["70", cumulativePension(base, 70, death)],
+      ["75", cumulativePension(base, 75, death)],
+    ];
+    return arr.reduce((a, b) => (b[1] > a[1] ? b : a))[0];
+  };
+  it("寿命別に最多となる開始年齢: 75/80→60・85/90→70・95/100→75", () => {
+    expect(maxStart(75)).toBe("60");
+    expect(maxStart(80)).toBe("60");
+    expect(maxStart(85)).toBe("70");
+    expect(maxStart(90)).toBe("70");
+    expect(maxStart(95)).toBe("75");
+    expect(maxStart(100)).toBe("75");
+  });
+  it("早見表の累計値（記事の主数値）", () => {
+    expect(cumulativePension(base, 60, 75)).toBe(20_520_000);
+    expect(cumulativePension(base, 70, 85)).toBe(38_340_000);
+    expect(cumulativePension(base, 70, 90)).toBe(51_120_000);
+    expect(cumulativePension(base, 75, 95)).toBe(66_240_000);
+    expect(cumulativePension(base, 75, 100)).toBe(82_800_000);
+  });
+  it("損益分岐年齢: 60→80歳10か月・70→81歳11か月・75→86歳11か月", () => {
+    const b60 = breakEvenAgeVs65(60);
+    const b70 = breakEvenAgeVs65(70);
+    const b75 = breakEvenAgeVs65(75);
+    expect([b60.years, b60.months]).toEqual([80, 10]);
+    expect([b70.years, b70.months]).toEqual([81, 11]);
+    expect([b75.years, b75.months]).toEqual([86, 11]);
+  });
+});
+
 describe("記事 nenkin-kurisage-kakyu（D6）の損益分岐の二重化", () => {
   // 記事本文が参照する繰下げの損益分岐（70歳＝81歳11か月）を固定（品質ゲート①）。
   // 加給年金・振替加算の金額は法定・世帯依存で計算対象外のため本文で定性的に扱い、
