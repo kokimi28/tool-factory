@@ -80,6 +80,25 @@ describe("calcHomeLoanDeduction — 各年・総額の控除見込み", () => {
     expect(r.totalDeduction).toBe(1_251_200);
     expect(r.schedule[0].deduction).toBe(140_000); // 2,000万×0.7%
   });
+  it("記事 jutaku-loan-getsugaku-hensai（B10）の毎月返済額・総返済額（借入額×金利別）", () => {
+    // 記事の毎月返済額（元利均等・35年）と総返済額（毎月×420回）を固定（品質ゲート①）。
+    const y = 35;
+    expect(monthlyPayment(30_000_000, 0.5, y)).toBe(77_875);
+    expect(monthlyPayment(30_000_000, 1.0, y)).toBe(84_685);
+    expect(monthlyPayment(30_000_000, 1.5, y)).toBe(91_855);
+    expect(monthlyPayment(30_000_000, 1.0, y) * y * 12).toBe(35_567_700);
+    expect(monthlyPayment(30_000_000, 1.5, y) * y * 12).toBe(38_579_100);
+    expect(monthlyPayment(40_000_000, 0.5, y)).toBe(103_834);
+    expect(monthlyPayment(40_000_000, 1.0, y)).toBe(112_914);
+    expect(monthlyPayment(40_000_000, 1.5, y)).toBe(122_473);
+    expect(monthlyPayment(50_000_000, 0.5, y)).toBe(129_792);
+    expect(monthlyPayment(50_000_000, 1.0, y)).toBe(141_142);
+    expect(monthlyPayment(50_000_000, 1.5, y)).toBe(153_092);
+    // 金利0.5%差の総額インパクト（3,000万・1.0%→1.5%で約301万円増）
+    const diff = monthlyPayment(30_000_000, 1.5, y) * y * 12 - monthlyPayment(30_000_000, 1.0, y) * y * 12;
+    expect(diff).toBe(3_011_400);
+  });
+
   it("記事 jutaku-loan-chuko（B6）の中古の限度額・控除期間・総額", () => {
     // 記事の中古の借入限度額・控除期間10年・総額を固定（品質ゲート①）。
     expect(borrowingLimit("existing_certified", false)).toBe(30_000_000);
