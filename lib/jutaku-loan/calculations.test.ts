@@ -80,6 +80,15 @@ describe("calcHomeLoanDeduction — 各年・総額の控除見込み", () => {
     expect(r.totalDeduction).toBe(1_251_200);
     expect(r.schedule[0].deduction).toBe(140_000); // 2,000万×0.7%
   });
+  it("記事 jutaku-loan-shotokuzei-zero（B9）の控除額アンカー（中古2,000万の1年目控除）", () => {
+    // 記事の1年目控除額（住民税繰越の説明用アンカー）を固定（品質ゲート①）。
+    // 住民税からの控除上限97,500円は法定値（国税庁 No.1211-1）で計算対象外のため本文で明記。
+    const r = calcHomeLoanDeduction({ principal: 20_000_000, annualRatePercent: 1.0, years: 35, housingType: "existing_other" });
+    expect(r.years).toBe(10);
+    expect(r.schedule[0].deduction).toBe(136_600);
+    expect(r.totalDeduction).toBe(1_209_100);
+  });
+
   it("記事 jutaku-loan-getsugaku-hensai（B10）の毎月返済額・総返済額（借入額×金利別）", () => {
     // 記事の毎月返済額（元利均等・35年）と総返済額（毎月×420回）を固定（品質ゲート①）。
     const y = 35;
