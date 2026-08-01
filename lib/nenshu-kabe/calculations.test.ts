@@ -25,6 +25,23 @@ describe("takeHomeAtIncome — tedori と同一仕様（加入時）", () => {
   });
 });
 
+describe("記事 nenshu-kabe-hatarakikata（C8）の働き方別 手取り比較の二重化", () => {
+  // 記事の働き方別 手取り（106万の壁を跨ぐ/跨がない）を固定（品質ゲート①）。
+  // 105万抑える=1,050,000 / 106万加入=903,650（逆転）/ 125万で105万時を上回る=1,065,625。
+  it("105万1,050,000→106万903,650(逆転)→110万937,750→125万1,065,625→130万1,100,450", () => {
+    expect(takeHomeWithWall(1_050_000, 1_060_000).takeHome).toBe(1_050_000);
+    const at106 = takeHomeWithWall(1_060_000, 1_060_000);
+    expect([at106.enrolled, at106.socialInsurance, at106.takeHome]).toEqual([true, 156_350, 903_650]);
+    expect(takeHomeWithWall(1_100_000, 1_060_000).takeHome).toBe(937_750);
+    expect(takeHomeWithWall(1_250_000, 1_060_000).takeHome).toBe(1_065_625);
+    expect(takeHomeWithWall(1_300_000, 1_060_000).takeHome).toBe(1_100_450);
+    // 働き損の解消: 125万の手取りが105万抑えたときを上回る
+    expect(takeHomeWithWall(1_250_000, 1_060_000).takeHome).toBeGreaterThan(
+      takeHomeWithWall(1_050_000, 1_060_000).takeHome,
+    );
+  });
+});
+
 describe("記事 nenshu-kabe-gakusei（C6）の通常非課税ライン103万の二重化", () => {
   // 記事の通常非課税ライン（年収103万→手取り103万＝税0）を固定（品質ゲート①）。
   // 勤労学生控除27万・親の扶養63万は法定値で calc 未モデルのため本文で明記しリンク誘導。
