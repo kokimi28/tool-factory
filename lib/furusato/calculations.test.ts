@@ -80,6 +80,19 @@ describe("estimateTaxableIncomeFromSalary — 年収→課税総所得金額（�
   });
 });
 
+describe("記事 furusato-kojin-jigyonushi（A8）の課税所得別限度額の二重化", () => {
+  // 記事の課税所得別（事業所得ベース）の限度額を固定（品質ゲート①）。
+  // 250万→64,664（率10%）/ 400万→116,975（率20%）/ 600万→174,463（率20%）。
+  it("課税所得250万→64,664・400万→116,975・600万→174,463", () => {
+    const r250 = calcFurusatoLimit(2_500_000);
+    expect([r250.residentLevy, r250.marginalRate, r250.limit]).toEqual([250_000, 0.1, 64_664]);
+    const r400 = calcFurusatoLimit(4_000_000);
+    expect([r400.residentLevy, r400.marginalRate, r400.limit]).toEqual([400_000, 0.2, 116_975]);
+    const r600 = calcFurusatoLimit(6_000_000);
+    expect([r600.residentLevy, r600.marginalRate, r600.limit]).toEqual([600_000, 0.2, 174_463]);
+  });
+});
+
 describe("記事 furusato-keisan-shiki（A10）の20%の壁の二重化", () => {
   // 記事の分解（特例分＝住民税所得割の20%）と限度額を固定（品質ゲート①）。
   // 300万: 所得割300,000・特例分上限60,000・限度額77,197 / 700万: 700,000・140,000・212,472。
