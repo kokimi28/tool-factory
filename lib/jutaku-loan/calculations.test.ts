@@ -80,6 +80,20 @@ describe("calcHomeLoanDeduction — 各年・総額の控除見込み", () => {
     expect(r.totalDeduction).toBe(1_251_200);
     expect(r.schedule[0].deduction).toBe(140_000); // 2,000万×0.7%
   });
+  it("記事 jutaku-loan-pair-loan（B7）のペアローンの控除総額（二人分 vs 単独）", () => {
+    // 記事のペアローン比較（夫3,000万＋妻2,000万＝各ZEH/1%/35年）と単独5,000万を固定（品質ゲート①）。
+    const husband = calcHomeLoanDeduction({ principal: 30_000_000, annualRatePercent: 1.0, years: 35, housingType: "zeh" });
+    const wife = calcHomeLoanDeduction({ principal: 20_000_000, annualRatePercent: 1.0, years: 35, housingType: "zeh" });
+    expect([husband.schedule[0].deduction, husband.totalDeduction]).toEqual([204_900, 2_252_200]);
+    expect([wife.schedule[0].deduction, wife.totalDeduction]).toEqual([136_600, 1_501_200]);
+    const pairTotal = husband.totalDeduction + wife.totalDeduction;
+    expect(pairTotal).toBe(3_753_400);
+    const solo = calcHomeLoanDeduction({ principal: 50_000_000, annualRatePercent: 1.0, years: 35, housingType: "zeh" });
+    expect([solo.limit, solo.totalDeduction]).toEqual([35_000_000, 3_172_500]);
+    // ペアローンが単独より控除総額が大きい（記事の主張）
+    expect(pairTotal).toBeGreaterThan(solo.totalDeduction);
+  });
+
   it("記事 jutaku-loan-shotokuzei-zero（B9）の控除額アンカー（中古2,000万の1年目控除）", () => {
     // 記事の1年目控除額（住民税繰越の説明用アンカー）を固定（品質ゲート①）。
     // 住民税からの控除上限97,500円は法定値（国税庁 No.1211-1）で計算対象外のため本文で明記。
