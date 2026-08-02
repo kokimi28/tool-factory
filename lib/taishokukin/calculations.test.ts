@@ -334,6 +334,20 @@ describe('記事 worked example: iDeCo同年受取（idct-same-year 記事の退
   });
 });
 
+describe('記事 worked example: 勤続20年の壁（one-more-year-20year 記事の裏取り）', () => {
+  // 退職金2,000万・一般。19→20年（控除+40万）と20→21年（控除+70万）で手取り差が変わる。
+  it('19→20年: 控除+400,000・手取り+60,840 / 20→21年: 控除+700,000・手取り+106,470', () => {
+    const c19 = compareWithOneMoreYear({ retirementAmount: 20_000_000, yearsOfService: 19, isExecutive: false });
+    expect([c19.deductionDiff, c19.netAmountDiff]).toEqual([400_000, 60_840]);
+    const c20 = compareWithOneMoreYear({ retirementAmount: 20_000_000, yearsOfService: 20, isExecutive: false });
+    expect([c20.deductionDiff, c20.netAmountDiff]).toEqual([700_000, 106_470]);
+    // 20年の壁を超える1年のほうが手取り効果が大きい
+    expect(c20.netAmountDiff).toBeGreaterThan(c19.netAmountDiff);
+    // 控除額そのもの: 20年=800万・21年=870万
+    expect([calcRetirementDeduction(20), calcRetirementDeduction(21)]).toEqual([8_000_000, 8_700_000]);
+  });
+});
+
 describe('記事 worked example: 自己都合vs会社都合（reason-and-tax 記事の裏取り）', () => {
   // 退職理由は税額計算に影響しない（separationReason は UI 用）
   const base = { retirementAmount: 5_000_000, yearsOfService: 10, isExecutive: false };
