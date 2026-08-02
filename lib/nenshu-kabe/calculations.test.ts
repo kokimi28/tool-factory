@@ -25,6 +25,16 @@ describe("takeHomeAtIncome — tedori と同一仕様（加入時）", () => {
   });
 });
 
+describe("記事 nenshu-kabe-106-joken（C7）の106万加入時の手取りの二重化", () => {
+  // 記事の106万加入時の手取り（条件を満たして加入した場合）を固定（品質ゲート①）。
+  // 加入5条件（従業員数51人以上等）は法定要件で calc 未モデルのため本文で明記。
+  it("105万未加入1,050,000 → 106万加入 社保156,350/手取り903,650", () => {
+    expect(takeHomeWithWall(1_050_000, 1_060_000).takeHome).toBe(1_050_000);
+    const at106 = takeHomeWithWall(1_060_000, 1_060_000);
+    expect([at106.enrolled, at106.socialInsurance, at106.takeHome]).toEqual([true, 156_350, 903_650]);
+  });
+});
+
 describe("記事 nenshu-kabe-double-work（C10）のダブルワーク合算の二重化", () => {
   // 記事の合算収入の手取り（未加入・税のみ）を固定（品質ゲート①）。
   // 扶養130万は合算判定、社保加入は勤務先ごと要件で calc 未モデルのため本文で明記。
