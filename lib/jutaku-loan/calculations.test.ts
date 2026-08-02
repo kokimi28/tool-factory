@@ -80,6 +80,14 @@ describe("calcHomeLoanDeduction — 各年・総額の控除見込み", () => {
     expect(r.totalDeduction).toBe(1_251_200);
     expect(r.schedule[0].deduction).toBe(140_000); // 2,000万×0.7%
   });
+  it("記事 jutaku-loan-kakutei-shinkoku（B8）の控除額アンカー（ZEH3,000万の初年度分）", () => {
+    // 記事の初年度控除・総額（確定申告で受け取る額のアンカー）を固定（品質ゲート①）。
+    // 手続き（初年度確定申告・2年目以降年末調整）は制度説明のため本文で扱う。
+    const r = calcHomeLoanDeduction({ principal: 30_000_000, annualRatePercent: 1.0, years: 35, housingType: "zeh" });
+    expect(r.schedule[0].deduction).toBe(204_900);
+    expect(r.totalDeduction).toBe(2_252_200);
+  });
+
   it("記事 jutaku-loan-pair-loan（B7）のペアローンの控除総額（二人分 vs 単独）", () => {
     // 記事のペアローン比較（夫3,000万＋妻2,000万＝各ZEH/1%/35年）と単独5,000万を固定（品質ゲート①）。
     const husband = calcHomeLoanDeduction({ principal: 30_000_000, annualRatePercent: 1.0, years: 35, housingType: "zeh" });
