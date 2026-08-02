@@ -12,6 +12,31 @@ import {
   calcHomeLoanDeduction,
 } from "./calculations";
 
+describe("QC6 境界値網羅（jutaku-loan・0/負/上限/性能区分）", () => {
+  // auto-backlog Tier C QC6: 金経路の境界値を明示的に固定（既存テスト不変・新規追加のみ）。
+  it("毎月返済額は借入負・返済年数0で0（下限クランプ）", () => {
+    expect(monthlyPayment(-100, 1, 35)).toBe(0);
+    expect(monthlyPayment(30_000_000, 1, 0)).toBe(0);
+  });
+  it("残高は経過月0以下で元金のまま（負もクランプ）", () => {
+    expect(remainingBalanceAtMonth(30_000_000, 1, 35, 0)).toBe(30_000_000);
+    expect(remainingBalanceAtMonth(30_000_000, 1, 35, -5)).toBe(30_000_000);
+  });
+  it("省エネ基準の借入限度額（一般3,000万・子育て4,000万）と控除期間", () => {
+    expect(borrowingLimit("energy_saving", false)).toBe(30_000_000);
+    expect(borrowingLimit("energy_saving", true)).toBe(40_000_000);
+    expect(deductionYears("zeh")).toBe(13);
+    expect(deductionYears("existing_certified")).toBe(10);
+  });
+  it("借入0は控除総額0（限度額は区分値のまま）", () => {
+    const r = calcHomeLoanDeduction({ principal: 0, annualRatePercent: 1, years: 35, housingType: "zeh" });
+    expect([r.limit, r.totalDeduction, r.schedule[0].deduction]).toEqual([35_000_000, 0, 0]);
+  });
+  it("高金利（3.0%）でも毎月返済額を算出（3,000万・35年→115,455）", () => {
+    expect(monthlyPayment(30_000_000, 3.0, 35)).toBe(115_455);
+  });
+});
+
 describe("monthlyPayment — 元利均等の毎月返済額", () => {
   it("3,000万円・年1.0%・35年 → 84,685円", () => {
     expect(monthlyPayment(30_000_000, 1.0, 35)).toBe(84_685);
