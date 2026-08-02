@@ -174,6 +174,20 @@ describe("記事 worked example: 社会保険料の内訳（shakai-hoken-uchiwak
   });
 });
 
+describe("記事 worked example: 昇給の限界手取り率（shokyu-tedori-fueni-kui 記事の裏取り）", () => {
+  // 年収を100万円ずつ上げたときの手取り増分（限界手取り率が下がる）を固定（品質ゲート①）。
+  it("+100万の手取り増: 300→400=762,927 / 400→500=734,004 / 500→600=720,528 / 600→700=683,345 / 700→800=636,261", () => {
+    const th = (inc: number) => calculateNetSalary({ annualIncome: inc, isOver40: false }).takeHome;
+    expect(th(4_000_000) - th(3_000_000)).toBe(762_927);
+    expect(th(5_000_000) - th(4_000_000)).toBe(734_004);
+    expect(th(6_000_000) - th(5_000_000)).toBe(720_528);
+    expect(th(7_000_000) - th(6_000_000)).toBe(683_345);
+    expect(th(8_000_000) - th(7_000_000)).toBe(636_261);
+    // 限界手取り率は逓減する（記事の主張）
+    expect(th(4_000_000) - th(3_000_000)).toBeGreaterThan(th(8_000_000) - th(7_000_000));
+  });
+});
+
 describe("記事 worked example: 手取りから年収逆算の早見表（tedori-kara-nenshu-gyakusan 記事の裏取り）", () => {
   // 会社員・扶養なし・40歳未満の年収→手取り（記事の早見表の各行）
   const table: Array<[number, number, number]> = [
