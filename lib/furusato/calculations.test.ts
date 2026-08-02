@@ -12,6 +12,31 @@ import {
   estimateFurusatoLimitFromSalary,
 } from "./calculations";
 
+describe("QC6 境界値網羅（furusato・0/負/上限/区分境界）", () => {
+  // auto-backlog Tier C QC6: 金経路の境界値を明示的に固定（既存テスト不変・新規追加のみ）。
+  it("負の課税所得は限度0・住民税所得割0（下限クランプ）", () => {
+    expect(calcFurusatoLimit(-100).limit).toBe(0);
+    expect(residentTaxLevy(-100)).toBe(0);
+  });
+  it("所得税率区分の境界で限度額が段差になる（1,950,000→47,939 / 1,950,001→50,878）", () => {
+    expect(marginalIncomeTaxRate(1_950_000)).toBe(0.05);
+    expect(marginalIncomeTaxRate(1_950_001)).toBe(0.1);
+    expect(calcFurusatoLimit(1_950_000).limit).toBe(47_939);
+    expect(calcFurusatoLimit(1_950_001).limit).toBe(50_878);
+  });
+  it("最高税率区分（課税所得5,000万・45%）の限度額と所得割", () => {
+    const r = calcFurusatoLimit(50_000_000);
+    expect([r.marginalRate, r.residentLevy, r.limit]).toEqual([0.45, 5_000_000, 2_271_889]);
+  });
+  it("住民税所得割は1円未満切り捨て（1,234,567→123,456）", () => {
+    expect(residentTaxLevy(1_234_567)).toBe(123_456);
+  });
+  it("年収概算は負・低年収で課税所得0（下限クランプ）", () => {
+    expect(estimateTaxableIncomeFromSalary({ annualIncome: -5 })).toBe(0);
+    expect(estimateTaxableIncomeFromSalary({ annualIncome: 1_000_000 })).toBe(0);
+  });
+});
+
 describe("marginalIncomeTaxRate — 課税総所得に対する限界税率", () => {
   it("各区分の境界", () => {
     expect(marginalIncomeTaxRate(1_950_000)).toBe(0.05);
