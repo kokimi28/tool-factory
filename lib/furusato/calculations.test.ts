@@ -80,6 +80,17 @@ describe("estimateTaxableIncomeFromSalary — 年収→課税総所得金額（�
   });
 });
 
+describe("記事 furusato-ikukyu（A9）の所得減で限度額が下がるの二重化", () => {
+  // 記事の低年収域の限度額（育休で所得が減ると限度も下がる）を固定（品質ゲート①）。
+  // 500万→60,704 / 300万→27,843 / 250万→21,341 / 200万→14,839（扶養なし概算）。
+  it("年収500万→60,704・300万→27,843・250万→21,341・200万→14,839", () => {
+    expect(estimateFurusatoLimitFromSalary({ annualIncome: 5_000_000 }).limit).toBe(60_704);
+    expect(estimateFurusatoLimitFromSalary({ annualIncome: 3_000_000 }).limit).toBe(27_843);
+    expect(estimateFurusatoLimitFromSalary({ annualIncome: 2_500_000 }).limit).toBe(21_341);
+    expect(estimateFurusatoLimitFromSalary({ annualIncome: 2_000_000 }).limit).toBe(14_839);
+  });
+});
+
 describe("記事 furusato-kojin-jigyonushi（A8）の課税所得別限度額の二重化", () => {
   // 記事の課税所得別（事業所得ベース）の限度額を固定（品質ゲート①）。
   // 250万→64,664（率10%）/ 400万→116,975（率20%）/ 600万→174,463（率20%）。
