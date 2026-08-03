@@ -3,6 +3,8 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ARTICLES, getArticle } from '@/lib/furusato/articles';
 import { SITE_META } from '@/lib/furusato/site-meta';
+import { SITE } from '@/lib/site';
+import { breadcrumbListJsonLd } from '@/lib/breadcrumb';
 
 export function generateStaticParams() {
   return ARTICLES.map((a) => ({ slug: a.slug }));
@@ -59,6 +61,11 @@ export default async function ArticlePage({
           acceptedAnswer: { '@type': 'Answer', text: f.answer },
         })),
       },
+      breadcrumbListJsonLd([
+        { name: 'ホーム', url: SITE.url },
+        { name: SITE_META.name, url: SITE_META.url },
+        { name: article.title, url: `${SITE_META.url}/articles/${article.slug}` },
+      ]),
     ],
   };
 
