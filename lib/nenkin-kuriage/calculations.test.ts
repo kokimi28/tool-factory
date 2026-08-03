@@ -11,6 +11,32 @@ import {
   pensionScenario,
 } from "./calculations";
 
+describe("QC6 境界値網羅（nenkin-kuriage・年齢クランプ/65歳/分岐なし）", () => {
+  // auto-backlog Tier C QC6: 金経路の境界値を明示的に固定（既存テスト不変・新規追加のみ）。
+  it("受給率は60歳未満→60歳・75歳超→75歳にクランプ", () => {
+    expect(pensionRate(58)).toBeCloseTo(0.76, 10);
+    expect(pensionRate(58)).toBe(pensionRate(60));
+    expect(pensionRate(80)).toBeCloseTo(1.84, 10);
+    expect(pensionRate(80)).toBe(pensionRate(75));
+  });
+  it("65歳ちょうどは率1.0・月額そのまま・年額×12", () => {
+    expect(pensionRate(65)).toBe(1);
+    const s = pensionScenario(150_000, 65);
+    expect([s.rate, s.monthly, s.annual]).toEqual([1, 150_000, 1_800_000]);
+  });
+  it("月額も年齢クランプ（58歳→60歳の114,000）", () => {
+    expect(monthlyPension(150_000, 58)).toBe(114_000);
+  });
+  it("65歳開始は損益分岐なし（null）", () => {
+    const b = breakEvenAgeVs65(65);
+    expect([b.ageYears, b.years, b.months]).toEqual([null, null, null]);
+  });
+  it("累計は開始年齢=死亡年齢で0（受給期間ゼロ）", () => {
+    expect(cumulativePension(150_000, 65, 65)).toBe(0);
+    expect(cumulativePension(150_000, 70, 70)).toBe(0);
+  });
+});
+
 describe("pensionRate — 受給率（65歳=1.0）", () => {
   it("繰上げは0.4%/月減（60歳=0.76・最大−24%）", () => {
     expect(pensionRate(60)).toBeCloseTo(0.76, 10);
