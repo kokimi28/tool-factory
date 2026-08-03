@@ -33,25 +33,33 @@ export default function sitemap(): MetadataRoute.Sitemap {
     slug: string,
     articles: ReadonlyArray<{ slug: string; updated: string }>,
     includeIndex: boolean,
-  ): MetadataRoute.Sitemap => [
-    // 記事一覧ページを持つツールだけ index URL を載せる（tedori は一覧ルート無し）。
-    ...(includeIndex
-      ? [
-          {
-            url: `${SITE.url}/${slug}/articles`,
-            lastModified,
-            changeFrequency: "monthly" as const,
-            priority: 0.6,
-          },
-        ]
-      : []),
-    ...articles.map((a) => ({
-      url: `${SITE.url}/${slug}/articles/${a.slug}`,
-      lastModified: new Date(a.updated),
-      changeFrequency: "yearly" as const,
-      priority: 0.6,
-    })),
-  ];
+  ): MetadataRoute.Sitemap => {
+    // QC11: 記事一覧（index）の lastmod は「そのツールの記事のうち最も新しい updated」に同期する。
+    // 記事を1本更新すれば一覧の lastmod も自動で追随する（グローバル日付での固定を廃止）。
+    const newestArticleDate = articles.reduce<Date>((acc, a) => {
+      const d = new Date(a.updated);
+      return d > acc ? d : acc;
+    }, new Date(0));
+    return [
+      // 記事一覧ページを持つツールだけ index URL を載せる（tedori は一覧ルート無し）。
+      ...(includeIndex
+        ? [
+            {
+              url: `${SITE.url}/${slug}/articles`,
+              lastModified: newestArticleDate,
+              changeFrequency: "monthly" as const,
+              priority: 0.7,
+            },
+          ]
+        : []),
+      ...articles.map((a) => ({
+        url: `${SITE.url}/${slug}/articles/${a.slug}`,
+        lastModified: new Date(a.updated),
+        changeFrequency: "yearly" as const,
+        priority: 0.6,
+      })),
+    ];
+  };
 
   const articleSets: MetadataRoute.Sitemap = [
     ...articleEntries("taishokukin", TAISHOKUKIN_ARTICLES, true),
