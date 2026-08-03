@@ -3,6 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getAllArticles, getArticle } from "@/lib/tedori/articles";
 import { SITE_NAME, SITE_URL } from "@/lib/tedori/site";
+import { SITE } from "@/lib/site";
+import { breadcrumbListJsonLd } from "@/lib/breadcrumb";
 
 export function generateStaticParams() {
   return getAllArticles().map((a) => ({ slug: a.slug }));
@@ -33,14 +35,23 @@ export default function ArticlePage({ params }: { params: { slug: string } }) {
 
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "Article",
-    headline: article.title,
-    description: article.description,
-    datePublished: article.updatedAt,
-    dateModified: article.updatedAt,
-    inLanguage: "ja",
-    mainEntityOfPage: `${SITE_URL}/articles/${article.slug}`,
-    publisher: { "@type": "Organization", name: SITE_NAME },
+    "@graph": [
+      {
+        "@type": "Article",
+        headline: article.title,
+        description: article.description,
+        datePublished: article.updatedAt,
+        dateModified: article.updatedAt,
+        inLanguage: "ja",
+        mainEntityOfPage: `${SITE_URL}/articles/${article.slug}`,
+        publisher: { "@type": "Organization", name: SITE_NAME },
+      },
+      breadcrumbListJsonLd([
+        { name: "ホーム", url: SITE.url },
+        { name: SITE_NAME, url: SITE_URL },
+        { name: article.title, url: `${SITE_URL}/articles/${article.slug}` },
+      ]),
+    ],
   };
 
   return (
