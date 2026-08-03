@@ -25,6 +25,23 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
+  // QC8: OGP / Twitter Card のサイト共通デフォルト。全ページ・全記事が継承し、
+  // 個別ページ（記事など）が openGraph.title/description/url を上書きする。
+  // 画像アセットは未用意のため card は summary（画像なしでも成立）。取得後に
+  // openGraph.images / twitter.card=summary_large_image をここ1か所で足せば全ページに反映される。
+  openGraph: {
+    type: "website",
+    siteName: SITE.name,
+    locale: "ja_JP",
+    url: SITE.url,
+    title: SITE.name,
+    description: SITE.description,
+  },
+  twitter: {
+    card: "summary",
+    title: SITE.name,
+    description: SITE.description,
+  },
 };
 
 export default function RootLayout({
