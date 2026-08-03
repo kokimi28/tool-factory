@@ -10,6 +10,31 @@ import {
 } from "./calculations";
 import { calculateNetSalary } from "../tedori/calculations";
 
+describe("QC6 境界値網羅（nenshu-kabe・0/負/壁の前後）", () => {
+  // auto-backlog Tier C QC6: 金経路の境界値を明示的に固定（既存テスト不変・新規追加のみ）。
+  it("年収0は全て0・未加入", () => {
+    const r = takeHomeAtIncome(0, false);
+    expect([r.socialInsurance, r.takeHome, r.enrolled]).toEqual([0, 0, false]);
+  });
+  it("負の年収は0にクランプ", () => {
+    const r = takeHomeAtIncome(-100, false);
+    expect([r.income, r.takeHome]).toEqual([0, 0]);
+  });
+  it("130万の壁: 直下(129万)は未加入・壁(130万)で加入", () => {
+    expect(takeHomeWithWall(1_290_000, 1_300_000).enrolled).toBe(false);
+    expect(takeHomeWithWall(1_300_000, 1_300_000).enrolled).toBe(true);
+  });
+  it("106万の壁: 直下(105万)は未加入・壁(106万)で加入", () => {
+    expect(takeHomeWithWall(1_050_000, 1_060_000).enrolled).toBe(false);
+    expect(takeHomeWithWall(1_060_000, 1_060_000).enrolled).toBe(true);
+  });
+  it("高収入(800万・加入)は社保>0・手取り<額面", () => {
+    const r = takeHomeAtIncome(8_000_000, true);
+    expect(r.socialInsurance).toBeGreaterThan(0);
+    expect(r.takeHome).toBeLessThan(8_000_000);
+  });
+});
+
 describe("takeHomeAtIncome — tedori と同一仕様（加入時）", () => {
   it("enrolled=true は tedori の calculateNetSalary と一致（二重管理しない保証）", () => {
     for (const inc of [1_300_000, 3_000_000, 5_000_000, 8_000_000]) {
