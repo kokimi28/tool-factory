@@ -5,6 +5,7 @@ import { ARTICLES, getArticle } from '@/lib/taishokukin/articles';
 import { SITE_META } from '@/lib/taishokukin/site-meta';
 import { SITE } from '@/lib/site';
 import { breadcrumbListJsonLd } from '@/lib/breadcrumb';
+import RelatedTools from '@/components/RelatedTools';
 
 export function generateStaticParams() {
   return ARTICLES.map((a) => ({ slug: a.slug }));
@@ -140,6 +141,9 @@ export default async function ArticlePage({
             ※本記事は情報提供を目的とした一般的な解説であり、税務・法律・金融の助言ではありません。計算結果はあくまで概算・参考値です。個別の事情については税理士・FP 等の専門家にご相談ください。
           </p>
         </article>
+        <div className="max-w-3xl mx-auto">
+          <RelatedTools currentSlug="taishokukin" />
+        </div>
       </main>
     </div>
   );
