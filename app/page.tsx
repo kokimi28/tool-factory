@@ -1,13 +1,34 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { SITE } from "@/lib/site";
-import { TOOLS } from "@/lib/tools-registry";
+import { TOOLS, liveTools } from "@/lib/tools-registry";
 
 export const metadata: Metadata = {
   title: SITE.name,
   description: SITE.description,
   alternates: { canonical: "/" },
 };
+
+/**
+ * ハブ（トップ）の ItemList 構造化データ（QC1）。
+ * 公開中ツールを tools-registry から列挙し、検索エンジンにツール一覧を明示する。
+ * 一覧の内容は tools-registry が単一ソース＝ツール追加で JSON-LD も自動更新。
+ */
+function itemListJsonLd() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: SITE.name,
+    description: SITE.description,
+    itemListElement: liveTools().map((t, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      name: t.name,
+      description: t.description,
+      url: `${SITE.url}/${t.slug}`,
+    })),
+  };
+}
 
 /**
  * トップ＝ツール一覧ハブ。tools-registry から自動生成する。
@@ -17,6 +38,10 @@ export const metadata: Metadata = {
 export default function HomePage() {
   return (
     <main className="mx-auto max-w-3xl px-4 py-12">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd()) }}
+      />
       <header className="mb-8">
         <h1 className="text-2xl font-bold">{SITE.name}</h1>
         <p className="mt-2 text-black/60">{SITE.description}</p>
