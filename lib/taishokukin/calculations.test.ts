@@ -17,6 +17,28 @@ import {
   calcWithholdingWithoutDeclaration,
 } from './calculations';
 
+describe('QC6 境界値網羅（taishokukin・0/負/最低保障/非課税/未提出源泉）', () => {
+  // auto-backlog Tier C QC6: 金経路の境界値を明示的に固定（既存テスト不変・新規追加のみ）。
+  it('退職所得控除は0/負で0・1年で最低保障80万円・20年境界(+70万/年)', () => {
+    expect(calcRetirementDeduction(0)).toBe(0);
+    expect(calcRetirementDeduction(-3)).toBe(0);
+    expect(calcRetirementDeduction(1)).toBe(800_000);
+    expect(calcRetirementDeduction(20)).toBe(8_000_000);
+    expect(calcRetirementDeduction(21)).toBe(8_700_000);
+  });
+  it('勤続年数は端数月を1年切り上げ（10年3月→11年）・0は0', () => {
+    expect(calcEffectiveYears(10, 3)).toBe(11);
+    expect(calcEffectiveYears(0, 0)).toBe(0);
+  });
+  it('退職金が控除以下は非課税（税0・手取り=退職金）', () => {
+    const r = calcAll({ retirementAmount: 500_000, yearsOfService: 10, isExecutive: false });
+    expect([r.taxableRetirementIncome, r.totalTax, r.netAmount]).toEqual([0, 0, 500_000]);
+  });
+  it('受給申告書 未提出は一律20.42%源泉（1,000万→2,042,000）', () => {
+    expect(calcWithholdingWithoutDeclaration(10_000_000)).toBe(2_042_000);
+  });
+});
+
 describe('calcEffectiveYears: 勤続年数の切り上げ', () => {
   it('19年5ヶ月は20年に切り上げ', () => {
     expect(calcEffectiveYears(19, 5)).toBe(20);
