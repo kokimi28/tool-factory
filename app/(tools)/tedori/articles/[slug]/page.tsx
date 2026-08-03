@@ -5,6 +5,7 @@ import { getAllArticles, getArticle } from "@/lib/tedori/articles";
 import { SITE_NAME, SITE_URL } from "@/lib/tedori/site";
 import { SITE } from "@/lib/site";
 import { breadcrumbListJsonLd } from "@/lib/breadcrumb";
+import RelatedTools from "@/components/RelatedTools";
 
 export function generateStaticParams() {
   return getAllArticles().map((a) => ({ slug: a.slug }));
@@ -13,8 +14,13 @@ export function generateStaticParams() {
 // 未知の slug は 404（静的生成した記事のみ配信）
 export const dynamicParams = false;
 
-export function generateMetadata({ params }: { params: { slug: string } }): Metadata {
-  const article = getArticle(params.slug);
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const article = getArticle(slug);
   if (!article) return {};
   return {
     title: article.title,
@@ -29,8 +35,13 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
   };
 }
 
-export default function ArticlePage({ params }: { params: { slug: string } }) {
-  const article = getArticle(params.slug);
+export default async function ArticlePage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  const article = getArticle(slug);
   if (!article) notFound();
 
   const jsonLd = {
@@ -100,6 +111,8 @@ export default function ArticlePage({ params }: { params: { slug: string } }) {
       <p className="mt-6 text-xs text-slate-400">
         本記事は情報提供を目的としたもので、税務上の助言ではありません。金額は参考値です。
       </p>
+
+      <RelatedTools currentSlug="tedori" />
     </article>
   );
 }
