@@ -7,6 +7,30 @@ import {
   calculateNetSalary,
 } from "./calculations";
 
+describe("QC6 境界値網羅（tedori・0/負/最低保障/介護保険）", () => {
+  // auto-backlog Tier C QC6: 金経路の境界値を明示的に固定（既存テスト不変・新規追加のみ）。
+  it("給与所得控除は低年収・負でも最低保障65万円", () => {
+    expect(salaryIncomeDeduction(1_000_000)).toBe(650_000);
+    expect(salaryIncomeDeduction(-5)).toBe(650_000);
+  });
+  it("所得税は課税所得0/負で0", () => {
+    expect(incomeTaxByBracket(0)).toBe(0);
+    expect(incomeTaxByBracket(-100)).toBe(0);
+  });
+  it("年収0/負は全て0・手取り0・手取り率0", () => {
+    const r0 = calculateNetSalary({ annualIncome: 0, isOver40: false });
+    expect([r0.socialInsurance, r0.takeHome, r0.takeHomeRate]).toEqual([0, 0, 0]);
+    expect(calculateNetSalary({ annualIncome: -100, isOver40: false }).takeHome).toBe(0);
+  });
+  it("40歳以上（介護保険料あり）は同年収でも手取りが少ない", () => {
+    const over40 = calculateNetSalary({ annualIncome: 5_000_000, isOver40: true });
+    const under40 = calculateNetSalary({ annualIncome: 5_000_000, isOver40: false });
+    expect(over40.nursingInsurance).toBeGreaterThan(0);
+    expect(under40.nursingInsurance).toBe(0);
+    expect(over40.takeHome).toBeLessThan(under40.takeHome);
+  });
+});
+
 describe("salaryIncomeDeduction — 給与所得控除（令和7年分以降）", () => {
   it("190万円以下は最低保障65万円", () => {
     expect(salaryIncomeDeduction(1_000_000)).toBe(650_000);
