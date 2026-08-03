@@ -24,6 +24,30 @@ import {
 // 端数処理・基礎関数
 // ============================================================
 
+describe('QC6 境界値網羅（ideco・0/負/最低保障/非課税）', () => {
+  // auto-backlog Tier C QC6: 金経路の境界値を明示的に固定（既存テスト不変・新規追加のみ）。
+  it('退職所得控除は0/負で0・1年で最低保障80万円', () => {
+    expect(calcRetirementDeduction(0)).toBe(0);
+    expect(calcRetirementDeduction(-2)).toBe(0);
+    expect(calcRetirementDeduction(1)).toBe(800_000);
+  });
+  it('20年境界: 20年800万・21年870万（式は+70万/年）', () => {
+    expect(calcRetirementDeduction(20)).toBe(8_000_000);
+    expect(calcRetirementDeduction(21)).toBe(8_700_000);
+    expect(calcDeductionByFormula(20)).toBe(8_000_000);
+    expect(calcDeductionByFormula(21)).toBe(8_700_000);
+  });
+  it('加入年数は端数月を1年切り上げ（5年1月→6年）・0は0', () => {
+    expect(calcEffectiveYears(5, 1)).toBe(6);
+    expect(calcEffectiveYears(0, 0)).toBe(0);
+  });
+  it('控除以下は課税所得0（非課税）・税額も0', () => {
+    expect(calcTaxableIncome(500_000, 8_000_000)).toBe(0);
+    expect(calcIncomeTax(0)).toBe(0);
+    expect(calcIncomeTax(-100)).toBe(0);
+  });
+});
+
 describe('calcEffectiveYears（勤続年数の切り上げ／所令69）', () => {
   it('端数月なしはそのまま', () => {
     expect(calcEffectiveYears(20, 0)).toBe(20);
