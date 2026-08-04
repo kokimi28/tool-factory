@@ -74,4 +74,31 @@ describe("tools-registry の不変条件", () => {
     const planned = TOOLS.filter((t: Tool) => t.status === "planned");
     expect(planned.length).toBe(0);
   });
+
+  // QC3（内部リンク網羅監査）: 全ツールが互いに到達可能であることを固定する。
+  // RelatedTools は relatedTools(slug) の結果をそのまま出すため、これが
+  // 「自分以外の全公開ツール」と一致する限り、任意のツールから他の全ツールへ
+  // 1ホップで到達できる（相互リンクの欠落ゼロ）。将来クラスタ分割や
+  // status 変更で相互リンクが欠けたら、この不変条件が CI で赤になる。
+  it("各公開ツールの relatedTools は自分以外の全公開ツールと一致（全ツール互いに到達可）", () => {
+    const live = liveTools();
+    const liveSlugs = live.map((t) => t.slug).sort();
+    for (const t of live) {
+      const relSlugs = relatedTools(t.slug)
+        .map((r) => r.slug)
+        .sort();
+      const expected = liveSlugs.filter((s) => s !== t.slug);
+      expect(relSlugs).toEqual(expected);
+    }
+  });
+
+  it("相互リンクは対称（A の関連に B があれば B の関連にも A がある）", () => {
+    const live = liveTools();
+    for (const a of live) {
+      for (const b of relatedTools(a.slug)) {
+        const back = relatedTools(b.slug).map((r) => r.slug);
+        expect(back).toContain(a.slug);
+      }
+    }
+  });
 });
