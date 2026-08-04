@@ -5,16 +5,12 @@ import {
   calcFurusatoLimit,
   estimateFurusatoLimitFromSalary,
 } from "@/lib/furusato/calculations";
+import { parseNonNegativeNumber as toNumber } from "@/lib/input";
 
 type Mode = "salary" | "taxable";
 
 const yen = (n: number) => `${Math.round(n).toLocaleString("ja-JP")}円`;
 const pct = (r: number) => `${Math.round(r * 100)}%`;
-
-function toNumber(s: string): number {
-  const n = Number(s.replace(/[,，\s]/g, ""));
-  return Number.isFinite(n) ? n : 0;
-}
 
 export default function Calculator() {
   const [mode, setMode] = useState<Mode>("salary");
