@@ -5,13 +5,9 @@ import {
   calcHomeLoanDeduction,
   type HousingType,
 } from "@/lib/jutaku-loan/calculations";
+import { parseNonNegativeNumber as toNumber } from "@/lib/input";
 
 const yen = (n: number) => `${Math.round(n).toLocaleString("ja-JP")}円`;
-
-function toNumber(s: string): number {
-  const n = Number(s.replace(/[,，\s]/g, ""));
-  return Number.isFinite(n) ? n : 0;
-}
 
 const HOUSING_OPTIONS: { value: HousingType; label: string }[] = [
   { value: "long_term", label: "認定長期優良住宅・低炭素住宅（新築・13年）" },

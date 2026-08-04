@@ -6,14 +6,10 @@ import {
   analyzeWallReversal,
   type SiWall,
 } from "@/lib/nenshu-kabe/calculations";
+import { parseNonNegativeNumber as toNumber } from "@/lib/input";
 
 const yen = (n: number) => `${Math.round(n).toLocaleString("ja-JP")}円`;
 const man = (n: number) => `${Math.round(n / 10000).toLocaleString("ja-JP")}万円`;
-
-function toNumber(s: string): number {
-  const n = Number(s.replace(/[,，\s]/g, ""));
-  return Number.isFinite(n) ? n : 0;
-}
 
 export default function Calculator() {
   const [wall, setWall] = useState<SiWall>(1_300_000);

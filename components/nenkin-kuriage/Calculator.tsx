@@ -5,14 +5,10 @@ import {
   pensionScenario,
   breakEvenAgeVs65,
 } from "@/lib/nenkin-kuriage/calculations";
+import { parseNonNegativeNumber as toNumber } from "@/lib/input";
 
 const yen = (n: number) => `${Math.round(n).toLocaleString("ja-JP")}円`;
 const pct = (r: number) => `${(r * 100).toFixed(1)}%`;
-
-function toNumber(s: string): number {
-  const n = Number(s.replace(/[,，\s]/g, ""));
-  return Number.isFinite(n) ? n : 0;
-}
 
 const AGES = [60, 62, 65, 66, 68, 70, 72, 75];
 
