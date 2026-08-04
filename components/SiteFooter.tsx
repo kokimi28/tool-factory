@@ -24,6 +24,9 @@ export default function SiteFooter() {
           <Link href="/" className="hover:underline">
             ツール一覧
           </Link>
+          <Link href="/articles" className="hover:underline">
+            解説記事一覧
+          </Link>
           <Link href="/about" className="hover:underline">
             このサイトについて
           </Link>

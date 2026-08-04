@@ -9,6 +9,7 @@
 import type { MetadataRoute } from "next";
 import { SITE } from "@/lib/site";
 import { liveTools } from "@/lib/tools-registry";
+import { allArticles } from "@/lib/all-articles";
 import { ARTICLES as TAISHOKUKIN_ARTICLES } from "@/lib/taishokukin/articles";
 import { ARTICLES as IDECO_ARTICLES } from "@/lib/ideco/articles";
 import { getAllArticles as tedoriArticles } from "@/lib/tedori/articles";
@@ -84,6 +85,16 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 1.0,
     },
     ...toolEntries,
+    // QC4: 全ツール横断の記事集約ハブ /articles。lastmod は全記事の最新 updated に同期。
+    {
+      url: `${SITE.url}/articles`,
+      lastModified: allArticles().reduce<Date>((acc, a) => {
+        const d = new Date(a.updated);
+        return d > acc ? d : acc;
+      }, new Date(0)),
+      changeFrequency: "weekly",
+      priority: 0.7,
+    },
     ...articleSets,
     {
       url: `${SITE.url}/about`,
