@@ -251,3 +251,39 @@ describe("記事 worked example: 手取り月額 vs 年収÷12（tedori-getsugak
     expect(Math.round(4_000_000 / 12)).toBe(333_333);
   });
 });
+
+describe("記事 gakumen-tedori-hayamihyo（MB5・早見表）の数値二重化", () => {
+  // auto-backlog Tier B MB5: 記事本文の早見表の各手取り額を calc 出力で固定する
+  //（§品質ゲート①：誤値は CI で赤）。前提は会社員・扶養なし・40歳未満。
+  const rows: Array<[number, number]> = [
+    [2_000_000, 1_636_672],
+    [3_000_000, 2_402_219],
+    [4_000_000, 3_165_146],
+    [5_000_000, 3_899_150],
+    [6_000_000, 4_619_678],
+    [7_000_000, 5_303_023],
+    [8_000_000, 5_939_284],
+    [10_000_000, 7_257_955],
+    [12_000_000, 8_536_891],
+    [15_000_000, 10_225_029],
+  ];
+  for (const [income, takeHome] of rows) {
+    it(`年収${income / 10_000}万の手取りは ${takeHome}円`, () => {
+      const r = calculateNetSalary({ annualIncome: income, isOver40: false });
+      expect(r.takeHome).toBe(takeHome);
+    });
+  }
+
+  it("年収500万の内訳（社保737,500 / 所得税119,150 / 住民税244,200）", () => {
+    const r = calculateNetSalary({ annualIncome: 5_000_000, isOver40: false });
+    expect(r.socialInsurance).toBe(737_500);
+    expect(r.incomeTax).toBe(119_150);
+    expect(r.residentTax).toBe(244_200);
+  });
+
+  it("年収500万・40歳以上は介護保険39,750で手取り3,867,484（40歳未満より約3.2万円減）", () => {
+    const r = calculateNetSalary({ annualIncome: 5_000_000, isOver40: true });
+    expect(r.nursingInsurance).toBe(39_750);
+    expect(r.takeHome).toBe(3_867_484);
+  });
+});
