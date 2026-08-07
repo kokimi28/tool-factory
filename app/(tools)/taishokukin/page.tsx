@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Calculator from '@/components/taishokukin/Calculator';
 import RelatedTools from '@/components/RelatedTools';
 import ToolBreadcrumbJsonLd from '@/components/ToolBreadcrumbJsonLd';
+import ToolHowToJsonLd from '@/components/ToolHowToJsonLd';
 
 export const metadata: Metadata = {
   title: '退職金課税シミュレーター | 退職所得控除・所得税・住民税・手取り額を即時計算',
@@ -156,6 +157,7 @@ export default function Home() {
 
           <div className="w-full max-w-3xl mx-auto">
             <ToolBreadcrumbJsonLd slug="taishokukin" />
+            <ToolHowToJsonLd slug="taishokukin" />
             <RelatedTools currentSlug="taishokukin" />
           </div>
         </main>

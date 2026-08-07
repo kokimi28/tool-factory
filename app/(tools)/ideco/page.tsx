@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Calculator from '@/components/ideco/Calculator';
 import RelatedTools from '@/components/RelatedTools';
 import ToolBreadcrumbJsonLd from '@/components/ToolBreadcrumbJsonLd';
+import ToolHowToJsonLd from '@/components/ToolHowToJsonLd';
 import { SITE_META } from '@/lib/ideco/site-meta';
 
 export const metadata: Metadata = {
@@ -146,6 +147,7 @@ export default function Home() {
 
           <div className="w-full max-w-3xl mx-auto">
             <ToolBreadcrumbJsonLd slug="ideco" />
+            <ToolHowToJsonLd slug="ideco" />
             <RelatedTools currentSlug="ideco" />
           </div>
         </main>
