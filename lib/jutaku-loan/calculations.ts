@@ -83,6 +83,33 @@ export function monthlyPayment(
 }
 
 /**
+ * 総返済額（元利均等・全期間固定の概算）。「毎月返済額 × 返済回数（年×12）」。
+ * 毎月返済額は monthlyPayment（切り捨て後）を用いるため、実際は最終回の端数精算で
+ * 数百円ずれる（記事本文の注記と同じ前提）。金利別・借入額別の総額比較に用いる。
+ */
+export function totalRepayment(
+  principal: number,
+  annualRatePercent: number,
+  years: number,
+): number {
+  const n = Math.round(clampNonNeg(years) * 12);
+  if (n <= 0) return 0;
+  return monthlyPayment(principal, annualRatePercent, years) * n;
+}
+
+/**
+ * 総利息（総返済額 − 元金）。負値にはならないよう 0 でクランプ。
+ */
+export function totalInterest(
+  principal: number,
+  annualRatePercent: number,
+  years: number,
+): number {
+  const P = clampNonNeg(principal);
+  return Math.max(0, totalRepayment(principal, annualRatePercent, years) - P);
+}
+
+/**
  * 元利均等返済で t か月返済した後のローン残高（円、1円未満切り捨て）。
  * 毎月返済額は monthlyPayment（切り捨て後）を用いる。
  */

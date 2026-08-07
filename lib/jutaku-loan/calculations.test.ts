@@ -10,6 +10,8 @@ import {
   borrowingLimit,
   deductionYears,
   calcHomeLoanDeduction,
+  totalRepayment,
+  totalInterest,
 } from "./calculations";
 
 describe("QC6 境界値網羅（jutaku-loan・0/負/上限/性能区分）", () => {
@@ -254,5 +256,40 @@ describe("calcHomeLoanDeduction — 各年・総額の控除見込み", () => {
     expect(base.limit).toBe(45_000_000);
     expect(child.limit).toBe(50_000_000);
     expect(child.schedule[0].deduction).toBeGreaterThan(base.schedule[0].deduction);
+  });
+});
+
+describe("D7 総返済額・総利息（記事 jutaku-loan-getsugaku-hensai の金利別数値を固定）", () => {
+  // auto-backlog 2巡目 Tier D7: 総返済額 = 毎月返済額 × 返済回数（元利均等・35年・借入3,000万）。
+  // 記事本文の金利別の毎月返済額・総返済額・利息を calc 出力で二重化（§品質ゲート①）。
+  const P = 30_000_000;
+  const Y = 35;
+
+  it("金利0.5%: 毎月77,875 / 総返済32,707,500 / 利息2,707,500", () => {
+    expect(monthlyPayment(P, 0.5, Y)).toBe(77_875);
+    expect(totalRepayment(P, 0.5, Y)).toBe(32_707_500);
+    expect(totalInterest(P, 0.5, Y)).toBe(2_707_500);
+  });
+
+  it("金利1.0%: 毎月84,685 / 総返済35,567,700 / 利息5,567,700", () => {
+    expect(monthlyPayment(P, 1.0, Y)).toBe(84_685);
+    expect(totalRepayment(P, 1.0, Y)).toBe(35_567_700);
+    expect(totalInterest(P, 1.0, Y)).toBe(5_567_700);
+  });
+
+  it("金利1.5%: 毎月91,855 / 総返済38,579,100 / 利息8,579,100", () => {
+    expect(monthlyPayment(P, 1.5, Y)).toBe(91_855);
+    expect(totalRepayment(P, 1.5, Y)).toBe(38_579_100);
+    expect(totalInterest(P, 1.5, Y)).toBe(8_579_100);
+  });
+
+  it("金利1.0%→1.5%で総返済額は約301万円増（3,011,400）", () => {
+    const diff = totalRepayment(P, 1.5, Y) - totalRepayment(P, 1.0, Y);
+    expect(diff).toBe(3_011_400);
+  });
+
+  it("総利息は元金以下にクランプされない（借入0・年数0で0）", () => {
+    expect(totalRepayment(0, 1.0, Y)).toBe(0);
+    expect(totalInterest(30_000_000, 1.0, 0)).toBe(0);
   });
 });
