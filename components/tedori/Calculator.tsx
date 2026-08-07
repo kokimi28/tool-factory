@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { calculateNetSalary, type NetSalaryInput } from "@/lib/tedori/calculations";
 import { encodeShareParams, decodeShareParams } from "@/lib/share-url";
+import { TEDORI_PRESETS } from "@/lib/tedori/presets";
 import ResultDisplay from "@/components/tedori/ResultDisplay";
 import CTA from "@/components/tedori/CTA";
 
@@ -111,6 +112,24 @@ export default function Calculator() {
             <p className="mt-1 text-right text-xs text-slate-500">
               {toInt(state.annualIncome).toLocaleString("ja-JP")} 円
             </p>
+            <div
+              className="mt-3 flex flex-wrap gap-2"
+              role="group"
+              aria-label="年収プリセット"
+            >
+              {TEDORI_PRESETS.map((p) => (
+                <button
+                  key={p.value}
+                  type="button"
+                  className="rounded-full border border-slate-300 px-3 py-1 text-xs text-slate-600 transition hover:border-brand hover:text-brand-dark"
+                  onClick={() =>
+                    dispatch({ type: "set", field: "annualIncome", value: String(p.value) })
+                  }
+                >
+                  {p.label}
+                </button>
+              ))}
+            </div>
           </div>
 
           <fieldset>
