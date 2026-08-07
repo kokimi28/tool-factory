@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Calculator from "@/components/nenkin-kuriage/Calculator";
 import RelatedTools from "@/components/RelatedTools";
 import ToolBreadcrumbJsonLd from "@/components/ToolBreadcrumbJsonLd";
+import ToolHowToJsonLd from "@/components/ToolHowToJsonLd";
 
 export const metadata: Metadata = {
   title: "年金 繰上げ・繰下げ 損益分岐シミュレーター｜何歳から受給すると得？",
@@ -101,6 +102,7 @@ export default function NenkinKuriagePage() {
 
       <div className="max-w-2xl mx-auto">
         <ToolBreadcrumbJsonLd slug="nenkin-kuriage" />
+        <ToolHowToJsonLd slug="nenkin-kuriage" />
         <RelatedTools currentSlug="nenkin-kuriage" />
       </div>
 
