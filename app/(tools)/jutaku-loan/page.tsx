@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Calculator from "@/components/jutaku-loan/Calculator";
 import RelatedTools from "@/components/RelatedTools";
+import ToolBreadcrumbJsonLd from "@/components/ToolBreadcrumbJsonLd";
 
 export const metadata: Metadata = {
   title: "住宅ローン控除シミュレーター｜年末残高×0.7%の控除額を年別に計算",
@@ -99,6 +100,7 @@ export default function JutakuLoanPage() {
       </section>
 
       <div className="max-w-2xl mx-auto">
+        <ToolBreadcrumbJsonLd slug="jutaku-loan" />
         <RelatedTools currentSlug="jutaku-loan" />
       </div>
 

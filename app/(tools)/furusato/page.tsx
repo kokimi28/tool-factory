@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Calculator from "@/components/furusato/Calculator";
 import RelatedTools from "@/components/RelatedTools";
+import ToolBreadcrumbJsonLd from "@/components/ToolBreadcrumbJsonLd";
 
 export const metadata: Metadata = {
   title: "ふるさと納税 限度額シミュレーター｜自己負担2,000円で済む寄付上限を計算",
@@ -99,6 +100,7 @@ export default function FurusatoPage() {
       </section>
 
       <div className="max-w-2xl mx-auto">
+        <ToolBreadcrumbJsonLd slug="furusato" />
         <RelatedTools currentSlug="furusato" />
       </div>
 
