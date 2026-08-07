@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useReducer } from "react";
+import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { calculateNetSalary, type NetSalaryInput } from "@/lib/tedori/calculations";
+import { encodeShareParams, decodeShareParams } from "@/lib/share-url";
 import ResultDisplay from "@/components/tedori/ResultDisplay";
 import CTA from "@/components/tedori/CTA";
 
@@ -40,6 +41,40 @@ function toInt(raw: string): number {
 
 export default function Calculator() {
   const [state, dispatch] = useReducer(reducer, initialState);
+  const hydrated = useRef(false);
+  const [copied, setCopied] = useState(false);
+
+  // マウント時に URL のクエリから入力を復元（共有リンクで同じ結果を再現）。
+  useEffect(() => {
+    const p = decodeShareParams(window.location.search);
+    if (p.income) {
+      dispatch({ type: "set", field: "annualIncome", value: String(toInt(p.income)) });
+    }
+    if (p.over40 === "1") {
+      dispatch({ type: "set", field: "isOver40", value: true });
+    }
+    hydrated.current = true;
+  }, []);
+
+  // 入力が変わったら URL に反映（履歴を汚さない replaceState）。復元完了後のみ。
+  useEffect(() => {
+    if (!hydrated.current) return;
+    const qs = encodeShareParams({
+      income: String(toInt(state.annualIncome)),
+      over40: state.isOver40 ? "1" : "0",
+    });
+    window.history.replaceState(null, "", qs || window.location.pathname);
+  }, [state]);
+
+  async function copyShareLink() {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1500);
+    } catch {
+      // クリップボード不可の環境では何もしない（URL は既にアドレスバーに反映済み）。
+    }
+  }
 
   const input: NetSalaryInput = useMemo(
     () => ({
@@ -95,13 +130,23 @@ export default function Calculator() {
             会社員（協会けんぽ・一般の事業）で扶養なしの場合の概算です。健康保険料率は都道府県で、各種控除は扶養状況で変わります。
           </div>
 
-          <button
-            type="button"
-            className="text-sm text-slate-500 underline underline-offset-2 hover:text-slate-700"
-            onClick={() => dispatch({ type: "reset" })}
-          >
-            入力をリセット
-          </button>
+          <div className="flex flex-wrap items-center gap-4">
+            <button
+              type="button"
+              className="text-sm text-slate-500 underline underline-offset-2 hover:text-slate-700"
+              onClick={() => dispatch({ type: "reset" })}
+            >
+              入力をリセット
+            </button>
+            <button
+              type="button"
+              className="text-sm font-medium text-brand-dark underline underline-offset-2 hover:text-brand"
+              onClick={copyShareLink}
+              aria-live="polite"
+            >
+              {copied ? "リンクをコピーしました" : "この結果のリンクをコピー"}
+            </button>
+          </div>
         </div>
       </form>
 
