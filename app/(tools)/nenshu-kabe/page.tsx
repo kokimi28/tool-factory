@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Calculator from "@/components/nenshu-kabe/Calculator";
 import RelatedTools from "@/components/RelatedTools";
+import ToolBreadcrumbJsonLd from "@/components/ToolBreadcrumbJsonLd";
 
 export const metadata: Metadata = {
   title: "年収の壁 手取り逆転シミュレーター｜106万・130万の壁で手取りはいくら下がる？",
@@ -99,6 +100,7 @@ export default function NenshuKabePage() {
       </section>
 
       <div className="max-w-2xl mx-auto">
+        <ToolBreadcrumbJsonLd slug="nenshu-kabe" />
         <RelatedTools currentSlug="nenshu-kabe" />
       </div>
 

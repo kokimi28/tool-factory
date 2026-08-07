@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Calculator from "@/components/tedori/Calculator";
 import RelatedTools from "@/components/RelatedTools";
+import ToolBreadcrumbJsonLd from "@/components/ToolBreadcrumbJsonLd";
 import { getAllArticles } from "@/lib/tedori/articles";
 import { FAQ_ITEMS } from "@/lib/tedori/faq";
 import { SITE_NAME, SITE_URL, SITE_DESCRIPTION, LAW_CHECKED_AT } from "@/lib/tedori/site";
@@ -43,6 +44,7 @@ export default function HomePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+      <ToolBreadcrumbJsonLd slug="tedori" />
 
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-slate-900 md:text-3xl">
