@@ -383,3 +383,33 @@ describe('記事 worked example: 自己都合vs会社都合（reason-and-tax 記
     expect(involuntary.taxableRetirementIncome).toBe(voluntary.taxableRetirementIncome);
   });
 });
+
+describe('記事 kinzoku-nensuu-betsu-hikaku（G2・勤続年数別早見）の数値二重化', () => {
+  // 2巡目 Tier G2: 退職金2,000万円固定で勤続年数別の税額・手取りを記事本文に載せる。
+  // §品質ゲート①：本文の各数値を calcAll 出力で固定（誤値は CI で赤）。
+  const A = 20_000_000;
+  const rows: Array<[number, number, number]> = [
+    // [勤続年数, 税額(totalTax), 手取り(netAmount)]
+    [5, 5_641_089, 14_358_911],
+    [10, 2_029_284, 17_970_716],
+    [15, 1_694_454, 18_305_546],
+    [20, 1_388_722, 18_611_278],
+    [25, 856_372, 19_143_628],
+    [30, 405_702, 19_594_298],
+    [35, 113_287, 19_886_713],
+    [38, 0, 20_000_000],
+  ];
+  for (const [years, totalTax, netAmount] of rows) {
+    it(`勤続${years}年: 税額${totalTax} / 手取り${netAmount}`, () => {
+      const r = calcAll({ retirementAmount: A, yearsOfService: years });
+      expect(r.totalTax).toBe(totalTax);
+      expect(r.netAmount).toBe(netAmount);
+    });
+  }
+
+  it('勤続38年は控除が退職金を上回り非課税（税0・手取り=退職金）', () => {
+    const r = calcAll({ retirementAmount: A, yearsOfService: 38 });
+    expect(r.totalTax).toBe(0);
+    expect(r.netAmount).toBe(A);
+  });
+});
