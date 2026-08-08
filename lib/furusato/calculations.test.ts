@@ -252,3 +252,36 @@ describe("estimateFurusatoLimitFromSalary — 年収→上限（概算）", () =
     expect(r.limit).toBe(58_022);
   });
 });
+
+describe("D3 その他の所得控除（iDeCo/医療費/生保）で限度額が下がる", () => {
+  // 2巡目 Tier D3: otherDeductions を課税総所得金額から差し引く。年収700万・扶養なしで固定。
+  it("控除なし: 課税3,687,000 / 限度107,978", () => {
+    const r = estimateFurusatoLimitFromSalary({ annualIncome: 7_000_000 });
+    expect(r.estimatedTaxableIncome).toBe(3_687_000);
+    expect(r.limit).toBe(107_978);
+  });
+
+  it("その他控除27.6万（iDeCo満額相当）: 課税3,411,000 / 限度100,045", () => {
+    const r = estimateFurusatoLimitFromSalary({
+      annualIncome: 7_000_000,
+      otherDeductions: 276_000,
+    });
+    expect(r.estimatedTaxableIncome).toBe(3_411_000);
+    expect(r.limit).toBe(100_045);
+  });
+
+  it("その他控除が増えると限度額は下がる（単調非増加）", () => {
+    const base = estimateFurusatoLimitFromSalary({ annualIncome: 7_000_000 }).limit;
+    const withDed = estimateFurusatoLimitFromSalary({
+      annualIncome: 7_000_000,
+      otherDeductions: 276_000,
+    }).limit;
+    expect(withDed).toBeLessThan(base);
+  });
+
+  it("otherDeductions 未指定・0・負は控除なしと同じ（後方互換）", () => {
+    const none = estimateFurusatoLimitFromSalary({ annualIncome: 7_000_000 }).limit;
+    expect(estimateFurusatoLimitFromSalary({ annualIncome: 7_000_000, otherDeductions: 0 }).limit).toBe(none);
+    expect(estimateFurusatoLimitFromSalary({ annualIncome: 7_000_000, otherDeductions: -100 }).limit).toBe(none);
+  });
+});
