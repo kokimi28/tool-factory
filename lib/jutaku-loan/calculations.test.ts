@@ -293,3 +293,43 @@ describe("D7 総返済額・総利息（記事 jutaku-loan-getsugaku-hensai の�
     expect(totalInterest(30_000_000, 1.0, 0)).toBe(0);
   });
 });
+
+describe("G5 返済年数別（記事 jutaku-loan-hensai-nensuu-hikaku の数値を固定）", () => {
+  // 2巡目 Tier G5: 借入3,000万・金利1.0%・認定住宅（控除13年）で返済25/30/35年を比較。
+  // 記事本文の毎月返済額・総返済額・総利息・控除総額を calc 出力で二重化（§品質ゲート①）。
+  const P = 30_000_000;
+  const rate = 1.0;
+  const rows: Array<[number, number, number, number, number]> = [
+    // [返済年数, 毎月, 総返済, 総利息, 控除総額]
+    [25, 113_061, 33_918_300, 3_918_300, 2_025_100],
+    [30, 96_491, 34_736_760, 4_736_760, 2_157_700],
+    [35, 84_685, 35_567_700, 5_567_700, 2_252_200],
+  ];
+  for (const [years, monthly, total, interest, deduction] of rows) {
+    it(`返済${years}年: 毎月${monthly} / 総返済${total} / 利息${interest} / 控除${deduction}`, () => {
+      expect(monthlyPayment(P, rate, years)).toBe(monthly);
+      expect(totalRepayment(P, rate, years)).toBe(total);
+      expect(totalInterest(P, rate, years)).toBe(interest);
+      const d = calcHomeLoanDeduction({
+        principal: P,
+        annualRatePercent: rate,
+        years,
+        housingType: "long_term",
+      });
+      const totalDeduction = d.schedule.reduce((s, y) => s + y.deduction, 0);
+      expect(totalDeduction).toBe(deduction);
+    });
+  }
+
+  it("実質コスト（総返済−控除）は返済年数が短いほど小さい", () => {
+    const net = (years: number) =>
+      totalRepayment(P, rate, years) -
+      calcHomeLoanDeduction({ principal: P, annualRatePercent: rate, years, housingType: "long_term" }).schedule.reduce(
+        (s, y) => s + y.deduction,
+        0,
+      );
+    expect(net(25)).toBeLessThan(net(30));
+    expect(net(30)).toBeLessThan(net(35));
+    expect(net(25)).toBe(31_893_200);
+  });
+});
