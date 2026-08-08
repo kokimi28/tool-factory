@@ -287,3 +287,18 @@ describe("記事 gakumen-tedori-hayamihyo（MB5・早見表）の数値二重化
     expect(r.takeHome).toBe(3_867_484);
   });
 });
+
+describe("E4 計算の内訳（詳しく）の中間値の整合", () => {
+  // 2巡目 Tier E4: ResultDisplay の展開表示が使う calc 中間値の関係を固定。
+  // 給与所得 = 額面 − 給与所得控除、課税所得 ≤ 給与所得、各中間値は非負。
+  for (const income of [3_000_000, 5_000_000, 8_000_000, 12_000_000]) {
+    it(`年収${income / 10_000}万: 給与所得=額面−給与所得控除・課税所得≤給与所得`, () => {
+      const r = calculateNetSalary({ annualIncome: income, isOver40: false });
+      expect(r.employmentIncome).toBe(income - r.salaryDeduction);
+      expect(r.taxableIncomeForIncomeTax).toBeLessThanOrEqual(r.employmentIncome);
+      expect(r.salaryDeduction).toBeGreaterThanOrEqual(0);
+      expect(r.employmentIncome).toBeGreaterThanOrEqual(0);
+      expect(r.taxableIncomeForIncomeTax).toBeGreaterThanOrEqual(0);
+    });
+  }
+});
