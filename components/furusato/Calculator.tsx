@@ -6,6 +6,7 @@ import {
   estimateFurusatoLimitFromSalary,
 } from "@/lib/furusato/calculations";
 import { parseNonNegativeNumber as toNumber } from "@/lib/input";
+import { FURUSATO_INCOME_PRESETS } from "@/lib/furusato/presets";
 
 type Mode = "salary" | "taxable";
 
@@ -79,6 +80,18 @@ export default function Calculator() {
                 <span className="text-gray-500">円</span>
               </div>
             </label>
+            <div className="flex flex-wrap gap-2" role="group" aria-label="年収プリセット">
+              {FURUSATO_INCOME_PRESETS.map((p) => (
+                <button
+                  key={p.value}
+                  type="button"
+                  className="rounded-full border border-gray-300 px-3 py-1 text-xs text-gray-600 transition hover:border-blue-400 hover:text-blue-700"
+                  onClick={() => setAnnualIncome(String(p.value))}
+                >
+                  {p.label}
+                </button>
+              ))}
+            </div>
             <div className="flex flex-wrap items-center gap-4">
               <label className="flex items-center gap-2 text-sm text-gray-700">
                 <input
