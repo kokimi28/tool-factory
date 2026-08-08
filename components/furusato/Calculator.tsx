@@ -18,6 +18,7 @@ export default function Calculator() {
   const [annualIncome, setAnnualIncome] = useState("6000000");
   const [hasSpouse, setHasSpouse] = useState(false);
   const [dependents, setDependents] = useState("0");
+  const [otherDeductions, setOtherDeductions] = useState("0");
   const [taxableIncome, setTaxableIncome] = useState("3000000");
 
   const result = useMemo(() => {
@@ -26,12 +27,13 @@ export default function Calculator() {
         annualIncome: toNumber(annualIncome),
         hasSpouse,
         dependents: Math.max(0, Math.floor(toNumber(dependents))),
+        otherDeductions: toNumber(otherDeductions),
       });
       return { ...r, taxable: r.estimatedTaxableIncome, estimated: true };
     }
     const r = calcFurusatoLimit(toNumber(taxableIncome));
     return { ...r, taxable: toNumber(taxableIncome), estimated: false };
-  }, [mode, annualIncome, hasSpouse, dependents, taxableIncome]);
+  }, [mode, annualIncome, hasSpouse, dependents, otherDeductions, taxableIncome]);
 
   return (
     <div className="w-full max-w-2xl mx-auto">
@@ -112,6 +114,23 @@ export default function Calculator() {
                 人
               </label>
             </div>
+            <label className="block">
+              <span className="text-sm font-medium text-gray-800">
+                その他の所得控除（iDeCo・医療費・生命保険料など・任意）
+              </span>
+              <div className="mt-1 flex items-center gap-2">
+                <input
+                  inputMode="numeric"
+                  value={otherDeductions}
+                  onChange={(e) => setOtherDeductions(e.target.value)}
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-right"
+                />
+                <span className="text-gray-500">円</span>
+              </div>
+              <span className="mt-1 block text-xs text-gray-500">
+                iDeCoの年間掛金・医療費控除・生命保険料控除などの合計を入れると、課税所得が下がり限度額も下がります（未入力なら0）。
+              </span>
+            </label>
           </>
         ) : (
           <label className="block">

@@ -109,6 +109,12 @@ export type SalaryEstimateInput = {
   hasSpouse?: boolean;
   /** 一般の扶養控除対象人数（配偶者を除く） */
   dependents?: number;
+  /**
+   * その他の所得控除の合計（円・任意）。iDeCo（小規模企業共済等掛金控除）・医療費控除・
+   * 生命保険料控除など、基礎控除・配偶者/扶養控除以外で課税所得を下げる控除の合算。
+   * 指定すると課税総所得金額がその分下がり、ふるさと納税の限度額も下がる（D3）。
+   */
+  otherDeductions?: number;
 };
 
 /**
@@ -128,9 +134,10 @@ export function estimateTaxableIncomeFromSalary(input: SalaryEstimateInput): num
   const socialInsurance = Math.round(income * SOCIAL_INSURANCE_ESTIMATE_RATE);
   const spouse = input.hasSpouse ? DEPENDENT_DEDUCTION : 0;
   const dependents = clampNonNeg(input.dependents ?? 0) * DEPENDENT_DEDUCTION;
+  const other = clampNonNeg(input.otherDeductions ?? 0);
   const taxable = Math.max(
     0,
-    employmentIncome - socialInsurance - BASIC_DEDUCTION - spouse - dependents,
+    employmentIncome - socialInsurance - BASIC_DEDUCTION - spouse - dependents - other,
   );
   // 課税総所得金額は1,000円未満切り捨て
   return Math.floor(taxable / 1000) * 1000;
