@@ -1,14 +1,14 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   calcFurusatoLimit,
   estimateFurusatoLimitFromSalary,
 } from "@/lib/furusato/calculations";
 import { parseNonNegativeNumber as toNumber } from "@/lib/input";
 import { FURUSATO_INCOME_PRESETS } from "@/lib/furusato/presets";
-
-type Mode = "salary" | "taxable";
+import { encodeShareParams, decodeShareParams } from "@/lib/share-url";
+import { parseMode, boolToFlag, flagToBool, type Mode } from "@/lib/furusato/share";
 
 const yen = (n: number) => `${Math.round(n).toLocaleString("ja-JP")}円`;
 const pct = (r: number) => `${Math.round(r * 100)}%`;
@@ -20,6 +20,44 @@ export default function Calculator() {
   const [dependents, setDependents] = useState("0");
   const [otherDeductions, setOtherDeductions] = useState("0");
   const [taxableIncome, setTaxableIncome] = useState("3000000");
+  const hydrated = useRef(false);
+  const [copied, setCopied] = useState(false);
+
+  // マウント時に URL のクエリから入力を復元（共有リンクで同じ結果を再現）。
+  useEffect(() => {
+    const p = decodeShareParams(window.location.search);
+    if (p.mode) setMode(parseMode(p.mode));
+    if (p.income) setAnnualIncome(String(toNumber(p.income)));
+    if (p.spouse) setHasSpouse(flagToBool(p.spouse));
+    if (p.deps) setDependents(String(Math.max(0, Math.floor(toNumber(p.deps)))));
+    if (p.other) setOtherDeductions(String(toNumber(p.other)));
+    if (p.taxable) setTaxableIncome(String(toNumber(p.taxable)));
+    hydrated.current = true;
+  }, []);
+
+  // 入力が変わったら URL に反映（履歴を汚さない replaceState）。復元完了後のみ。
+  useEffect(() => {
+    if (!hydrated.current) return;
+    const qs = encodeShareParams({
+      mode,
+      income: String(toNumber(annualIncome)),
+      spouse: boolToFlag(hasSpouse),
+      deps: String(Math.max(0, Math.floor(toNumber(dependents)))),
+      other: String(toNumber(otherDeductions)),
+      taxable: String(toNumber(taxableIncome)),
+    });
+    window.history.replaceState(null, "", qs || window.location.pathname);
+  }, [mode, annualIncome, hasSpouse, dependents, otherDeductions, taxableIncome]);
+
+  async function copyShareLink() {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1500);
+    } catch {
+      // クリップボード不可の環境では何もしない（URL は既にアドレスバーに反映済み）。
+    }
+  }
 
   const result = useMemo(() => {
     if (mode === "salary") {
@@ -170,6 +208,18 @@ export default function Calculator() {
             <dd className="font-semibold">{pct(result.marginalRate)}</dd>
           </div>
         </dl>
+      </div>
+
+      {/* 結果の共有（E3） */}
+      <div className="mt-4">
+        <button
+          type="button"
+          onClick={copyShareLink}
+          aria-live="polite"
+          className="text-sm font-medium text-blue-700 underline underline-offset-2 hover:text-blue-800"
+        >
+          {copied ? "リンクをコピーしました" : "この結果のリンクをコピー"}
+        </button>
       </div>
 
       <p className="mt-4 text-xs text-gray-500 leading-relaxed">
