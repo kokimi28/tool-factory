@@ -6,6 +6,7 @@ import {
   type HousingType,
 } from "@/lib/jutaku-loan/calculations";
 import { parseNonNegativeNumber as toNumber } from "@/lib/input";
+import PrincipalScenarioTable from "@/components/jutaku-loan/PrincipalScenarioTable";
 
 const yen = (n: number) => `${Math.round(n).toLocaleString("ja-JP")}円`;
 
@@ -51,6 +52,20 @@ export default function Calculator() {
               className="w-full rounded-lg border border-gray-300 px-3 py-2 text-right"
             />
             <span className="text-gray-500">円</span>
+          </div>
+          <input
+            type="range"
+            min={10_000_000}
+            max={60_000_000}
+            step={1_000_000}
+            value={Math.min(60_000_000, Math.max(10_000_000, toNumber(principal)))}
+            onChange={(e) => setPrincipal(e.target.value)}
+            className="mt-2 w-full"
+            aria-label="借入額スライダー"
+          />
+          <div className="flex justify-between text-xs text-gray-400">
+            <span>1,000万円</span>
+            <span>6,000万円</span>
           </div>
         </label>
 
@@ -154,6 +169,16 @@ export default function Calculator() {
             ))}
           </tbody>
         </table>
+      </div>
+
+      {/* 借入額を振ったときの返済と控除の同時比較（E8） */}
+      <div className="mt-6">
+        <PrincipalScenarioTable
+          annualRatePercent={toNumber(rate)}
+          years={Math.max(1, Math.floor(toNumber(years)))}
+          housingType={housingType}
+          childRearingHousehold={childRearing}
+        />
       </div>
 
       <p className="mt-4 text-xs text-gray-500 leading-relaxed">
