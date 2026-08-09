@@ -1,12 +1,14 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   calcHomeLoanDeduction,
   type HousingType,
 } from "@/lib/jutaku-loan/calculations";
 import { parseNonNegativeNumber as toNumber } from "@/lib/input";
 import { JUTAKU_LOAN_PRESETS } from "@/lib/jutaku-loan/presets";
+import { encodeShareParams, decodeShareParams } from "@/lib/share-url";
+import { parseHousingType, boolToFlag, flagToBool } from "@/lib/jutaku-loan/share";
 import PrincipalScenarioTable from "@/components/jutaku-loan/PrincipalScenarioTable";
 
 const yen = (n: number) => `${Math.round(n).toLocaleString("ja-JP")}円`;
@@ -25,6 +27,42 @@ export default function Calculator() {
   const [years, setYears] = useState("35");
   const [housingType, setHousingType] = useState<HousingType>("zeh");
   const [childRearing, setChildRearing] = useState(false);
+  const hydrated = useRef(false);
+  const [copied, setCopied] = useState(false);
+
+  // マウント時に URL のクエリから入力を復元（共有リンクで同じ結果を再現）。
+  useEffect(() => {
+    const p = decodeShareParams(window.location.search);
+    if (p.principal) setPrincipal(String(toNumber(p.principal)));
+    if (p.rate) setRate(p.rate);
+    if (p.years) setYears(String(Math.max(1, Math.floor(toNumber(p.years)))));
+    if (p.housing) setHousingType(parseHousingType(p.housing));
+    if (p.child) setChildRearing(flagToBool(p.child));
+    hydrated.current = true;
+  }, []);
+
+  // 入力が変わったら URL に反映（履歴を汚さない replaceState）。復元完了後のみ。
+  useEffect(() => {
+    if (!hydrated.current) return;
+    const qs = encodeShareParams({
+      principal: String(toNumber(principal)),
+      rate,
+      years: String(Math.max(1, Math.floor(toNumber(years)))),
+      housing: housingType,
+      child: boolToFlag(childRearing),
+    });
+    window.history.replaceState(null, "", qs || window.location.pathname);
+  }, [principal, rate, years, housingType, childRearing]);
+
+  async function copyShareLink() {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1500);
+    } catch {
+      // クリップボード不可の環境では何もしない（URL は既にアドレスバーに反映済み）。
+    }
+  }
 
   const result = useMemo(
     () =>
@@ -192,6 +230,18 @@ export default function Calculator() {
           housingType={housingType}
           childRearingHousehold={childRearing}
         />
+      </div>
+
+      {/* 結果の共有（E3） */}
+      <div className="mt-4">
+        <button
+          type="button"
+          onClick={copyShareLink}
+          aria-live="polite"
+          className="text-sm font-medium text-emerald-700 underline underline-offset-2 hover:text-emerald-800"
+        >
+          {copied ? "リンクをコピーしました" : "この結果のリンクをコピー"}
+        </button>
       </div>
 
       <p className="mt-4 text-xs text-gray-500 leading-relaxed">
