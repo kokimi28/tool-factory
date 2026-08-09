@@ -9,7 +9,7 @@
  * - E: 自己都合/会社都合の選択でCTA文言を出し分け
  */
 
-import { useState, useMemo } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import {
   calcAll,
   compareWithOneMoreYear,
@@ -19,6 +19,8 @@ import {
   type RetirementCategory,
 } from '@/lib/taishokukin/calculations';
 import { TAISHOKUKIN_PRESETS } from '@/lib/taishokukin/presets';
+import { encodeShareParams, decodeShareParams } from '@/lib/share-url';
+import { parseSeparation, boolToFlag, flagToBool } from '@/lib/taishokukin/share';
 
 /** 金額を「○○円」形式（カンマ区切り）でフォーマット */
 function yen(n: number): string {
@@ -46,6 +48,42 @@ export default function Calculator() {
   const [months, setMonths] = useState<string>('0');
   const [isExecutive, setIsExecutive] = useState<boolean>(false);
   const [separation, setSeparation] = useState<SeparationReason>('voluntary');
+  const hydrated = useRef(false);
+  const [copied, setCopied] = useState(false);
+
+  // マウント時に URL のクエリから入力を復元（共有リンクで同じ結果を再現）。
+  useEffect(() => {
+    const p = decodeShareParams(window.location.search);
+    if (p.man) setRetirementMan(p.man);
+    if (p.years) setYears(p.years);
+    if (p.months) setMonths(p.months);
+    if (p.exec) setIsExecutive(flagToBool(p.exec));
+    if (p.sep) setSeparation(parseSeparation(p.sep));
+    hydrated.current = true;
+  }, []);
+
+  // 入力が変わったら URL に反映（履歴を汚さない replaceState）。復元完了後のみ。
+  useEffect(() => {
+    if (!hydrated.current) return;
+    const qs = encodeShareParams({
+      man: retirementMan,
+      years,
+      months,
+      exec: boolToFlag(isExecutive),
+      sep: separation,
+    });
+    window.history.replaceState(null, '', qs || window.location.pathname);
+  }, [retirementMan, years, months, isExecutive, separation]);
+
+  async function copyShareLink() {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1500);
+    } catch {
+      // クリップボード不可の環境では何もしない（URL は既にアドレスバーに反映済み）。
+    }
+  }
 
   // 入力を数値化
   const input: Partial<RetirementInput> = {
@@ -235,6 +273,18 @@ export default function Calculator() {
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center">
             <p className="text-sm text-blue-700 mb-1">手取り額</p>
             <p className="text-3xl font-bold text-blue-900">{yen(result.netAmount)}</p>
+          </div>
+
+          {/* 結果の共有（E3） */}
+          <div>
+            <button
+              type="button"
+              onClick={copyShareLink}
+              aria-live="polite"
+              className="text-sm font-medium text-blue-700 underline underline-offset-2 hover:text-blue-800"
+            >
+              {copied ? 'リンクをコピーしました' : 'この結果のリンクをコピー'}
+            </button>
           </div>
 
           <p className="text-xs text-gray-500">
