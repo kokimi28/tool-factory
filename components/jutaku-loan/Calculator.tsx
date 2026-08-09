@@ -6,6 +6,7 @@ import {
   type HousingType,
 } from "@/lib/jutaku-loan/calculations";
 import { parseNonNegativeNumber as toNumber } from "@/lib/input";
+import { JUTAKU_LOAN_PRESETS } from "@/lib/jutaku-loan/presets";
 import PrincipalScenarioTable from "@/components/jutaku-loan/PrincipalScenarioTable";
 
 const yen = (n: number) => `${Math.round(n).toLocaleString("ja-JP")}円`;
@@ -66,6 +67,18 @@ export default function Calculator() {
           <div className="flex justify-between text-xs text-gray-400">
             <span>1,000万円</span>
             <span>6,000万円</span>
+          </div>
+          <div className="mt-3 flex flex-wrap gap-2" role="group" aria-label="借入額プリセット">
+            {JUTAKU_LOAN_PRESETS.map((p) => (
+              <button
+                key={p.value}
+                type="button"
+                className="rounded-full border border-gray-300 px-3 py-1 text-xs text-gray-600 transition hover:border-emerald-400 hover:text-emerald-700"
+                onClick={() => setPrincipal(String(p.value))}
+              >
+                {p.label}
+              </button>
+            ))}
           </div>
         </label>
 
