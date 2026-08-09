@@ -7,6 +7,7 @@ import {
   type SiWall,
 } from "@/lib/nenshu-kabe/calculations";
 import { parseNonNegativeNumber as toNumber } from "@/lib/input";
+import WallCurveTable from "@/components/nenshu-kabe/WallCurveTable";
 
 const yen = (n: number) => `${Math.round(n).toLocaleString("ja-JP")}円`;
 const man = (n: number) => `${Math.round(n / 10000).toLocaleString("ja-JP")}万円`;
@@ -131,6 +132,11 @@ export default function Calculator() {
             ))}
           </tbody>
         </table>
+      </div>
+
+      {/* 壁をまたぐ手取り曲線（壁の上下に広げたデータ表・E6） */}
+      <div className="mt-6">
+        <WallCurveTable wall={wall} />
       </div>
 
       <p className="mt-4 text-xs text-gray-500 leading-relaxed">
