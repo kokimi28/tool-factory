@@ -22,6 +22,7 @@ import {
   type AppliedRule,
   type ReceiptOrder,
 } from '@/lib/ideco/calculations';
+import { IDECO_PRESETS } from '@/lib/ideco/presets';
 
 // ============================================================
 // 表示ヘルパー
@@ -335,6 +336,24 @@ export default function Calculator() {
       {/* 入力フォーム */}
       <section className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
         <h2 className="text-lg font-bold text-gray-900 mb-4">受け取り条件を入力</h2>
+
+        {/* 受取シナリオ・プリセット（E2）: ワンタップで代表ケースを入力 */}
+        <div className="mb-5">
+          <p className="text-sm font-semibold text-gray-800 mb-2">受取シナリオの例（ワンタップで入力）</p>
+          <div className="flex flex-wrap gap-2" role="group" aria-label="受取シナリオ・プリセット">
+            {IDECO_PRESETS.map((p) => (
+              <button
+                key={p.label}
+                type="button"
+                title={p.description}
+                onClick={() => setRaw(p.inputs)}
+                className="rounded-full border border-gray-300 bg-white px-3 py-1 text-xs text-gray-700 transition hover:border-blue-400 hover:text-blue-700"
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
+        </div>
 
         {/* 退職金ブロック */}
         <fieldset className="mb-5">
