@@ -18,6 +18,7 @@ import {
   type SeparationReason,
   type RetirementCategory,
 } from '@/lib/taishokukin/calculations';
+import { TAISHOKUKIN_PRESETS } from '@/lib/taishokukin/presets';
 
 /** 金額を「○○円」形式（カンマ区切り）でフォーマット */
 function yen(n: number): string {
@@ -93,6 +94,18 @@ export default function Calculator() {
               className="w-full rounded border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               placeholder="例: 2000"
             />
+            <div className="mt-2 flex flex-wrap gap-2" role="group" aria-label="退職金額プリセット">
+              {TAISHOKUKIN_PRESETS.map((p) => (
+                <button
+                  key={p.man}
+                  type="button"
+                  className="rounded-full border border-gray-300 px-3 py-1 text-xs text-gray-600 transition hover:border-blue-400 hover:text-blue-700"
+                  onClick={() => setRetirementMan(String(p.man))}
+                >
+                  {p.label}
+                </button>
+              ))}
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
