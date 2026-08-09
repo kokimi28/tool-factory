@@ -1,11 +1,13 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   pensionScenario,
   breakEvenAgeVs65,
 } from "@/lib/nenkin-kuriage/calculations";
 import { PENSION_MONTHLY_PRESETS } from "@/lib/nenkin-kuriage/presets";
+import { clampStartAge } from "@/lib/nenkin-kuriage/share";
+import { encodeShareParams, decodeShareParams } from "@/lib/share-url";
 import { parseNonNegativeNumber as toNumber } from "@/lib/input";
 
 const yen = (n: number) => `${Math.round(n).toLocaleString("ja-JP")}円`;
@@ -16,6 +18,36 @@ const AGES = [60, 62, 65, 66, 68, 70, 72, 75];
 export default function Calculator() {
   const [baseMonthly, setBaseMonthly] = useState("150000");
   const [startAge, setStartAge] = useState(70);
+  const hydrated = useRef(false);
+  const [copied, setCopied] = useState(false);
+
+  // マウント時に URL のクエリから入力を復元（共有リンクで同じ結果を再現）。
+  useEffect(() => {
+    const p = decodeShareParams(window.location.search);
+    if (p.base) setBaseMonthly(String(toNumber(p.base)));
+    if (p.age) setStartAge(clampStartAge(Number(p.age)));
+    hydrated.current = true;
+  }, []);
+
+  // 入力が変わったら URL に反映（履歴を汚さない replaceState）。復元完了後のみ。
+  useEffect(() => {
+    if (!hydrated.current) return;
+    const qs = encodeShareParams({
+      base: String(toNumber(baseMonthly)),
+      age: String(startAge),
+    });
+    window.history.replaceState(null, "", qs || window.location.pathname);
+  }, [baseMonthly, startAge]);
+
+  async function copyShareLink() {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1500);
+    } catch {
+      // クリップボード不可の環境では何もしない（URL は既にアドレスバーに反映済み）。
+    }
+  }
 
   const base = toNumber(baseMonthly);
   const scenario = useMemo(() => pensionScenario(base, startAge), [base, startAge]);
@@ -126,6 +158,18 @@ export default function Calculator() {
             ))}
           </tbody>
         </table>
+      </div>
+
+      {/* 結果の共有（E3） */}
+      <div className="mt-4">
+        <button
+          type="button"
+          onClick={copyShareLink}
+          aria-live="polite"
+          className="text-sm font-medium text-indigo-700 underline underline-offset-2 hover:text-indigo-800"
+        >
+          {copied ? "リンクをコピーしました" : "この結果のリンクをコピー"}
+        </button>
       </div>
 
       <p className="mt-4 text-xs text-gray-500 leading-relaxed">
