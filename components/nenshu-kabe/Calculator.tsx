@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   takeHomeWithWall,
   analyzeWallReversal,
@@ -8,6 +8,8 @@ import {
 } from "@/lib/nenshu-kabe/calculations";
 import { parseNonNegativeNumber as toNumber } from "@/lib/input";
 import { NENSHU_KABE_PRESETS } from "@/lib/nenshu-kabe/presets";
+import { encodeShareParams, decodeShareParams } from "@/lib/share-url";
+import { wallToCode, codeToWall } from "@/lib/nenshu-kabe/share";
 import WallCurveTable from "@/components/nenshu-kabe/WallCurveTable";
 
 const yen = (n: number) => `${Math.round(n).toLocaleString("ja-JP")}円`;
@@ -16,6 +18,36 @@ const man = (n: number) => `${Math.round(n / 10000).toLocaleString("ja-JP")}万�
 export default function Calculator() {
   const [wall, setWall] = useState<SiWall>(1_300_000);
   const [income, setIncome] = useState("1400000");
+  const hydrated = useRef(false);
+  const [copied, setCopied] = useState(false);
+
+  // マウント時に URL のクエリから入力を復元（共有リンクで同じ結果を再現）。
+  useEffect(() => {
+    const p = decodeShareParams(window.location.search);
+    if (p.income) setIncome(String(toNumber(p.income)));
+    if (p.wall) setWall(codeToWall(p.wall));
+    hydrated.current = true;
+  }, []);
+
+  // 入力が変わったら URL に反映（履歴を汚さない replaceState）。復元完了後のみ。
+  useEffect(() => {
+    if (!hydrated.current) return;
+    const qs = encodeShareParams({
+      income: String(toNumber(income)),
+      wall: wallToCode(wall),
+    });
+    window.history.replaceState(null, "", qs || window.location.pathname);
+  }, [income, wall]);
+
+  async function copyShareLink() {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1500);
+    } catch {
+      // クリップボード不可の環境では何もしない（URL は既にアドレスバーに反映済み）。
+    }
+  }
 
   const reversal = useMemo(() => analyzeWallReversal(wall), [wall]);
   const current = useMemo(
@@ -150,6 +182,18 @@ export default function Calculator() {
       {/* 壁をまたぐ手取り曲線（壁の上下に広げたデータ表・E6） */}
       <div className="mt-6">
         <WallCurveTable wall={wall} />
+      </div>
+
+      {/* 結果の共有（E3） */}
+      <div className="mt-4">
+        <button
+          type="button"
+          onClick={copyShareLink}
+          aria-live="polite"
+          className="text-sm font-medium text-rose-700 underline underline-offset-2 hover:text-rose-800"
+        >
+          {copied ? "リンクをコピーしました" : "この結果のリンクをコピー"}
+        </button>
       </div>
 
       <p className="mt-4 text-xs text-gray-500 leading-relaxed">
