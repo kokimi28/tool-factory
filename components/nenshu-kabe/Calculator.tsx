@@ -7,6 +7,7 @@ import {
   type SiWall,
 } from "@/lib/nenshu-kabe/calculations";
 import { parseNonNegativeNumber as toNumber } from "@/lib/input";
+import { NENSHU_KABE_PRESETS } from "@/lib/nenshu-kabe/presets";
 import WallCurveTable from "@/components/nenshu-kabe/WallCurveTable";
 
 const yen = (n: number) => `${Math.round(n).toLocaleString("ja-JP")}円`;
@@ -71,6 +72,18 @@ export default function Calculator() {
               className="w-full rounded-lg border border-gray-300 px-3 py-2 text-right"
             />
             <span className="text-gray-500">円</span>
+          </div>
+          <div className="mt-3 flex flex-wrap gap-2" role="group" aria-label="年収プリセット">
+            {NENSHU_KABE_PRESETS.map((p) => (
+              <button
+                key={p.value}
+                type="button"
+                className="rounded-full border border-gray-300 px-3 py-1 text-xs text-gray-600 transition hover:border-rose-400 hover:text-rose-700"
+                onClick={() => setIncome(String(p.value))}
+              >
+                {p.label}
+              </button>
+            ))}
           </div>
         </label>
       </div>
