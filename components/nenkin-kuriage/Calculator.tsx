@@ -5,6 +5,7 @@ import {
   pensionScenario,
   breakEvenAgeVs65,
 } from "@/lib/nenkin-kuriage/calculations";
+import { PENSION_MONTHLY_PRESETS } from "@/lib/nenkin-kuriage/presets";
 import { parseNonNegativeNumber as toNumber } from "@/lib/input";
 
 const yen = (n: number) => `${Math.round(n).toLocaleString("ja-JP")}円`;
@@ -41,6 +42,18 @@ export default function Calculator() {
               className="w-full rounded-lg border border-gray-300 px-3 py-2 text-right"
             />
             <span className="text-gray-500">円</span>
+          </div>
+          <div className="mt-3 flex flex-wrap gap-2" role="group" aria-label="年金月額プリセット">
+            {PENSION_MONTHLY_PRESETS.map((p) => (
+              <button
+                key={p.value}
+                type="button"
+                className="rounded-full border border-gray-300 px-3 py-1 text-xs text-gray-600 transition hover:border-indigo-400 hover:text-indigo-700"
+                onClick={() => setBaseMonthly(String(p.value))}
+              >
+                {p.label}
+              </button>
+            ))}
           </div>
         </label>
 
