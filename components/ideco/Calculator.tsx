@@ -12,7 +12,7 @@
  * 永続化なし（メモリ内 state のみ）。localStorage 等は使用しない。
  */
 
-import { useMemo, useState, type ChangeEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react';
 import {
   calcIdecoSim,
   compareVariants,
@@ -23,6 +23,8 @@ import {
   type ReceiptOrder,
 } from '@/lib/ideco/calculations';
 import { IDECO_PRESETS } from '@/lib/ideco/presets';
+import { encodeShareParams, decodeShareParams } from '@/lib/share-url';
+import { encodeIdecoInputs, decodeIdecoInputs } from '@/lib/ideco/share';
 
 // ============================================================
 // 表示ヘルパー
@@ -270,10 +272,38 @@ const DEFAULTS: RawInputs = {
 
 export default function Calculator() {
   const [raw, setRaw] = useState<RawInputs>(DEFAULTS);
+  const hydrated = useRef(false);
+  const [copied, setCopied] = useState(false);
 
   // e.target.value を全角→半角に正規化してそのまま置換（連結・追記しない）。
   const set = (key: keyof RawInputs) => (e: ChangeEvent<HTMLInputElement>) =>
     setRaw((prev) => ({ ...prev, [key]: toHalfWidthDigits(e.target.value) }));
+
+  // マウント時に URL のクエリから入力を復元（共有リンクで同じ結果を再現）。
+  useEffect(() => {
+    const restored = decodeIdecoInputs(decodeShareParams(window.location.search));
+    if (Object.keys(restored).length > 0) {
+      setRaw((prev) => ({ ...prev, ...restored }));
+    }
+    hydrated.current = true;
+  }, []);
+
+  // 入力が変わったら URL に反映（履歴を汚さない replaceState）。復元完了後のみ。
+  useEffect(() => {
+    if (!hydrated.current) return;
+    const qs = encodeShareParams(encodeIdecoInputs(raw));
+    window.history.replaceState(null, '', qs || window.location.pathname);
+  }, [raw]);
+
+  async function copyShareLink() {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1500);
+    } catch {
+      // クリップボード不可の環境では何もしない（URL は既にアドレスバーに反映済み）。
+    }
+  }
 
   const errors = useMemo(() => validate(raw), [raw]);
   const isValid = errors.length === 0;
@@ -481,6 +511,18 @@ export default function Calculator() {
               <span className="text-blue-700 font-medium">手取り合計</span>
               <span className="text-3xl font-bold text-blue-900">{yen(result.totalNet)}</span>
             </div>
+          </div>
+
+          {/* 結果の共有（E3） */}
+          <div>
+            <button
+              type="button"
+              onClick={copyShareLink}
+              aria-live="polite"
+              className="text-sm font-medium text-blue-700 underline underline-offset-2 hover:text-blue-800"
+            >
+              {copied ? 'リンクをコピーしました' : 'この結果のリンクをコピー'}
+            </button>
           </div>
 
           <p className="text-xs text-gray-500">
