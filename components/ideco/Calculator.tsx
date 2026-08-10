@@ -25,6 +25,8 @@ import {
 import { IDECO_PRESETS } from '@/lib/ideco/presets';
 import { encodeShareParams, decodeShareParams } from '@/lib/share-url';
 import { encodeIdecoInputs, decodeIdecoInputs } from '@/lib/ideco/share';
+import { resultToClipboardText } from '@/lib/ideco/result-text';
+import CopyResult from '@/components/ideco/CopyResult';
 
 // ============================================================
 // 表示ヘルパー
@@ -513,8 +515,8 @@ export default function Calculator() {
             </div>
           </div>
 
-          {/* 結果の共有（E3） */}
-          <div>
+          {/* 結果の共有（E3）＋テキストコピー（E12） */}
+          <div className="flex flex-wrap gap-x-6 gap-y-2">
             <button
               type="button"
               onClick={copyShareLink}
@@ -523,6 +525,7 @@ export default function Calculator() {
             >
               {copied ? 'リンクをコピーしました' : 'この結果のリンクをコピー'}
             </button>
+            <CopyResult text={resultToClipboardText(result)} />
           </div>
 
           <p className="text-xs text-gray-500">
