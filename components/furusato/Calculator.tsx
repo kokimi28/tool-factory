@@ -9,6 +9,8 @@ import { parseNonNegativeNumber as toNumber } from "@/lib/input";
 import { FURUSATO_INCOME_PRESETS } from "@/lib/furusato/presets";
 import { encodeShareParams, decodeShareParams } from "@/lib/share-url";
 import { parseMode, boolToFlag, flagToBool, type Mode } from "@/lib/furusato/share";
+import { resultToClipboardText } from "@/lib/furusato/result-text";
+import CopyResult from "@/components/furusato/CopyResult";
 
 const yen = (n: number) => `${Math.round(n).toLocaleString("ja-JP")}円`;
 const pct = (r: number) => `${Math.round(r * 100)}%`;
@@ -246,8 +248,8 @@ export default function Calculator() {
         </p>
       </details>
 
-      {/* 結果の共有（E3） */}
-      <div className="mt-4">
+      {/* 結果の共有（E3）＋テキストコピー（E12） */}
+      <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2">
         <button
           type="button"
           onClick={copyShareLink}
@@ -256,6 +258,7 @@ export default function Calculator() {
         >
           {copied ? "リンクをコピーしました" : "この結果のリンクをコピー"}
         </button>
+        <CopyResult text={resultToClipboardText({ ...result, taxable: result.taxable })} />
       </div>
 
       <p className="mt-4 text-xs text-gray-500 leading-relaxed">
