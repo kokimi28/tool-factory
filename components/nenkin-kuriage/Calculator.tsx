@@ -9,6 +9,8 @@ import {
 } from "@/lib/nenkin-kuriage/calculations";
 import { PENSION_MONTHLY_PRESETS } from "@/lib/nenkin-kuriage/presets";
 import { clampStartAge } from "@/lib/nenkin-kuriage/share";
+import { resultToClipboardText } from "@/lib/nenkin-kuriage/result-text";
+import CopyResult from "@/components/nenkin-kuriage/CopyResult";
 import { encodeShareParams, decodeShareParams } from "@/lib/share-url";
 import { parseNonNegativeNumber as toNumber } from "@/lib/input";
 
@@ -197,8 +199,8 @@ export default function Calculator() {
         </table>
       </div>
 
-      {/* 結果の共有（E3） */}
-      <div className="mt-4">
+      {/* 結果の共有（E3）＋テキストコピー（E12） */}
+      <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2">
         <button
           type="button"
           onClick={copyShareLink}
@@ -207,6 +209,7 @@ export default function Calculator() {
         >
           {copied ? "リンクをコピーしました" : "この結果のリンクをコピー"}
         </button>
+        <CopyResult text={resultToClipboardText(scenario, breakEven)} />
       </div>
 
       <p className="mt-4 text-xs text-gray-500 leading-relaxed">
