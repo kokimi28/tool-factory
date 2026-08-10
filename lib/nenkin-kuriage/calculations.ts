@@ -24,14 +24,29 @@ function clamp(n: number, lo: number, hi: number): number {
 }
 
 /**
+ * 65歳を基準とした受給開始月数の差（繰上げは負・繰下げは正）。
+ * @param startAge 受給開始年齢（60〜75、月単位の端数も可）
+ */
+export function monthsFrom65(startAge: number): number {
+  const age = clamp(startAge, MIN_AGE, MAX_AGE);
+  return Math.round((age - STANDARD_AGE) * 12);
+}
+
+/**
+ * 適用される1か月あたりの増減率（繰上げ 0.4%／繰下げ 0.7%）。
+ * @param startAge 受給開始年齢
+ */
+export function ratePerMonth(startAge: number): number {
+  return monthsFrom65(startAge) < 0 ? EARLY_RATE_PER_MONTH : DEFER_RATE_PER_MONTH;
+}
+
+/**
  * 受給開始年齢に対する受給率（65歳＝1.0）。
  * @param startAge 受給開始年齢（60〜75、月単位の端数も可）
  */
 export function pensionRate(startAge: number): number {
-  const age = clamp(startAge, MIN_AGE, MAX_AGE);
-  const months = Math.round((age - STANDARD_AGE) * 12);
-  if (months < 0) return 1 + EARLY_RATE_PER_MONTH * months; // months<0 → 減額
-  return 1 + DEFER_RATE_PER_MONTH * months;
+  const months = monthsFrom65(startAge);
+  return 1 + ratePerMonth(startAge) * months;
 }
 
 /**
