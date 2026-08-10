@@ -10,6 +10,8 @@ import { parseNonNegativeNumber as toNumber } from "@/lib/input";
 import { NENSHU_KABE_PRESETS } from "@/lib/nenshu-kabe/presets";
 import { encodeShareParams, decodeShareParams } from "@/lib/share-url";
 import { wallToCode, codeToWall } from "@/lib/nenshu-kabe/share";
+import { resultToClipboardText } from "@/lib/nenshu-kabe/result-text";
+import CopyResult from "@/components/nenshu-kabe/CopyResult";
 import WallCurveTable from "@/components/nenshu-kabe/WallCurveTable";
 
 const yen = (n: number) => `${Math.round(n).toLocaleString("ja-JP")}円`;
@@ -184,8 +186,8 @@ export default function Calculator() {
         <WallCurveTable wall={wall} />
       </div>
 
-      {/* 結果の共有（E3） */}
-      <div className="mt-4">
+      {/* 結果の共有（E3）＋テキストコピー（E12） */}
+      <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2">
         <button
           type="button"
           onClick={copyShareLink}
@@ -194,6 +196,7 @@ export default function Calculator() {
         >
           {copied ? "リンクをコピーしました" : "この結果のリンクをコピー"}
         </button>
+        <CopyResult text={resultToClipboardText(current, wall, reversal)} />
       </div>
 
       <p className="mt-4 text-xs text-gray-500 leading-relaxed">
