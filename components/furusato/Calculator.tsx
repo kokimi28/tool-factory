@@ -210,6 +210,42 @@ export default function Calculator() {
         </dl>
       </div>
 
+      {/* 計算の内訳（E4）: 総務省の式に実数を当てはめて段階表示 */}
+      <details className="mt-4 rounded-lg border border-gray-200 bg-white p-4">
+        <summary className="cursor-pointer text-sm font-medium text-gray-700 hover:text-gray-900">
+          計算の内訳（詳しく）
+        </summary>
+        <ol className="mt-3 space-y-2 text-sm text-gray-700">
+          {result.estimated && (
+            <li>
+              <span className="text-gray-500">① 年収から課税総所得金額を概算：</span>{" "}
+              <span className="font-semibold tabular-nums">{yen(result.taxable)}</span>
+            </li>
+          )}
+          <li>
+            <span className="text-gray-500">
+              {result.estimated ? "②" : "①"} 住民税所得割 ＝ 課税総所得 × 10%：
+            </span>{" "}
+            <span className="font-semibold tabular-nums">{yen(result.residentLevy)}</span>
+          </li>
+          <li>
+            <span className="text-gray-500">
+              {result.estimated ? "③" : "②"} 所得税の限界税率：
+            </span>{" "}
+            <span className="font-semibold tabular-nums">{pct(result.marginalRate)}</span>
+          </li>
+          <li>
+            <span className="text-gray-500">
+              {result.estimated ? "④" : "③"} 控除上限 ＝ 住民税所得割 × 20% ÷（90% − 限界税率 × 1.021）＋ 2,000円：
+            </span>{" "}
+            <span className="font-semibold tabular-nums">{yen(result.limit)}</span>
+          </li>
+        </ol>
+        <p className="mt-2 text-xs text-gray-400">
+          総務省「ふるさと納税のしくみ（控除上限額）」の計算式に基づく概算です。自己負担 2,000 円で済む年間寄付額の目安を表します。
+        </p>
+      </details>
+
       {/* 結果の共有（E3） */}
       <div className="mt-4">
         <button
