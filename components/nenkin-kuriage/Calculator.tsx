@@ -4,6 +4,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   pensionScenario,
   breakEvenAgeVs65,
+  monthsFrom65,
+  ratePerMonth,
 } from "@/lib/nenkin-kuriage/calculations";
 import { PENSION_MONTHLY_PRESETS } from "@/lib/nenkin-kuriage/presets";
 import { clampStartAge } from "@/lib/nenkin-kuriage/share";
@@ -130,6 +132,41 @@ export default function Calculator() {
           <p className="mt-3 text-sm text-indigo-800">65歳受給（基準）です。</p>
         )}
       </div>
+
+      {/* 受給率の内訳（E4）: 月数 × 適用率で受給率を段階表示 */}
+      <details className="mt-6 rounded-xl border border-gray-200 bg-white p-5">
+        <summary className="cursor-pointer text-sm font-medium text-gray-700 hover:text-gray-900">
+          受給率の内訳（詳しく）
+        </summary>
+        <ol className="mt-3 space-y-2 text-sm text-gray-700">
+          <li>
+            <span className="text-gray-500">① 65歳からの月数：</span>{" "}
+            <span className="font-semibold tabular-nums">
+              {monthsFrom65(startAge) >= 0 ? "＋" : "−"}
+              {Math.abs(monthsFrom65(startAge))}か月
+            </span>
+          </li>
+          <li>
+            <span className="text-gray-500">
+              ② 適用率（{startAge < 65 ? "繰上げ" : startAge > 65 ? "繰下げ" : "基準"}）：
+            </span>{" "}
+            <span className="font-semibold tabular-nums">
+              {startAge === 65 ? "—" : `1か月あたり ${(ratePerMonth(startAge) * 100).toFixed(1)}%`}
+            </span>
+          </li>
+          <li>
+            <span className="text-gray-500">③ 受給率 ＝ 1 ＋ 月数 × 適用率：</span>{" "}
+            <span className="font-semibold tabular-nums">{pct(scenario.rate)}</span>
+          </li>
+          <li>
+            <span className="text-gray-500">④ 月額 ＝ 基準月額 × 受給率：</span>{" "}
+            <span className="font-semibold tabular-nums">{yen(scenario.monthly)}</span>（年額 {yen(scenario.annual)}）
+          </li>
+        </ol>
+        <p className="mt-2 text-xs text-gray-400">
+          繰上げは1か月あたり0.4%減額（60歳で−24%）、繰下げは1か月あたり0.7%増額（75歳で+84%）。1円未満は切り捨て。
+        </p>
+      </details>
 
       {/* 年齢別の比較テーブル */}
       <div className="mt-6 overflow-x-auto">
