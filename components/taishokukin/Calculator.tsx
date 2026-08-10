@@ -21,6 +21,8 @@ import {
 import { TAISHOKUKIN_PRESETS } from '@/lib/taishokukin/presets';
 import { encodeShareParams, decodeShareParams } from '@/lib/share-url';
 import { parseSeparation, boolToFlag, flagToBool } from '@/lib/taishokukin/share';
+import { resultToClipboardText } from '@/lib/taishokukin/result-text';
+import CopyResult from '@/components/taishokukin/CopyResult';
 
 /** 金額を「○○円」形式（カンマ区切り）でフォーマット */
 function yen(n: number): string {
@@ -275,8 +277,8 @@ export default function Calculator() {
             <p className="text-3xl font-bold text-blue-900">{yen(result.netAmount)}</p>
           </div>
 
-          {/* 結果の共有（E3） */}
-          <div>
+          {/* 結果の共有（E3）＋テキストコピー（E12） */}
+          <div className="flex flex-wrap gap-x-6 gap-y-2">
             <button
               type="button"
               onClick={copyShareLink}
@@ -285,6 +287,7 @@ export default function Calculator() {
             >
               {copied ? 'リンクをコピーしました' : 'この結果のリンクをコピー'}
             </button>
+            <CopyResult text={resultToClipboardText(result)} />
           </div>
 
           <p className="text-xs text-gray-500">
