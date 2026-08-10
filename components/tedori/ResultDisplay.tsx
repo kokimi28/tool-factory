@@ -1,5 +1,7 @@
 import type { NetSalaryResult } from "@/lib/tedori/calculations";
 import { yen } from "@/lib/tedori/format";
+import { resultToClipboardText } from "@/lib/tedori/result-text";
+import CopyResult from "@/components/tedori/CopyResult";
 
 function Row({
   label,
@@ -70,6 +72,9 @@ export default function ResultDisplay({ result }: { result: NetSalaryResult }) {
         <div className="mt-2 flex items-baseline justify-between">
           <span className="text-sm text-slate-600">手取り率</span>
           <span className="tabular-nums text-slate-800">{ratePct}%</span>
+        </div>
+        <div className="mt-3 border-t border-slate-100 pt-3 text-right">
+          <CopyResult text={resultToClipboardText(result)} />
         </div>
       </div>
 
