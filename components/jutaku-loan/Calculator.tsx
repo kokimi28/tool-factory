@@ -9,6 +9,8 @@ import { parseNonNegativeNumber as toNumber } from "@/lib/input";
 import { JUTAKU_LOAN_PRESETS } from "@/lib/jutaku-loan/presets";
 import { encodeShareParams, decodeShareParams } from "@/lib/share-url";
 import { parseHousingType, boolToFlag, flagToBool } from "@/lib/jutaku-loan/share";
+import { resultToClipboardText } from "@/lib/jutaku-loan/result-text";
+import CopyResult from "@/components/jutaku-loan/CopyResult";
 import PrincipalScenarioTable from "@/components/jutaku-loan/PrincipalScenarioTable";
 
 const yen = (n: number) => `${Math.round(n).toLocaleString("ja-JP")}円`;
@@ -232,8 +234,8 @@ export default function Calculator() {
         />
       </div>
 
-      {/* 結果の共有（E3） */}
-      <div className="mt-4">
+      {/* 結果の共有（E3）＋テキストコピー（E12） */}
+      <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2">
         <button
           type="button"
           onClick={copyShareLink}
@@ -242,6 +244,7 @@ export default function Calculator() {
         >
           {copied ? "リンクをコピーしました" : "この結果のリンクをコピー"}
         </button>
+        <CopyResult text={resultToClipboardText(result)} />
       </div>
 
       <p className="mt-4 text-xs text-gray-500 leading-relaxed">
