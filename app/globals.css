@@ -9,3 +9,41 @@ body {
   background: var(--background);
   color: var(--foreground);
 }
+
+/*
+ * 印刷 / PDF 用レイアウト（E10・2巡目）。
+ * 計算結果を紙・PDF に残す用途を想定し、操作 UI・広告導線・サイト chrome を落として
+ * 結果本文だけを黒地に白で読みやすく出力する。ツール個別の変更は不要（構造・rel で対象化）。
+ */
+@media print {
+  /* 操作系（コピー/リセット/プリセット等）・ナビ・フッターは印刷しない */
+  button,
+  nav,
+  footer {
+    display: none !important;
+  }
+
+  /* アフィリエイト/PR 導線（rel="sponsored"）は印刷に含めない */
+  a[rel~="sponsored"] {
+    display: none !important;
+  }
+
+  /* 明示的に印刷から外したい要素の共通クラス */
+  .no-print {
+    display: none !important;
+  }
+
+  /* 折りたたみ（計算の内訳など）は開いた状態で印刷する */
+  details {
+    display: block !important;
+  }
+  details > summary {
+    display: none !important;
+  }
+
+  /* 紙面は黒地に白・色背景や影は落として読みやすく・インク節約 */
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+}
