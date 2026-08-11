@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { calculateNetSalary, type NetSalaryInput } from "@/lib/tedori/calculations";
 import { encodeShareParams, decodeShareParams } from "@/lib/share-url";
+import { validateNumberInput } from "@/lib/validate-input";
 import { TEDORI_PRESETS } from "@/lib/tedori/presets";
 import ResultDisplay from "@/components/tedori/ResultDisplay";
 import ScenarioCompare from "@/components/tedori/ScenarioCompare";
@@ -89,6 +90,12 @@ export default function Calculator() {
 
   const result = useMemo(() => calculateNetSalary(input), [input]);
 
+  // E9: 年収入力の妥当性メッセージ（負値・非数字・上限超過を分かりやすく通知）。
+  const incomeError = useMemo(
+    () => validateNumberInput(state.annualIncome, { max: 1_000_000_000 }).error,
+    [state.annualIncome],
+  );
+
   return (
     <div className="grid gap-8 md:grid-cols-2">
       <form
@@ -110,10 +117,18 @@ export default function Calculator() {
               className="w-full rounded-lg border border-slate-300 px-3 py-2 text-right text-lg tabular-nums focus:border-brand focus:ring-2 focus:ring-brand/30"
               value={state.annualIncome}
               onChange={(e) => dispatch({ type: "set", field: "annualIncome", value: e.target.value })}
+              aria-invalid={incomeError !== null}
+              aria-describedby={incomeError ? "annualIncome-error" : undefined}
             />
-            <p className="mt-1 text-right text-xs text-slate-500">
-              {toInt(state.annualIncome).toLocaleString("ja-JP")} 円
-            </p>
+            {incomeError ? (
+              <p id="annualIncome-error" role="alert" className="mt-1 text-right text-xs text-rose-600">
+                {incomeError}
+              </p>
+            ) : (
+              <p className="mt-1 text-right text-xs text-slate-500">
+                {toInt(state.annualIncome).toLocaleString("ja-JP")} 円
+              </p>
+            )}
             <div
               className="mt-3 flex flex-wrap gap-2"
               role="group"
