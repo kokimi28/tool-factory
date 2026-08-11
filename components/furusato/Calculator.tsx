@@ -6,6 +6,7 @@ import {
   estimateFurusatoLimitFromSalary,
 } from "@/lib/furusato/calculations";
 import { parseNonNegativeNumber as toNumber } from "@/lib/input";
+import { validateNumberInput } from "@/lib/validate-input";
 import { FURUSATO_INCOME_PRESETS } from "@/lib/furusato/presets";
 import { encodeShareParams, decodeShareParams } from "@/lib/share-url";
 import { parseMode, boolToFlag, flagToBool, type Mode } from "@/lib/furusato/share";
@@ -60,6 +61,17 @@ export default function Calculator() {
       // クリップボード不可の環境では何もしない（URL は既にアドレスバーに反映済み）。
     }
   }
+
+  // E9: 主要な金額入力の妥当性メッセージ（負値・非数字・上限超過を通知）。
+  // QC12 の silent clamp（parseNonNegativeNumber）を補完し「なぜ 0 になったか」を伝える。
+  const incomeError = useMemo(
+    () => validateNumberInput(annualIncome, { max: 100_000_000 }).error,
+    [annualIncome],
+  );
+  const taxableError = useMemo(
+    () => validateNumberInput(taxableIncome, { max: 100_000_000 }).error,
+    [taxableIncome],
+  );
 
   const result = useMemo(() => {
     if (mode === "salary") {
@@ -118,9 +130,16 @@ export default function Calculator() {
                   value={annualIncome}
                   onChange={(e) => setAnnualIncome(e.target.value)}
                   className="w-full rounded-lg border border-gray-300 px-3 py-2 text-right"
+                  aria-invalid={incomeError !== null}
+                  aria-describedby={incomeError ? "furusato-income-error" : undefined}
                 />
                 <span className="text-gray-500">円</span>
               </div>
+              {incomeError && (
+                <p id="furusato-income-error" role="alert" className="mt-1 text-xs text-rose-600">
+                  {incomeError}
+                </p>
+              )}
             </label>
             <div className="flex flex-wrap gap-2" role="group" aria-label="年収プリセット">
               {FURUSATO_INCOME_PRESETS.map((p) => (
@@ -183,9 +202,16 @@ export default function Calculator() {
                 value={taxableIncome}
                 onChange={(e) => setTaxableIncome(e.target.value)}
                 className="w-full rounded-lg border border-gray-300 px-3 py-2 text-right"
+                aria-invalid={taxableError !== null}
+                aria-describedby={taxableError ? "furusato-taxable-error" : undefined}
               />
               <span className="text-gray-500">円</span>
             </div>
+            {taxableError && (
+              <p id="furusato-taxable-error" role="alert" className="mt-1 text-xs text-rose-600">
+                {taxableError}
+              </p>
+            )}
           </label>
         )}
       </div>
