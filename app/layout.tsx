@@ -68,7 +68,17 @@ export default function RootLayout({
         )}
       </head>
       <body className="min-h-full flex flex-col">
-        <div className="flex-1">{children}</div>
+        {/* F7 a11y: キーボード利用者がナビを飛ばして本文へ移動できるスキップリンク（WCAG 2.4.1）。
+            通常は視覚的に隠し、フォーカス時のみ左上に表示する。 */}
+        <a
+          href="#main-content"
+          className="sr-only rounded bg-white px-3 py-2 text-sm font-medium text-blue-700 shadow focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-50"
+        >
+          本文へスキップ
+        </a>
+        <div id="main-content" className="flex-1">
+          {children}
+        </div>
         <SiteFooter />
         {/* QC14: GA タグは next/script の afterInteractive で読み込み、初期描画を妨げない
             （従来の <script async> はレンダーブロッキングとして Lighthouse に計上されうる）。 */}
