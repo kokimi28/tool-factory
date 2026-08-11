@@ -6,6 +6,7 @@ import { encodeShareParams, decodeShareParams } from "@/lib/share-url";
 import { TEDORI_PRESETS } from "@/lib/tedori/presets";
 import ResultDisplay from "@/components/tedori/ResultDisplay";
 import ScenarioCompare from "@/components/tedori/ScenarioCompare";
+import ReverseLookup from "@/components/tedori/ReverseLookup";
 import CTA from "@/components/tedori/CTA";
 
 type State = {
@@ -173,6 +174,7 @@ export default function Calculator() {
       <div className="space-y-6">
         <ResultDisplay result={result} />
         <ScenarioCompare isOver40={state.isOver40} />
+        <ReverseLookup isOver40={state.isOver40} />
         <CTA />
       </div>
     </div>
