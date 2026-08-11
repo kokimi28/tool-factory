@@ -6,6 +6,7 @@ import {
   type HousingType,
 } from "@/lib/jutaku-loan/calculations";
 import { parseNonNegativeNumber as toNumber } from "@/lib/input";
+import { validateNumberInput } from "@/lib/validate-input";
 import { JUTAKU_LOAN_PRESETS } from "@/lib/jutaku-loan/presets";
 import { encodeShareParams, decodeShareParams } from "@/lib/share-url";
 import { parseHousingType, boolToFlag, flagToBool } from "@/lib/jutaku-loan/share";
@@ -78,6 +79,12 @@ export default function Calculator() {
     [principal, rate, years, housingType, childRearing],
   );
 
+  // E9: 借入額入力の妥当性メッセージ（負値・非数字・上限超過を通知）。
+  const principalError = useMemo(
+    () => validateNumberInput(principal, { max: 1_000_000_000 }).error,
+    [principal],
+  );
+
   const isNewBuild = housingType.startsWith("existing") === false;
 
   return (
@@ -91,9 +98,16 @@ export default function Calculator() {
               value={principal}
               onChange={(e) => setPrincipal(e.target.value)}
               className="w-full rounded-lg border border-gray-300 px-3 py-2 text-right"
+              aria-invalid={principalError !== null}
+              aria-describedby={principalError ? "jutaku-principal-error" : undefined}
             />
             <span className="text-gray-500">円</span>
           </div>
+          {principalError && (
+            <p id="jutaku-principal-error" role="alert" className="mt-1 text-xs text-rose-600">
+              {principalError}
+            </p>
+          )}
           <input
             type="range"
             min={10_000_000}
