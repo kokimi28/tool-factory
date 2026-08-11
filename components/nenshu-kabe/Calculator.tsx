@@ -8,6 +8,7 @@ import {
 } from "@/lib/nenshu-kabe/calculations";
 import { parseNonNegativeNumber as toNumber } from "@/lib/input";
 import { NENSHU_KABE_PRESETS } from "@/lib/nenshu-kabe/presets";
+import { validateNumberInput } from "@/lib/validate-input";
 import { encodeShareParams, decodeShareParams } from "@/lib/share-url";
 import { wallToCode, codeToWall } from "@/lib/nenshu-kabe/share";
 import { resultToClipboardText } from "@/lib/nenshu-kabe/result-text";
@@ -50,6 +51,12 @@ export default function Calculator() {
       // クリップボード不可の環境では何もしない（URL は既にアドレスバーに反映済み）。
     }
   }
+
+  // E9: 年収入力の妥当性メッセージ（負値・非数字・上限超過を通知）。
+  const incomeError = useMemo(
+    () => validateNumberInput(income, { max: 100_000_000 }).error,
+    [income],
+  );
 
   const reversal = useMemo(() => analyzeWallReversal(wall), [wall]);
   const current = useMemo(
@@ -104,9 +111,16 @@ export default function Calculator() {
               value={income}
               onChange={(e) => setIncome(e.target.value)}
               className="w-full rounded-lg border border-gray-300 px-3 py-2 text-right"
+              aria-invalid={incomeError !== null}
+              aria-describedby={incomeError ? "nenshu-income-error" : undefined}
             />
             <span className="text-gray-500">円</span>
           </div>
+          {incomeError && (
+            <p id="nenshu-income-error" role="alert" className="mt-1 text-xs text-rose-600">
+              {incomeError}
+            </p>
+          )}
           <div className="mt-3 flex flex-wrap gap-2" role="group" aria-label="年収プリセット">
             {NENSHU_KABE_PRESETS.map((p) => (
               <button
