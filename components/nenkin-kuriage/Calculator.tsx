@@ -13,6 +13,7 @@ import { resultToClipboardText } from "@/lib/nenkin-kuriage/result-text";
 import CopyResult from "@/components/nenkin-kuriage/CopyResult";
 import { encodeShareParams, decodeShareParams } from "@/lib/share-url";
 import { parseNonNegativeNumber as toNumber } from "@/lib/input";
+import { validateNumberInput } from "@/lib/validate-input";
 
 const yen = (n: number) => `${Math.round(n).toLocaleString("ja-JP")}円`;
 const pct = (r: number) => `${(r * 100).toFixed(1)}%`;
@@ -54,6 +55,11 @@ export default function Calculator() {
   }
 
   const base = toNumber(baseMonthly);
+  // E9: 年金月額入力の妥当性メッセージ（負値・非数字・上限超過を通知）。
+  const baseError = useMemo(
+    () => validateNumberInput(baseMonthly, { max: 1_000_000 }).error,
+    [baseMonthly],
+  );
   const scenario = useMemo(() => pensionScenario(base, startAge), [base, startAge]);
   const breakEven = useMemo(() => breakEvenAgeVs65(startAge), [startAge]);
 
@@ -76,9 +82,16 @@ export default function Calculator() {
               value={baseMonthly}
               onChange={(e) => setBaseMonthly(e.target.value)}
               className="w-full rounded-lg border border-gray-300 px-3 py-2 text-right"
+              aria-invalid={baseError !== null}
+              aria-describedby={baseError ? "nenkin-base-error" : undefined}
             />
             <span className="text-gray-500">円</span>
           </div>
+          {baseError && (
+            <p id="nenkin-base-error" role="alert" className="mt-1 text-xs text-rose-600">
+              {baseError}
+            </p>
+          )}
           <div className="mt-3 flex flex-wrap gap-2" role="group" aria-label="年金月額プリセット">
             {PENSION_MONTHLY_PRESETS.map((p) => (
               <button
