@@ -100,9 +100,9 @@ export default async function ArticlePage({
 
       <div className="mt-10 rounded-xl border border-brand/20 bg-brand/5 p-5">
         <p className="text-sm text-slate-700">
-          退職金にかかる税金の概算は、
+          年収から手取り額の概算は、
           <Link href="/tedori" className="font-semibold text-brand-dark underline underline-offset-2">
-            退職金の税金計算シミュレーター
+            年収の手取り計算シミュレーター
           </Link>
           で確認できます。
         </p>

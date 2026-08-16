@@ -61,19 +61,19 @@ describe("記事 nenshu-kabe-haigusha-kojo（C11）の配偶者本人手取り�
 describe("記事 nenshu-kabe-shien-package（C9）の106万加入時の手取り減アンカーの二重化", () => {
   // 記事が「支援策で緩和する対象」として使う106万加入時の手取り減を固定（品質ゲート①）。
   // 適用促進手当・助成金・扶養連続2年は制度説明のため本文で扱う。
-  it("106万加入 社保156,350/手取り903,650（支援策で緩和する手取り減）", () => {
+  it("106万加入 社保155,979/手取り904,021（支援策で緩和する手取り減）", () => {
     const at106 = takeHomeWithWall(1_060_000, 1_060_000);
-    expect([at106.socialInsurance, at106.takeHome]).toEqual([156_350, 903_650]);
+    expect([at106.socialInsurance, at106.takeHome]).toEqual([155_979, 904_021]);
   });
 });
 
 describe("記事 nenshu-kabe-106-joken（C7）の106万加入時の手取りの二重化", () => {
   // 記事の106万加入時の手取り（条件を満たして加入した場合）を固定（品質ゲート①）。
   // 加入5条件（従業員数51人以上等）は法定要件で calc 未モデルのため本文で明記。
-  it("105万未加入1,050,000 → 106万加入 社保156,350/手取り903,650", () => {
+  it("105万未加入1,050,000 → 106万加入 社保155,979/手取り904,021", () => {
     expect(takeHomeWithWall(1_050_000, 1_060_000).takeHome).toBe(1_050_000);
     const at106 = takeHomeWithWall(1_060_000, 1_060_000);
-    expect([at106.enrolled, at106.socialInsurance, at106.takeHome]).toEqual([true, 156_350, 903_650]);
+    expect([at106.enrolled, at106.socialInsurance, at106.takeHome]).toEqual([true, 155_979, 904_021]);
   });
 });
 
@@ -90,14 +90,14 @@ describe("記事 nenshu-kabe-double-work（C10）のダブルワーク合算の�
 
 describe("記事 nenshu-kabe-hatarakikata（C8）の働き方別 手取り比較の二重化", () => {
   // 記事の働き方別 手取り（106万の壁を跨ぐ/跨がない）を固定（品質ゲート①）。
-  // 105万抑える=1,050,000 / 106万加入=903,650（逆転）/ 125万で105万時を上回る=1,065,625。
-  it("105万1,050,000→106万903,650(逆転)→110万937,750→125万1,065,625→130万1,100,450", () => {
+  // 105万抑える=1,050,000 / 106万加入=904,021（逆転）/ 125万で105万時を上回る=1,066,062。
+  it("105万1,050,000→106万904,021(逆転)→110万938,135→125万1,066,062→130万1,100,905", () => {
     expect(takeHomeWithWall(1_050_000, 1_060_000).takeHome).toBe(1_050_000);
     const at106 = takeHomeWithWall(1_060_000, 1_060_000);
-    expect([at106.enrolled, at106.socialInsurance, at106.takeHome]).toEqual([true, 156_350, 903_650]);
-    expect(takeHomeWithWall(1_100_000, 1_060_000).takeHome).toBe(937_750);
-    expect(takeHomeWithWall(1_250_000, 1_060_000).takeHome).toBe(1_065_625);
-    expect(takeHomeWithWall(1_300_000, 1_060_000).takeHome).toBe(1_100_450);
+    expect([at106.enrolled, at106.socialInsurance, at106.takeHome]).toEqual([true, 155_979, 904_021]);
+    expect(takeHomeWithWall(1_100_000, 1_060_000).takeHome).toBe(938_135);
+    expect(takeHomeWithWall(1_250_000, 1_060_000).takeHome).toBe(1_066_062);
+    expect(takeHomeWithWall(1_300_000, 1_060_000).takeHome).toBe(1_100_905);
     // 働き損の解消: 125万の手取りが105万抑えたときを上回る
     expect(takeHomeWithWall(1_250_000, 1_060_000).takeHome).toBeGreaterThan(
       takeHomeWithWall(1_050_000, 1_060_000).takeHome,
@@ -123,10 +123,10 @@ describe("記事 nenshu-kabe-saiteki（C5）の回復ライン（最適年収）
 
 describe("記事 nenshu-kabe-150-201（C4）の本人手取りは逆転しないの二重化", () => {
   // 記事の手取り（社保加入者・150/160/201万で増え続ける）を固定（品質ゲート①）。
-  it("150万→1,253,950・160万→1,330,600・201万→1,640,868（逆転せず増加）", () => {
-    expect(takeHomeAtIncome(1_500_000, true).takeHome).toBe(1_253_950);
-    expect(takeHomeAtIncome(1_600_000, true).takeHome).toBe(1_330_600);
-    expect(takeHomeAtIncome(2_010_000, true).takeHome).toBe(1_640_868);
+  it("150万→1,254,375・160万→1,331,160・201万→1,641,420（逆転せず増加）", () => {
+    expect(takeHomeAtIncome(1_500_000, true).takeHome).toBe(1_254_375);
+    expect(takeHomeAtIncome(1_600_000, true).takeHome).toBe(1_331_160);
+    expect(takeHomeAtIncome(2_010_000, true).takeHome).toBe(1_641_420);
   });
 });
 
@@ -141,24 +141,24 @@ describe("記事 nenshu-kabe-103（C3）の税の壁は緩やかの二重化", (
 
 describe("記事 nenshu-kabe-130（C2）の worked example: 130万の壁の逆転と回復", () => {
   // 記事本文の見出し数値（129万→130万の谷・135/150万・152万回復）を固定（品質ゲート①）。
-  it("129万1,264,000 → 130万 社保191,750/手取り1,100,450 → 135万1,138,875/150万1,253,950/152万回復1,269,300", () => {
+  it("129万1,264,000 → 130万 社保191,295/手取り1,100,905 → 135万1,139,247/150万1,254,375/152万回復1,269,732", () => {
     expect(takeHomeWithWall(1_290_000, 1_300_000).takeHome).toBe(1_264_000);
     const at130 = takeHomeWithWall(1_300_000, 1_300_000);
-    expect([at130.socialInsurance, at130.takeHome]).toEqual([191_750, 1_100_450]);
-    expect(takeHomeWithWall(1_350_000, 1_300_000).takeHome).toBe(1_138_875);
-    expect(takeHomeWithWall(1_500_000, 1_300_000).takeHome).toBe(1_253_950);
-    expect(takeHomeWithWall(1_520_000, 1_300_000).takeHome).toBe(1_269_300);
+    expect([at130.socialInsurance, at130.takeHome]).toEqual([191_295, 1_100_905]);
+    expect(takeHomeWithWall(1_350_000, 1_300_000).takeHome).toBe(1_139_247);
+    expect(takeHomeWithWall(1_500_000, 1_300_000).takeHome).toBe(1_254_375);
+    expect(takeHomeWithWall(1_520_000, 1_300_000).takeHome).toBe(1_269_732);
   });
 });
 
 describe("記事 nenshu-kabe-106（C1）の worked example: 106万の壁の前後", () => {
-  // 記事本文の見出し数値（105万→手取り105万・106万→社保156,350/手取り903,650・124万回復）を固定。
+  // 記事本文の見出し数値（105万→手取り105万・106万→社保155,979/手取り904,021・124万回復）を固定。
   // 誤値が記事に載ると CI が赤 → 自走マージが止まる（auto-backlog §品質ゲート①）。
-  it("105万未加入1,050,000 → 106万加入 社保156,350/手取り903,650 → 124万回復1,057,100", () => {
+  it("105万未加入1,050,000 → 106万加入 社保155,979/手取り904,021 → 124万回復1,057,534", () => {
     expect(takeHomeWithWall(1_050_000, 1_060_000).takeHome).toBe(1_050_000);
     const at106 = takeHomeWithWall(1_060_000, 1_060_000);
-    expect([at106.enrolled, at106.socialInsurance, at106.takeHome]).toEqual([true, 156_350, 903_650]);
-    expect(takeHomeWithWall(1_240_000, 1_060_000).takeHome).toBe(1_057_100);
+    expect([at106.enrolled, at106.socialInsurance, at106.takeHome]).toEqual([true, 155_979, 904_021]);
+    expect(takeHomeWithWall(1_240_000, 1_060_000).takeHome).toBe(1_057_534);
   });
 });
 
@@ -169,37 +169,37 @@ describe("takeHomeWithWall — 130万の壁の前後", () => {
     expect(r.socialInsurance).toBe(0);
     expect(r.takeHome).toBe(1_264_000);
   });
-  it("130万は加入・社会保険料191,750・手取り1,100,450（谷）", () => {
+  it("130万は加入・社会保険料191,295・手取り1,100,905（谷）", () => {
     const r = takeHomeWithWall(1_300_000, 1_300_000);
     expect(r.enrolled).toBe(true);
-    expect(r.socialInsurance).toBe(191_750);
-    expect(r.takeHome).toBe(1_100_450);
+    expect(r.socialInsurance).toBe(191_295);
+    expect(r.takeHome).toBe(1_100_905);
   });
 });
 
 describe("記事 nenshu-kabe-guide（C0）の worked example トレーサビリティ", () => {
   // 記事本文の2つの見出し数値を1ケースで束ね、記事 slug に紐づけて固定する
   // （誤値が記事に載ると CI が赤 → 自走マージが止まる。auto-backlog §品質ゲート①）。
-  it("130万=drop163,550/回復152万・106万=drop146,350/回復124万（記事の主数値）", () => {
+  it("130万=drop163,095/回復152万・106万=drop145,979/回復124万（記事の主数値）", () => {
     const w130 = analyzeWallReversal(1_300_000);
     const w106 = analyzeWallReversal(1_060_000);
-    expect([w130.dropAtWall, w130.recoveryIncome]).toEqual([163_550, 1_520_000]);
-    expect([w106.dropAtWall, w106.recoveryIncome]).toEqual([146_350, 1_240_000]);
+    expect([w130.dropAtWall, w130.recoveryIncome]).toEqual([163_095, 1_520_000]);
+    expect([w106.dropAtWall, w106.recoveryIncome]).toEqual([145_979, 1_240_000]);
   });
 });
 
 describe("analyzeWallReversal — 逆転の谷と回復年収", () => {
-  it("130万の壁: 手取り163,550円ダウン・回復年収152万円（+22万）", () => {
+  it("130万の壁: 手取り163,095円ダウン・回復年収152万円（+22万）", () => {
     const r = analyzeWallReversal(1_300_000);
     expect(r.takeHomeJustBelow).toBe(1_264_000);
-    expect(r.takeHomeAtWall).toBe(1_100_450);
-    expect(r.dropAtWall).toBe(163_550);
+    expect(r.takeHomeAtWall).toBe(1_100_905);
+    expect(r.dropAtWall).toBe(163_095);
     expect(r.recoveryIncome).toBe(1_520_000);
     expect(r.extraIncomeToRecover).toBe(220_000);
   });
-  it("106万の壁: 手取り146,350円ダウン・回復年収124万円（+18万）", () => {
+  it("106万の壁: 手取り145,979円ダウン・回復年収124万円（+18万）", () => {
     const r = analyzeWallReversal(1_060_000);
-    expect(r.dropAtWall).toBe(146_350);
+    expect(r.dropAtWall).toBe(145_979);
     expect(r.recoveryIncome).toBe(1_240_000);
     expect(r.extraIncomeToRecover).toBe(180_000);
   });

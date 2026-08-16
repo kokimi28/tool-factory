@@ -9,6 +9,6 @@ export const SITE_META = {
   url: `${SITE.url}/nenshu-kabe`,
   description:
     '103・106・130・150万円の「年収の壁」ごとに、超えた場合の手取りの逆転と回復ラインを試算するシミュレーター。',
-  lastUpdated: '2026-07-24',
-  appliedLawDate: '令和7年（2025年）分',
+  lastUpdated: '2026-08-16',
+  appliedLawDate: '令和7年（2025年）分の税制＋令和8年度の社会保険料率',
 } as const;

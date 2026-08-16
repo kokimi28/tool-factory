@@ -401,14 +401,14 @@ describe('記事 kinzoku-nensuu-betsu-hikaku（G2・勤続年数別早見）の�
   ];
   for (const [years, totalTax, netAmount] of rows) {
     it(`勤続${years}年: 税額${totalTax} / 手取り${netAmount}`, () => {
-      const r = calcAll({ retirementAmount: A, yearsOfService: years });
+      const r = calcAll({ retirementAmount: A, yearsOfService: years, isExecutive: false });
       expect(r.totalTax).toBe(totalTax);
       expect(r.netAmount).toBe(netAmount);
     });
   }
 
   it('勤続38年は控除が退職金を上回り非課税（税0・手取り=退職金）', () => {
-    const r = calcAll({ retirementAmount: A, yearsOfService: 38 });
+    const r = calcAll({ retirementAmount: A, yearsOfService: 38, isExecutive: false });
     expect(r.totalTax).toBe(0);
     expect(r.netAmount).toBe(A);
   });

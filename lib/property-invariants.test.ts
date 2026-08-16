@@ -64,7 +64,7 @@ describe("F2 taishokukin: 退職金の税・手取りの不変条件", () => {
   it("税額は非負・手取りは退職金額以下", () => {
     for (const retirementAmount of amounts) {
       for (const yearsOfService of years) {
-        const r = calcAll({ retirementAmount, yearsOfService });
+        const r = calcAll({ retirementAmount, yearsOfService, isExecutive: false });
         expect(r.totalTax).toBeGreaterThanOrEqual(0);
         expect(r.incomeTax).toBeGreaterThanOrEqual(0);
         expect(r.residentTax).toBeGreaterThanOrEqual(0);
@@ -77,7 +77,7 @@ describe("F2 taishokukin: 退職金の税・手取りの不変条件", () => {
     for (const yearsOfService of years) {
       let prev = -1;
       for (const retirementAmount of amounts) {
-        const r = calcAll({ retirementAmount, yearsOfService });
+        const r = calcAll({ retirementAmount, yearsOfService, isExecutive: false });
         expect(r.totalTax).toBeGreaterThanOrEqual(prev);
         prev = r.totalTax;
       }
