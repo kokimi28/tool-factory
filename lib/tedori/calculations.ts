@@ -2,7 +2,7 @@
  * 給与（年収）の手取り額を概算する計算ロジック。
  *
  * ─────────────────────────────────────────────────────────────
- *  法的根拠・料率の出典（最終確認日: 2026-07-13）
+ *  法的根拠・出典（税・控除の最終確認日: 2026-07-13）
  * ─────────────────────────────────────────────────────────────
  *  【所得税】
  *  - 給与所得控除（令和7年分以降・最低保障65万円）: 所得税法別表第五 / 国税庁 No.1410
@@ -14,15 +14,18 @@
  *  【住民税】※前年所得に対して課税されるため、本ツールは当年所得ベースの概算
  *  - 標準税率10%（市町村民税6%＋道府県民税4%）＋均等割5,000円（森林環境税1,000円含む）
  *  - 基礎控除43万円。地方税法。調整控除は簡略化のため未計上（数千円の差）。
- *  【社会保険料（従業員負担）】協会けんぽ・一般の事業を前提
- *  - 健康保険: 全国平均10.00% → 従業員5.00%（都道府県で差）。標準報酬月額上限139万円/月
- *  - 介護保険(40〜64歳): 1.59% → 従業員0.795%
- *  - 厚生年金: 18.30% → 従業員9.15%。標準報酬月額上限65万円/月
- *  - 雇用保険（労働者負担・一般の事業）: 0.6%
+ *  【社会保険料（従業員負担）】協会けんぽ・一般の事業・令和8年度
+ *  - 料率と標準報酬月額の上限は **rates.ts が単一の正**（出典 URL・最終確認日もそこ）。
+ *    賞与側（bonus.ts）と同じ定数を import するため、料率が片側だけ古くなることはない。
+ *  - 本ファイル固有の近似: 標準報酬月額の等級表を用いず、年収に上限を当てて料率を掛ける。
+ *    また健保・介護・支援金は健康保険法第156条第1項第1号では「1本の保険料額」だが、
+ *    ここでは内訳ごとに Math.round する（年収ベースの概算なので円単位の厳密さに意味がない。
+ *    標準賞与額が確定額である賞与側は、bonus.ts が合算1回丸めを厳密に実装している）。
  *
  *  ※料率・控除額は毎年改定され、都道府県・事業の種類・扶養状況で変わります。
  *    本ツールは扶養なし・単一の給与収入を前提とした概算であり、結果はあくまで参考値です。
  */
+import { RATE_EMP, MONTHLY_CAP } from "./rates";
 
 /** ユーザー入力 */
 export interface NetSalaryInput {
@@ -42,6 +45,8 @@ export interface NetSalaryResult {
   pensionInsurance: number;
   /** 雇用保険料（従業員負担） */
   employmentInsurance: number;
+  /** 子ども・子育て支援金（従業員負担・令和8年4月分〜。標準報酬月額にもかかる） */
+  childCareSupportLevy: number;
   /** 社会保険料合計 */
   socialInsurance: number;
   /** 給与所得控除額 */
@@ -64,18 +69,17 @@ export interface NetSalaryResult {
   takeHomeRate: number;
 }
 
-// ── 料率・控除の定数（改定時はここと最終確認日を更新する）──
-const KENKO_RATE_EMP = 0.05; // 健康保険 従業員負担（全国平均10%の折半）
-const KAIGO_RATE_EMP = 0.00795; // 介護保険 従業員負担（1.59%の折半）
-const KOSEI_RATE_EMP = 0.0915; // 厚生年金 従業員負担（18.3%の折半）
-const KOYO_RATE_EMP = 0.006; // 雇用保険 労働者負担（一般の事業）
-const KENKO_ANNUAL_CAP = 16_680_000; // 健保 標準報酬月額上限139万円 × 12
-const KOSEI_ANNUAL_CAP = 7_800_000; // 厚年 標準報酬月額上限65万円 × 12
+// ── 上限・控除の定数 ──
+// 料率は rates.ts が単一の正（RATE_EMP）。改定時は rates.ts だけを更新する。
+const KENKO_ANNUAL_CAP = MONTHLY_CAP.health * 12; // 健保・介護・支援金 標準報酬月額上限139万円 × 12
+const KOSEI_ANNUAL_CAP = MONTHLY_CAP.pension * 12; // 厚年 標準報酬月額上限65万円 × 12
 const BASIC_DEDUCTION_RESIDENT = 430_000; // 住民税の基礎控除
 const JUMINZEI_KINTOWARI = 5_000; // 住民税 均等割（森林環境税含む）
 
-const floorTo1000 = (v: number): number => Math.floor(v / 1000) * 1000;
-const clampNonNeg = (v: number): number => (Number.isFinite(v) && v > 0 ? v : 0);
+/** 1,000円未満切捨（課税所得・標準賞与額の共通処理） */
+export const floorTo1000 = (v: number): number => Math.floor(v / 1000) * 1000;
+/** 入力の正規化（非数・負値は0とみなす） */
+export const clampNonNeg = (v: number): number => (Number.isFinite(v) && v > 0 ? v : 0);
 
 /**
  * 給与所得控除額（令和7年分以降）。
@@ -126,14 +130,26 @@ export function incomeTaxByBracket(taxable: number): number {
 /**
  * 社会保険料（従業員負担・年額）を求める。
  * 標準報酬月額の等級表は用いず、年収に上限を適用した概算。
+ *
+ * 子ども・子育て支援金（令和8年4月分〜）は健康保険料と同じ標準報酬月額が土台なので、
+ * 健保・介護と同じ上限（139万円/月）を当てる。雇用保険だけは上限がなく年収の全額が基礎。
  */
 export function socialInsurance(income: number, isOver40: boolean) {
   const y = clampNonNeg(income);
-  const health = Math.round(Math.min(y, KENKO_ANNUAL_CAP) * KENKO_RATE_EMP);
-  const nursing = isOver40 ? Math.round(Math.min(y, KENKO_ANNUAL_CAP) * KAIGO_RATE_EMP) : 0;
-  const pension = Math.round(Math.min(y, KOSEI_ANNUAL_CAP) * KOSEI_RATE_EMP);
-  const employment = Math.round(y * KOYO_RATE_EMP);
-  return { health, nursing, pension, employment, total: health + nursing + pension + employment };
+  const healthBase = Math.min(y, KENKO_ANNUAL_CAP);
+  const health = Math.round(healthBase * RATE_EMP.health);
+  const nursing = isOver40 ? Math.round(healthBase * RATE_EMP.nursing) : 0;
+  const pension = Math.round(Math.min(y, KOSEI_ANNUAL_CAP) * RATE_EMP.pension);
+  const childCare = Math.round(healthBase * RATE_EMP.childCare);
+  const employment = Math.round(y * RATE_EMP.employment);
+  return {
+    health,
+    nursing,
+    pension,
+    childCare,
+    employment,
+    total: health + nursing + pension + childCare + employment,
+  };
 }
 
 /**
@@ -168,6 +184,7 @@ export function calculateNetSalary(input: NetSalaryInput): NetSalaryResult {
     nursingInsurance: si.nursing,
     pensionInsurance: si.pension,
     employmentInsurance: si.employment,
+    childCareSupportLevy: si.childCare,
     socialInsurance: si.total,
     salaryDeduction,
     employmentIncome,

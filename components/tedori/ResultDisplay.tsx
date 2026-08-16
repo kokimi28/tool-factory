@@ -37,6 +37,7 @@ export default function ResultDisplay({ result }: { result: NetSalaryResult }) {
     nursingInsurance,
     pensionInsurance,
     employmentInsurance,
+    childCareSupportLevy,
     socialInsurance,
     salaryDeduction,
     employmentIncome,
@@ -82,6 +83,7 @@ export default function ResultDisplay({ result }: { result: NetSalaryResult }) {
         <Row label="健康保険料" value={yen(healthInsurance)} />
         {nursingInsurance > 0 && <Row label="介護保険料" sub="40歳以上" value={yen(nursingInsurance)} />}
         <Row label="厚生年金保険料" value={yen(pensionInsurance)} />
+        <Row label="子ども・子育て支援金" sub="令和8年4月分〜" value={yen(childCareSupportLevy)} />
         <Row label="雇用保険料" value={yen(employmentInsurance)} />
         <Row label="社会保険料 合計" value={yen(socialInsurance)} strong />
         <Row label="所得税" sub="復興特別所得税込み" value={yen(incomeTax)} />

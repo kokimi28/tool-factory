@@ -17,9 +17,9 @@ describe("D10 grossFromNet 手取り→必要年収", () => {
   });
 
   it("worked example（40歳未満）", () => {
-    expect(grossFromNet(3_000_000)).toBe(3_780_766);
-    expect(grossFromNet(4_000_000)).toBe(5_139_872);
-    expect(grossFromNet(5_000_000)).toBe(6_527_676);
+    expect(grossFromNet(3_000_000)).toBe(3_779_391);
+    expect(grossFromNet(4_000_000)).toBe(5_138_000);
+    expect(grossFromNet(5_000_000)).toBe(6_524_997);
   });
 
   it("返す年収は目標手取り以上を満たす最小値（最小性）", () => {
