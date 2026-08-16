@@ -25,7 +25,13 @@
  *  ※料率・控除額は毎年改定され、都道府県・事業の種類・扶養状況で変わります。
  *    本ツールは扶養なし・単一の給与収入を前提とした概算であり、結果はあくまで参考値です。
  */
-import { RATE_EMP, MONTHLY_CAP } from "./rates";
+import {
+  RATE_EMP,
+  MONTHLY_CAP,
+  asFraction,
+  prefectureHealthRateEmpP100K,
+  type Prefecture,
+} from "./rates";
 
 /** ユーザー入力 */
 export interface NetSalaryInput {
@@ -33,6 +39,11 @@ export interface NetSalaryInput {
   annualIncome: number;
   /** 40歳以上65歳未満か（介護保険料の対象） */
   isOver40: boolean;
+  /**
+   * 勤務先の適用事業所がある都道府県（協会けんぽ支部）。
+   * 未指定なら全国平均の健康保険料率を使う。健康保険料率だけが都道府県で変わる。
+   */
+  prefecture?: Prefecture;
 }
 
 /** 計算結果（内訳つき・すべて年額の円） */
@@ -134,10 +145,18 @@ export function incomeTaxByBracket(taxable: number): number {
  * 子ども・子育て支援金（令和8年4月分〜）は健康保険料と同じ標準報酬月額が土台なので、
  * 健保・介護と同じ上限（139万円/月）を当てる。雇用保険だけは上限がなく年収の全額が基礎。
  */
-export function socialInsurance(income: number, isOver40: boolean) {
+export function socialInsurance(
+  income: number,
+  isOver40: boolean,
+  prefecture?: Prefecture,
+) {
   const y = clampNonNeg(income);
   const healthBase = Math.min(y, KENKO_ANNUAL_CAP);
-  const health = Math.round(healthBase * RATE_EMP.health);
+  // 都道府県で変わるのは健康保険料率だけ。介護・支援金・厚年・雇用保険は全国一律。
+  // prefecture 未指定なら全国平均（＝従来どおりの挙動）。
+  const health = Math.round(
+    healthBase * asFraction(prefectureHealthRateEmpP100K(prefecture)),
+  );
   const nursing = isOver40 ? Math.round(healthBase * RATE_EMP.nursing) : 0;
   const pension = Math.round(Math.min(y, KOSEI_ANNUAL_CAP) * RATE_EMP.pension);
   const childCare = Math.round(healthBase * RATE_EMP.childCare);
@@ -159,7 +178,7 @@ export function calculateNetSalary(input: NetSalaryInput): NetSalaryResult {
   const income = clampNonNeg(input.annualIncome);
 
   // 社会保険料
-  const si = socialInsurance(income, input.isOver40);
+  const si = socialInsurance(income, input.isOver40, input.prefecture);
 
   // 給与所得
   const salaryDeduction = salaryIncomeDeduction(income);
