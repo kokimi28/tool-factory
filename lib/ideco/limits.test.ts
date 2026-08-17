@@ -14,6 +14,8 @@ import {
   idecoAnnualLimit,
   idecoMonthlyLimit,
 } from './limits';
+import { getArticle } from './articles';
+import { incomeTaxByBracket } from '../tedori/calculations';
 
 describe('第1号・任意加入（68,000円と国民年金基金等の控除）', () => {
   it('控除が無ければ68,000円', () => {
@@ -192,5 +194,111 @@ describe('異常入力', () => {
         idecoMonthlyLimit({ category: 'first', kokuminNenkinFundContribution: bad }).limit,
       ).toBe(68_000);
     }
+  });
+});
+
+describe('記事 ideco-kyoshutsu-gendo の数値が実装と一致している', () => {
+  const body = (() => {
+    const a = getArticle('ideco-kyoshutsu-gendo');
+    if (!a) throw new Error('article not found');
+    return [
+      a.title,
+      a.description,
+      a.lead,
+      ...a.sections.flatMap((s) => [s.heading, ...s.paragraphs, ...(s.bullets ?? [])]),
+      ...a.faqs.flatMap((f) => [f.question, f.answer]),
+    ].join('\n');
+  })();
+
+  const yen = (n: number): string => n.toLocaleString('en-US');
+  /** 記事が前提にしている税率（所得税20%＋住民税10%）。所得税率は production の速算表から導出する。 */
+  const marginalIncomeTaxRate = (() => {
+    const t = 5_000_000; // 課税所得500万（330万超695万以下の区分）
+    return (incomeTaxByBracket(t + 100_000) - incomeTaxByBracket(t)) / 100_000;
+  })();
+  const RESIDENT_RATE = 0.1;
+  const totalRate = marginalIncomeTaxRate + RESIDENT_RATE;
+
+  it('記事が前提にする所得税率は速算表と一致する（20%区分）', () => {
+    expect(marginalIncomeTaxRate).toBeCloseTo(0.2, 10);
+    expect(body).toContain(`所得税率${marginalIncomeTaxRate * 100}%`);
+    expect(body).toContain(`住民税率${RESIDENT_RATE * 100}%`);
+  });
+
+  it('区分ごとの上限を月額と年額の対で載せている', () => {
+    const rows: Array<[string, Parameters<typeof idecoMonthlyLimit>[0]]> = [
+      ['第1号被保険者（自営業者等）', { category: 'first' }],
+      ['第2号被保険者・企業年金なし（公務員を除く）', { category: 'second', hasCorporatePlan: false }],
+      ['第2号被保険者・企業年金あり', { category: 'second', hasCorporatePlan: true }],
+      ['第3号被保険者（専業主婦・主夫等）', { category: 'third' }],
+      ['任意加入被保険者', { category: 'voluntary' }],
+    ];
+    for (const [label, input] of rows) {
+      const m = idecoMonthlyLimit(input).limit;
+      expect(body).toContain(`${label}：月${yen(m)}円（年${yen(idecoAnnualLimit(input))}円）`);
+    }
+  });
+
+  it('合計枠が binding になる例を、事業主掛金・残り枠・上限の3点セットで載せている', () => {
+    const of = (dc: number) =>
+      idecoMonthlyLimit({ category: 'second', hasCorporatePlan: true, corporateDcEmployerContribution: dc });
+    for (const dc of [35_000, 40_000, 55_000]) {
+      const r = of(dc);
+      expect(body).toContain(
+        `事業主掛金 月${yen(dc)}円 → 残り${yen(r.combinedRoomRemaining!)}円 →`,
+      );
+    }
+    // 40,000 のケースは本文でも実額を出している
+    const r40 = of(40_000);
+    expect(r40.boundBy).toBe('combinedCap');
+    expect(body).toContain(
+      `事業主掛金が月40,000円になると残りは15,000円しかなく、上限は月${yen(r40.limit)}円（年${yen(r40.limit * 12)}円）まで下がります`,
+    );
+  });
+
+  it('公務員の残り枠と上限が実装と一致する（残り枠の全出現を検査）', () => {
+    const r = idecoMonthlyLimit({
+      category: 'second',
+      hasCorporatePlan: true,
+      otherPlanEquivalent: OTHER_PLAN_EQUIVALENT.nationalPublicServant,
+    });
+    expect(body).toContain(
+      `${yen(OTHER_PLAN_EQUIVALENT.nationalPublicServant)}円が合計枠を消費しても残りは${yen(r.combinedRoomRemaining!)}円あるため、上限は区分上限どおり月${yen(r.limit)}円（年${yen(r.limit * 12)}円）です`,
+    );
+    // 「残りは○円」は本文とFAQに出るので全出現を検査する
+    const hits = [...body.matchAll(/残りは([\d,]+)円あるため/g)].map((m) => m[1]);
+    expect(hits.length).toBeGreaterThanOrEqual(1);
+    for (const hit of hits) expect(hit).toBe(yen(r.combinedRoomRemaining!));
+  });
+
+  it('第1号の控除例が実装と一致する（本文とFAQの両方＝全出現を検査）', () => {
+    const r = idecoMonthlyLimit({ category: 'first', kokuminNenkinFundContribution: 20_000 });
+    // 同じ数値が本文とFAQの2箇所に出る。toContain だと片方を書き換えても
+    // 他方が残っていて green のまま通ってしまう（変異テストで実際に素通りした）。
+    // そこで「この言い回しの全出現」を取り出して、すべて正しい額であることを確認する。
+    const hits = [...body.matchAll(/iDeCoに回せるのは月([\d,]+)円/g)].map((m) => m[1]);
+    expect(hits.length).toBeGreaterThanOrEqual(2);
+    for (const hit of hits) expect(hit).toBe(yen(r.limit));
+  });
+
+  it('節税額が「年間掛金 × 税率」で実装から導出できる', () => {
+    const rows: Array<[string, Parameters<typeof idecoMonthlyLimit>[0]]> = [
+      ['第2号・企業年金なし', { category: 'second', hasCorporatePlan: false }],
+      ['第2号・企業年金あり', { category: 'second', hasCorporatePlan: true }],
+      ['第1号', { category: 'first' }],
+    ];
+    for (const [label, input] of rows) {
+      const annual = idecoAnnualLimit(input);
+      const saving = Math.round(annual * totalRate);
+      expect(body).toContain(`${label}：年${yen(annual)}円 → 節税 年${yen(saving)}円`);
+    }
+  });
+
+  it('引き上げを反映していないことを読者に明示している', () => {
+    expect(body).toContain('施行日が一次資料で確認できないため');
+  });
+
+  it('レンダラが解釈しない markdown 記法が残っていない', () => {
+    expect(body).not.toContain('**');
   });
 });
