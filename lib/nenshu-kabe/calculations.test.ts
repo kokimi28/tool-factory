@@ -123,10 +123,10 @@ describe("記事 nenshu-kabe-saiteki（C5）の回復ライン（最適年収）
 
 describe("記事 nenshu-kabe-150-201（C4）の本人手取りは逆転しないの二重化", () => {
   // 記事の手取り（社保加入者・150/160/201万で増え続ける）を固定（品質ゲート①）。
-  it("150万→1,254,375・160万→1,331,160・201万→1,641,420（逆転せず増加）", () => {
+  it("150万→1,254,375・160万→1,331,160・201万→1,641,428（逆転せず増加）", () => {
     expect(takeHomeAtIncome(1_500_000, true).takeHome).toBe(1_254_375);
     expect(takeHomeAtIncome(1_600_000, true).takeHome).toBe(1_331_160);
-    expect(takeHomeAtIncome(2_010_000, true).takeHome).toBe(1_641_420);
+    expect(takeHomeAtIncome(2_010_000, true).takeHome).toBe(1_641_428);
   });
 });
 

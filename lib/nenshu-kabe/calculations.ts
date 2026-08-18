@@ -81,7 +81,9 @@ export function takeHomeAtIncome(
   const basicIt = basicDeductionIncomeTax(employmentIncome);
   const taxableIt = floorTo1000(Math.max(0, employmentIncome - si - basicIt));
   const incomeTaxBase = Math.floor(incomeTaxByBracket(taxableIt));
-  const incomeTax = Math.floor((incomeTaxBase * 1021) / 1000); // 復興特別所得税込み
+  // 年税額は所得税と復興特別所得税の合計で100円未満を切り捨てる
+  // （復興財源確保法30条1項2号＝年末調整の年調年税額／確定申告なら国税通則法119条1項）。
+  const incomeTax = Math.floor((incomeTaxBase * 1021) / 1000 / 100) * 100;
 
   const taxableRt = floorTo1000(Math.max(0, employmentIncome - si - RESIDENT_BASIC_DEDUCTION));
   const residentLevy = Math.floor(taxableRt / 1000) * 100; // 所得割10%を100円未満切り捨て
