@@ -42,11 +42,16 @@ import {
   basicDeductionIncomeTax,
   floorTo1000,
   incomeTaxByBracket,
+  salaryForTotalIncome,
   salaryIncomeDeduction,
   socialInsurance,
 } from '../tedori/calculations';
 
 import { takeHomeWithWall } from './calculations';
+
+// 給与所得控除の逆算は lib/tedori（給与所得控除の定義がある側）が正。
+// ここでは再輸出だけして、既存の import 経路を保つ。
+export { salaryForTotalIncome };
 
 /** 住民税の基礎控除（地方税法314条の2第2項）。calculations.ts と同じ値。 */
 const RESIDENT_BASIC_DEDUCTION = 430_000;
@@ -183,26 +188,6 @@ export function spouseDeduction(
     residentTax: apply(baseResidentTax),
     kind: 'specialDeduction',
   };
-}
-
-/**
- * 指定した合計所得金額になる給与収入（円）を、給与所得控除から逆算する。
- *
- * 壁はすべて合計所得金額で定義されており、給与収入の額はそこからの従属値。
- * 給与所得控除が改正されれば壁も動くので、数値を直書きしない。
- */
-export function salaryForTotalIncome(targetTotalIncome: number): number {
-  const target = nonNeg(targetTotalIncome);
-  if (target === 0) return 0;
-  const income = (salary: number): number => Math.max(0, salary - salaryIncomeDeduction(salary));
-  let lo = 0;
-  let hi = 20_000_000;
-  while (lo < hi) {
-    const mid = Math.floor((lo + hi) / 2);
-    if (income(mid) >= target) hi = mid;
-    else lo = mid + 1;
-  }
-  return lo;
 }
 
 /** 給与収入で言った「税の壁」（円）。すべて条文の合計所得から導出する。 */
