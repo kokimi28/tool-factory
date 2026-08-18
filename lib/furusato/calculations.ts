@@ -72,8 +72,19 @@ export type FurusatoResult = {
  * @param taxableTotalIncome 課税総所得金額（円）。源泉徴収票・住民税決定通知書の
  *   「課税総所得金額（課税標準）」に相当。
  */
-export function calcFurusatoLimit(taxableTotalIncome: number): FurusatoResult {
-  const residentLevy = residentTaxLevy(taxableTotalIncome);
+export function calcFurusatoLimit(
+  taxableTotalIncome: number,
+  options: {
+    /**
+     * 調整控除の額（円）。住民税所得割額は調整控除を引いたあとの額なので、
+     * 家族構成が分かっている呼び出し（年収からの概算）ではこれを渡す。
+     * 課税総所得金額だけを直接入力する使い方では家族構成が不明なため0のままでよい。
+     */
+    adjustmentCredit?: number;
+  } = {},
+): FurusatoResult {
+  const credit = clampNonNeg(options.adjustmentCredit ?? 0);
+  const residentLevy = Math.max(0, residentTaxLevy(taxableTotalIncome) - credit);
   const marginalRate = marginalIncomeTaxRate(taxableTotalIncome);
   if (residentLevy <= 0) {
     return { limit: 0, residentLevy: 0, marginalRate };
@@ -101,26 +112,48 @@ export function calcFurusatoLimit(taxableTotalIncome: number): FurusatoResult {
 const SOCIAL_INSURANCE_ESTIMATE_RATE =
   RATE_EMP.health + RATE_EMP.pension + RATE_EMP.employment + RATE_EMP.childCare;
 /**
- * 基礎控除（円）。
+ * 住民税の基礎控除（円）。地方税法第314条の2第2項（合計所得2,400万円以下で43万円）。
  *
- * ⚠ この 480,000 を「令和7年改正の段階的基礎控除（58万〜95万）」に差し替えないこと。
+ * ⚠ ここを「所得税の基礎控除（令和7年改正後は58万〜95万）」に差し替えないこと。
  *   一度そう修正しようとして誤りだと分かったので理由を残す。
  *
  *   総務省「ふるさと納税ポータルサイト（控除額の計算）」によれば、特例分の計算に使う
  *   所得税の税率は「個人住民税の課税総所得金額から人的控除差調整額を差し引いた金額により
- *   求めた所得税の税率」であり、住民税ベースの金額で決まる。住民税の基礎控除は43万円で、
- *   所得税の基礎控除（改正後は58万〜95万）とは別物。
+ *   求めた所得税の税率」であり、**住民税ベース**の金額で決まる。所得税の基礎控除とは別物。
  *
- *   本ツールは住民税ベースの課税総所得金額と人的控除差調整額を持たない簡易モデルなので、
- *   43万と58〜95万の中間にあたる 48万 を近似として使っている。改正後の所得税基礎控除に
- *   差し替えると住民税ベースからかえって遠ざかり、限度額を過小表示する。
- *
- *   正確に出したい利用者向けには、課税総所得金額を直接渡す calcFurusatoLimit がある。
- *   本格的にやるなら人的控除差調整額のモデル化が必要（未実施）。
+ *   以前は住民税ベースの人的控除も調整控除も持たない簡易モデルだったため、43万と58〜95万の
+ *   中間にあたる 48万 を近似として使っていた（当時のコメントに「本格的にやるなら
+ *   人的控除差調整額のモデル化が必要（未実施）」と記録されていた）。
+ *   それを実施したのが本ファイルの `personalDeductionDifference` /
+ *   `residentTaxAdjustmentCredit` で、近似は不要になったので条文どおりの43万円に戻した。
  */
-const BASIC_DEDUCTION = 480_000;
-/** 配偶者控除・扶養控除（一般の控除対象1人あたり、所得税） */
-const DEPENDENT_DEDUCTION = 380_000;
+const BASIC_DEDUCTION_RESIDENT = 430_000;
+
+/**
+ * 人的控除の差（調整控除の加算額）。地方税法第37条・第314条の6。
+ *
+ * 所得税と住民税で人的控除の額が違うぶん、住民税の課税所得だけが大きくなる。
+ * その差を税額から取り戻すのが調整控除で、差額の表は条文に列挙されている。
+ * 基礎控除5万円／控除対象配偶者5万円／扶養親族 一般5万円・特定18万円・老人10万円。
+ * （特定18万円 ＝ 所得税63万 − 住民税45万 と一致する＝表の内部整合）
+ */
+export const PERSONAL_DEDUCTION_DIFFERENCE = {
+  basic: 50_000,
+  spouse: 50_000,
+  dependentGeneral: 50_000,
+  dependentSpecific: 180_000,
+  dependentElderly: 100_000,
+} as const;
+
+/**
+ * 調整控除の率。市町村民税3%（指定都市4%）＋道府県民税2%（指定都市1%）で
+ * **合計は指定都市かどうかに関わらず5%**（地方税法314条の6・37条）。
+ */
+const ADJUSTMENT_CREDIT_RATE = 0.05;
+/** 調整控除の計算が切り替わる合計課税所得金額（200万円）。 */
+const ADJUSTMENT_CREDIT_THRESHOLD = 2_000_000;
+/** 200万円超のときの下限（5万円）。 */
+const ADJUSTMENT_CREDIT_FLOOR = 50_000;
 
 /**
  * 給与所得控除額（令和7年分以降・最低65万円）。
@@ -130,13 +163,68 @@ const DEPENDENT_DEDUCTION = 380_000;
 import { salaryIncomeDeduction } from "../tedori/calculations";
 import { RATE_EMP } from "../tedori/rates";
 
+/** 住民税の配偶者控除・扶養控除（地方税法314条の2第1項10号・11号）。 */
+const DEPENDENT_DEDUCTION_RESIDENT = {
+  spouse: 330_000,
+  general: 330_000,
+  specific: 450_000,
+  elderly: 380_000,
+} as const;
+
+/**
+ * 人的控除の差の合計（調整控除の加算額）。
+ * 基礎控除ぶんは誰にでもあるので常に加算する。
+ */
+export function personalDeductionDifference(input: {
+  hasSpouse?: boolean;
+  dependents?: number;
+  specificDependents?: number;
+  elderlyDependents?: number;
+}): number {
+  const d = PERSONAL_DEDUCTION_DIFFERENCE;
+  return (
+    d.basic +
+    (input.hasSpouse ? d.spouse : 0) +
+    clampNonNeg(input.dependents ?? 0) * d.dependentGeneral +
+    clampNonNeg(input.specificDependents ?? 0) * d.dependentSpecific +
+    clampNonNeg(input.elderlyDependents ?? 0) * d.dependentElderly
+  );
+}
+
+/**
+ * 調整控除の額（円）。地方税法第37条・第314条の6。
+ *
+ *   合計課税所得金額 ≦ 200万円 … min(人的控除差の合計, 合計課税所得金額) × 5%
+ *   合計課税所得金額 > 200万円 … max(人的控除差の合計 −(合計課税所得金額 − 200万円), 5万円) × 5%
+ *
+ * これは**所得控除ではなく税額控除**（所得割の額から直接引く）。課税所得を動かす形で
+ * 近似すると、限度額の分子（住民税所得割額）を取り違える。
+ */
+export function residentTaxAdjustmentCredit(
+  taxableTotalIncome: number,
+  personalDifference: number,
+): number {
+  const taxable = clampNonNeg(taxableTotalIncome);
+  const diff = clampNonNeg(personalDifference);
+  if (taxable <= 0) return 0;
+  const base =
+    taxable <= ADJUSTMENT_CREDIT_THRESHOLD
+      ? Math.min(diff, taxable)
+      : Math.max(diff - (taxable - ADJUSTMENT_CREDIT_THRESHOLD), ADJUSTMENT_CREDIT_FLOOR);
+  return Math.floor(base * ADJUSTMENT_CREDIT_RATE);
+}
+
 export type SalaryEstimateInput = {
   /** 額面年収（円） */
   annualIncome: number;
   /** 配偶者控除の対象がいるか（一般） */
   hasSpouse?: boolean;
-  /** 一般の扶養控除対象人数（配偶者を除く） */
+  /** 一般の扶養控除対象人数（16〜18歳・23〜69歳。配偶者を除く） */
   dependents?: number;
+  /** 特定扶養親族（19〜22歳）の人数。住民税45万円・調整控除の差18万円。 */
+  specificDependents?: number;
+  /** 老人扶養親族（70歳以上）の人数。住民税38万円・調整控除の差10万円。 */
+  elderlyDependents?: number;
   /**
    * その他の所得控除の合計（円・任意）。iDeCo（小規模企業共済等掛金控除）・医療費控除・
    * 生命保険料控除など、基礎控除・配偶者/扶養控除以外で課税所得を下げる控除の合算。
@@ -160,12 +248,17 @@ export function estimateTaxableIncomeFromSalary(input: SalaryEstimateInput): num
   if (income <= 0) return 0;
   const employmentIncome = Math.max(0, income - salaryIncomeDeduction(income));
   const socialInsurance = Math.round(income * SOCIAL_INSURANCE_ESTIMATE_RATE);
-  const spouse = input.hasSpouse ? DEPENDENT_DEDUCTION : 0;
-  const dependents = clampNonNeg(input.dependents ?? 0) * DEPENDENT_DEDUCTION;
+  // ふるさと納税の限度額は住民税所得割額から決まるので、人的控除は**住民税の額**を使う
+  // （地方税法314条の2。所得税の額を使うと課税所得を過小に見て限度額がずれる）。
+  const spouse = input.hasSpouse ? DEPENDENT_DEDUCTION_RESIDENT.spouse : 0;
+  const dependents =
+    clampNonNeg(input.dependents ?? 0) * DEPENDENT_DEDUCTION_RESIDENT.general +
+    clampNonNeg(input.specificDependents ?? 0) * DEPENDENT_DEDUCTION_RESIDENT.specific +
+    clampNonNeg(input.elderlyDependents ?? 0) * DEPENDENT_DEDUCTION_RESIDENT.elderly;
   const other = clampNonNeg(input.otherDeductions ?? 0);
   const taxable = Math.max(
     0,
-    employmentIncome - socialInsurance - BASIC_DEDUCTION - spouse - dependents - other,
+    employmentIncome - socialInsurance - BASIC_DEDUCTION_RESIDENT - spouse - dependents - other,
   );
   // 課税総所得金額は1,000円未満切り捨て
   return Math.floor(taxable / 1000) * 1000;
@@ -179,7 +272,15 @@ export function estimateFurusatoLimitFromSalary(
   input: SalaryEstimateInput,
 ): FurusatoResult & { estimatedTaxableIncome: number } {
   const estimatedTaxableIncome = estimateTaxableIncomeFromSalary(input);
-  return { estimatedTaxableIncome, ...calcFurusatoLimit(estimatedTaxableIncome) };
+  // 住民税所得割額は調整控除を引いたあとの額。家族構成が分かるこの経路では反映する。
+  const adjustmentCredit = residentTaxAdjustmentCredit(
+    estimatedTaxableIncome,
+    personalDeductionDifference(input),
+  );
+  return {
+    estimatedTaxableIncome,
+    ...calcFurusatoLimit(estimatedTaxableIncome, { adjustmentCredit }),
+  };
 }
 
 // ============================================================

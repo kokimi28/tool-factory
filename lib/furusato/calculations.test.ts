@@ -5,11 +5,14 @@
  */
 import { describe, it, expect } from "vitest";
 import {
+  PERSONAL_DEDUCTION_DIFFERENCE,
   calcFurusatoLimit,
-  marginalIncomeTaxRate,
-  residentTaxLevy,
-  estimateTaxableIncomeFromSalary,
   estimateFurusatoLimitFromSalary,
+  estimateTaxableIncomeFromSalary,
+  marginalIncomeTaxRate,
+  personalDeductionDifference,
+  residentTaxAdjustmentCredit,
+  residentTaxLevy,
 } from "./calculations";
 import { RATE_EMP } from "../tedori/rates";
 import { salaryIncomeDeduction } from "../tedori/calculations";
@@ -88,9 +91,9 @@ describe("calcFurusatoLimit — 控除上限（課税総所得金額から・総
 
 describe("estimateTaxableIncomeFromSalary — 年収→課税総所得金額（概算・給与所得者）", () => {
   it("扶養なしの概算（1,000円未満切り捨て）", () => {
-    expect(estimateTaxableIncomeFromSalary({ annualIncome: 4_000_000 })).toBe(1_691_000);
-    expect(estimateTaxableIncomeFromSalary({ annualIncome: 6_000_000 })).toBe(2_997_000);
-    expect(estimateTaxableIncomeFromSalary({ annualIncome: 8_000_000 })).toBe(4_442_000);
+    expect(estimateTaxableIncomeFromSalary({ annualIncome: 4_000_000 })).toBe(1_741_000);
+    expect(estimateTaxableIncomeFromSalary({ annualIncome: 6_000_000 })).toBe(3_047_000);
+    expect(estimateTaxableIncomeFromSalary({ annualIncome: 8_000_000 })).toBe(4_492_000);
   });
   it("配偶者控除・扶養控除で課税所得が下がる（各38万円）", () => {
     const base = estimateTaxableIncomeFromSalary({ annualIncome: 6_000_000 });
@@ -99,8 +102,8 @@ describe("estimateTaxableIncomeFromSalary — 年収→課税総所得金額（�
       hasSpouse: true,
       dependents: 1,
     });
-    expect(base - withFamily).toBe(760_000); // 38万 × 2
-    expect(withFamily).toBe(2_237_000);
+    expect(base - withFamily).toBe(660_000); // 38万 × 2
+    expect(withFamily).toBe(2_387_000);
   });
   it("年収0は課税所得0", () => {
     expect(estimateTaxableIncomeFromSalary({ annualIncome: 0 })).toBe(0);
@@ -125,12 +128,12 @@ describe("記事 furusato-6-jichitai（A11）の控除総額は不変の二重�
 
 describe("記事 furusato-ikukyu（A9）の所得減で限度額が下がるの二重化", () => {
   // 記事の低年収域の限度額（育休で所得が減ると限度も下がる）を固定（品質ゲート①）。
-  // 500万→60,754 / 300万→27,867 / 250万→21,365 / 200万→14,839（扶養なし概算）。
-  it("年収500万→60,754・300万→27,867・250万→21,365・200万→14,839", () => {
-    expect(estimateFurusatoLimitFromSalary({ annualIncome: 5_000_000 }).limit).toBe(60_754);
-    expect(estimateFurusatoLimitFromSalary({ annualIncome: 3_000_000 }).limit).toBe(27_867);
-    expect(estimateFurusatoLimitFromSalary({ annualIncome: 2_500_000 }).limit).toBe(21_365);
-    expect(estimateFurusatoLimitFromSalary({ annualIncome: 2_000_000 }).limit).toBe(14_839);
+  // 500万→61,380 / 300万→28,456 / 250万→21,954 / 200万→15,428（扶養なし概算）。
+  it("年収500万→61,380・300万→28,456・250万→21,954・200万→15,428", () => {
+    expect(estimateFurusatoLimitFromSalary({ annualIncome: 5_000_000 }).limit).toBe(61_380);
+    expect(estimateFurusatoLimitFromSalary({ annualIncome: 3_000_000 }).limit).toBe(28_456);
+    expect(estimateFurusatoLimitFromSalary({ annualIncome: 2_500_000 }).limit).toBe(21_954);
+    expect(estimateFurusatoLimitFromSalary({ annualIncome: 2_000_000 }).limit).toBe(15_428);
   });
 });
 
@@ -202,22 +205,22 @@ describe("記事 furusato-limit-koeta（A3）の超過自己負担の二重化",
 
 describe("記事 furusato-tomobataraki-fuyou（A2）の家族構成別の二重化", () => {
   // 記事の年収700万・家族構成別の限度額を固定（品質ゲート①）。
-  it("年収700万: 共働き108,036 / 配偶者97,113 / +扶養1 75,417 / +扶養2 65,892", () => {
-    expect(estimateFurusatoLimitFromSalary({ annualIncome: 7_000_000 }).limit).toBe(108_036);
-    expect(estimateFurusatoLimitFromSalary({ annualIncome: 7_000_000, hasSpouse: true }).limit).toBe(97_113);
-    expect(estimateFurusatoLimitFromSalary({ annualIncome: 7_000_000, hasSpouse: true, dependents: 1 }).limit).toBe(75_417);
-    expect(estimateFurusatoLimitFromSalary({ annualIncome: 7_000_000, hasSpouse: true, dependents: 2 }).limit).toBe(65_892);
+  it("年収700万: 共働き108,754 / 配偶者99,269 / +扶養1 78,550 / +扶養2 70,279", () => {
+    expect(estimateFurusatoLimitFromSalary({ annualIncome: 7_000_000 }).limit).toBe(108_754);
+    expect(estimateFurusatoLimitFromSalary({ annualIncome: 7_000_000, hasSpouse: true }).limit).toBe(99_269);
+    expect(estimateFurusatoLimitFromSalary({ annualIncome: 7_000_000, hasSpouse: true, dependents: 1 }).limit).toBe(78_550);
+    expect(estimateFurusatoLimitFromSalary({ annualIncome: 7_000_000, hasSpouse: true, dependents: 2 }).limit).toBe(70_279);
   });
 });
 
 describe("記事 furusato-limit-nenshu（A1）の年収別早見の二重化", () => {
   // 記事の早見表数値（扶養なし独身の概算・年収300/500/700/1000万）を固定。
   // 誤値が記事に載ると CI が赤 → 自走マージが止まる（auto-backlog §品質ゲート①）。
-  it("年収300万→27,867 / 500万→60,754 / 700万→108,036 / 1000万→177,280", () => {
-    expect(estimateFurusatoLimitFromSalary({ annualIncome: 3_000_000 }).limit).toBe(27_867);
-    expect(estimateFurusatoLimitFromSalary({ annualIncome: 5_000_000 }).limit).toBe(60_754);
-    expect(estimateFurusatoLimitFromSalary({ annualIncome: 7_000_000 }).limit).toBe(108_036);
-    expect(estimateFurusatoLimitFromSalary({ annualIncome: 10_000_000 }).limit).toBe(177_280);
+  it("年収300万→28,456 / 500万→61,380 / 700万→108,754 / 1000万→177,998", () => {
+    expect(estimateFurusatoLimitFromSalary({ annualIncome: 3_000_000 }).limit).toBe(28_456);
+    expect(estimateFurusatoLimitFromSalary({ annualIncome: 5_000_000 }).limit).toBe(61_380);
+    expect(estimateFurusatoLimitFromSalary({ annualIncome: 7_000_000 }).limit).toBe(108_754);
+    expect(estimateFurusatoLimitFromSalary({ annualIncome: 10_000_000 }).limit).toBe(177_998);
   });
 });
 
@@ -231,45 +234,45 @@ describe("記事 furusato-limit-shikumi（A0）の worked example の二重化",
       marginalRate: 0.1,
     });
   });
-  it("年収600万・扶養なし → 課税所得299.5万・上限77,122（記事の年収概算）", () => {
+  it("年収600万・扶養なし → 課税所得299.5万・上限77,748（記事の年収概算）", () => {
     const r = estimateFurusatoLimitFromSalary({ annualIncome: 6_000_000 });
-    expect(r.estimatedTaxableIncome).toBe(2_997_000);
-    expect(r.limit).toBe(77_122);
+    expect(r.estimatedTaxableIncome).toBe(3_047_000);
+    expect(r.limit).toBe(77_748);
   });
 });
 
 describe("estimateFurusatoLimitFromSalary — 年収→上限（概算）", () => {
-  it("年収600万・扶養なし → 課税所得2,997,000・上限77,122", () => {
+  it("年収600万・扶養なし → 課税所得3,047,000・上限77,748", () => {
     const r = estimateFurusatoLimitFromSalary({ annualIncome: 6_000_000 });
-    expect(r.estimatedTaxableIncome).toBe(2_997_000);
-    expect(r.limit).toBe(77_122);
+    expect(r.estimatedTaxableIncome).toBe(3_047_000);
+    expect(r.limit).toBe(77_748);
   });
-  it("年収600万・配偶者＋扶養1 → 課税所得2,237,000・上限58,072（家族が増えると上限は下がる）", () => {
+  it("年収600万・配偶者＋扶養1 → 課税所得2,387,000・上限61,205（家族が増えると上限は下がる）", () => {
     const r = estimateFurusatoLimitFromSalary({
       annualIncome: 6_000_000,
       hasSpouse: true,
       dependents: 1,
     });
-    expect(r.estimatedTaxableIncome).toBe(2_237_000);
-    expect(r.limit).toBe(58_072);
+    expect(r.estimatedTaxableIncome).toBe(2_387_000);
+    expect(r.limit).toBe(61_205);
   });
 });
 
 describe("D3 その他の所得控除（iDeCo/医療費/生保）で限度額が下がる", () => {
   // 2巡目 Tier D3: otherDeductions を課税総所得金額から差し引く。年収700万・扶養なしで固定。
-  it("控除なし: 課税3,689,000 / 限度108,036", () => {
+  it("控除なし: 課税3,739,000 / 限度108,754", () => {
     const r = estimateFurusatoLimitFromSalary({ annualIncome: 7_000_000 });
-    expect(r.estimatedTaxableIncome).toBe(3_689_000);
-    expect(r.limit).toBe(108_036);
+    expect(r.estimatedTaxableIncome).toBe(3_739_000);
+    expect(r.limit).toBe(108_754);
   });
 
-  it("その他控除27.6万（iDeCo満額相当）: 課税3,413,000 / 限度100,102", () => {
+  it("その他控除27.6万（iDeCo満額相当）: 課税3,463,000 / 限度100,821", () => {
     const r = estimateFurusatoLimitFromSalary({
       annualIncome: 7_000_000,
       otherDeductions: 276_000,
     });
-    expect(r.estimatedTaxableIncome).toBe(3_413_000);
-    expect(r.limit).toBe(100_102);
+    expect(r.estimatedTaxableIncome).toBe(3_463_000);
+    expect(r.limit).toBe(100_821);
   });
 
   it("その他控除が増えると限度額は下がる（単調非増加）", () => {
@@ -301,7 +304,7 @@ describe("社会保険料の概算率が tedori の rates.ts と一致してい�
     const taxable = estimateTaxableIncomeFromSalary({ annualIncome: income });
     // taxable = employmentIncome − 社保 − 基礎控除48万（1,000円未満切捨）
     // → 社保 ≒ employmentIncome − 480,000 − taxable
-    const impliedSocialInsurance = employmentIncome - 480_000 - taxable;
+    const impliedSocialInsurance = employmentIncome - 430_000 - taxable;
     const impliedRate = impliedSocialInsurance / income;
     expect(Math.abs(impliedRate - expected)).toBeLessThan(0.0002);
     // 旧値 0.1475 に戻っていたら検出する
@@ -318,7 +321,71 @@ describe("社会保険料の概算率が tedori の rates.ts と一致してい�
     const income = 6_000_000;
     const employmentIncome = income - salaryIncomeDeduction(income);
     const taxable = estimateTaxableIncomeFromSalary({ annualIncome: income });
-    const impliedRate = (employmentIncome - 480_000 - taxable) / income;
+    const impliedRate = (employmentIncome - 430_000 - taxable) / income;
     expect(Math.abs(impliedRate - (expected + RATE_EMP.nursing))).toBeGreaterThan(0.002);
+  });
+});
+
+describe('調整控除（地方税法37条・314条の6）', () => {
+  it('人的控除差の表が条文どおり（特定18万＝所得税63万−住民税45万 と一致）', () => {
+    expect(PERSONAL_DEDUCTION_DIFFERENCE.basic).toBe(50_000);
+    expect(PERSONAL_DEDUCTION_DIFFERENCE.spouse).toBe(50_000);
+    expect(PERSONAL_DEDUCTION_DIFFERENCE.dependentGeneral).toBe(50_000);
+    expect(PERSONAL_DEDUCTION_DIFFERENCE.dependentSpecific).toBe(180_000);
+    expect(PERSONAL_DEDUCTION_DIFFERENCE.dependentElderly).toBe(100_000);
+    // 表の内部整合: 差額は「所得税の控除 − 住民税の控除」に一致する
+    expect(PERSONAL_DEDUCTION_DIFFERENCE.dependentSpecific).toBe(630_000 - 450_000);
+    expect(PERSONAL_DEDUCTION_DIFFERENCE.dependentElderly).toBe(480_000 - 380_000);
+    expect(PERSONAL_DEDUCTION_DIFFERENCE.dependentGeneral).toBe(380_000 - 330_000);
+  });
+
+  it('人的控除差の合計は基礎控除ぶんを常に含み、家族で積み上がる', () => {
+    expect(personalDeductionDifference({})).toBe(50_000);
+    expect(personalDeductionDifference({ hasSpouse: true })).toBe(100_000);
+    expect(personalDeductionDifference({ hasSpouse: true, dependents: 2 })).toBe(200_000);
+    expect(personalDeductionDifference({ specificDependents: 1 })).toBe(230_000);
+    expect(personalDeductionDifference({ elderlyDependents: 1 })).toBe(150_000);
+  });
+
+  it('合計課税所得200万円以下は min(差額, 課税所得) × 5%', () => {
+    expect(residentTaxAdjustmentCredit(1_000_000, 50_000)).toBe(2_500);
+    expect(residentTaxAdjustmentCredit(30_000, 50_000)).toBe(1_500); // 課税所得のほうが小さい
+    expect(residentTaxAdjustmentCredit(2_000_000, 200_000)).toBe(10_000);
+  });
+
+  it('200万円超は max(差額 −(課税所得−200万), 5万円) × 5%', () => {
+    // 差額5万・課税所得300万 → 5万 −100万 < 5万 なので下限5万 → 2,500円
+    expect(residentTaxAdjustmentCredit(3_000_000, 50_000)).toBe(2_500);
+    // 差額30万・課税所得210万 → 30万 −10万 ＝ 20万 → 10,000円
+    expect(residentTaxAdjustmentCredit(2_100_000, 300_000)).toBe(10_000);
+  });
+
+  it('課税所得が0なら調整控除も0', () => {
+    expect(residentTaxAdjustmentCredit(0, 200_000)).toBe(0);
+  });
+
+  it('調整控除を引くぶん限度額は下がる（税額控除であって所得控除ではない）', () => {
+    const withCredit = calcFurusatoLimit(3_000_000, { adjustmentCredit: 2_500 });
+    const without = calcFurusatoLimit(3_000_000);
+    expect(withCredit.residentLevy).toBe(without.residentLevy - 2_500);
+    expect(withCredit.limit).toBeLessThan(without.limit);
+  });
+});
+
+describe('年収からの概算は住民税ベースの人的控除を使う', () => {
+  it('扶養親族の年齢区分が限度額に効く（特定・老人で額が違う）', () => {
+    const base = estimateFurusatoLimitFromSalary({ annualIncome: 7_000_000, hasSpouse: true });
+    const general = estimateFurusatoLimitFromSalary({ annualIncome: 7_000_000, hasSpouse: true, dependents: 1 });
+    const specific = estimateFurusatoLimitFromSalary({ annualIncome: 7_000_000, hasSpouse: true, specificDependents: 1 });
+    const elderly = estimateFurusatoLimitFromSalary({ annualIncome: 7_000_000, hasSpouse: true, elderlyDependents: 1 });
+    // 住民税の控除額 一般33万 < 老人38万 < 特定45万 → 控除が大きいほど限度額は下がる
+    expect(general.limit).toBeLessThan(base.limit);
+    expect(elderly.limit).toBeLessThan(general.limit);
+    expect(specific.limit).toBeLessThan(elderly.limit);
+  });
+
+  it('基礎控除は住民税の43万円（所得税の48万・58万ではない）', () => {
+    const r = estimateFurusatoLimitFromSalary({ annualIncome: 6_000_000 });
+    expect(r.estimatedTaxableIncome).toBe(3_047_000);
   });
 });
