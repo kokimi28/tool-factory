@@ -121,11 +121,11 @@ describe("calculateNetSalary — 年収400万・40歳未満（基準ケース）
     expect(r.salaryDeduction).toBe(1_240_000);
     expect(r.employmentIncome).toBe(2_760_000);
     expect(r.taxableIncomeForIncomeTax).toBe(1_291_000);
-    expect(r.incomeTax).toBe(65_905);
+    expect(r.incomeTax).toBe(65_900);
     expect(r.residentTax).toBe(179_100);
-    expect(r.totalDeduction).toBe(833_605);
-    expect(r.takeHome).toBe(3_166_395);
-    expect(r.takeHomeMonthly).toBe(263_866);
+    expect(r.totalDeduction).toBe(833_600);
+    expect(r.takeHome).toBe(3_166_400);
+    expect(r.takeHomeMonthly).toBe(263_867);
   });
 });
 
@@ -134,9 +134,9 @@ describe("calculateNetSalary — 年収600万・40歳未満", () => {
   it("内訳と手取り", () => {
     expect(r.socialInsurance).toBe(882_900);
     expect(r.employmentIncome).toBe(4_360_000);
-    expect(r.incomeTax).toBe(186_026);
+    expect(r.incomeTax).toBe(186_000);
     expect(r.residentTax).toBe(309_700);
-    expect(r.takeHome).toBe(4_621_374);
+    expect(r.takeHome).toBe(4_621_400);
   });
 });
 
@@ -168,21 +168,21 @@ describe("記事 worked example: 40歳の介護保険料と手取り（kaigo-hok
   // 年収500万・扶養なしで 40歳未満 vs 40歳以上
   const under = calculateNetSalary({ annualIncome: 5_000_000, isOver40: false });
   const over = calculateNetSalary({ annualIncome: 5_000_000, isOver40: true });
-  it("40歳未満: 社保735,750・手取り3,900,496・月325,041", () => {
+  it("40歳未満: 社保735,750・手取り3,900,550・月325,046", () => {
     expect(under.socialInsurance).toBe(735_750);
     expect(under.nursingInsurance).toBe(0);
-    expect(under.takeHome).toBe(3_900_496);
-    expect(under.takeHomeMonthly).toBe(325_041);
+    expect(under.takeHome).toBe(3_900_550);
+    expect(under.takeHomeMonthly).toBe(325_046);
   });
-  it("40歳以上: 介護40,500・社保776,250・手取り3,868,282・月322,357", () => {
+  it("40歳以上: 介護40,500・社保776,250・手取り3,868,350・月322,363", () => {
     expect(over.nursingInsurance).toBe(40_500);
     expect(over.socialInsurance).toBe(776_250);
-    expect(over.takeHome).toBe(3_868_282);
-    expect(over.takeHomeMonthly).toBe(322_357);
+    expect(over.takeHome).toBe(3_868_350);
+    expect(over.takeHomeMonthly).toBe(322_363);
   });
-  it("差額: 年32,214・月2,684", () => {
-    expect(under.takeHome - over.takeHome).toBe(32_214);
-    expect(under.takeHomeMonthly - over.takeHomeMonthly).toBe(2_684);
+  it("差額: 年32,200・月2,683", () => {
+    expect(under.takeHome - over.takeHome).toBe(32_200);
+    expect(under.takeHomeMonthly - over.takeHomeMonthly).toBe(2_683);
   });
 });
 
@@ -196,21 +196,21 @@ describe("記事 worked example: 社会保険料の内訳（shakai-hoken-uchiwak
     expect(r.employmentInsurance).toBe(25_000);
     expect(r.socialInsurance).toBe(735_750);
   });
-  it("記事で言及する所得税119,354・住民税244,400", () => {
-    expect(r.incomeTax).toBe(119_354);
+  it("記事で言及する所得税119,300・住民税244,400", () => {
+    expect(r.incomeTax).toBe(119_300);
     expect(r.residentTax).toBe(244_400);
   });
 });
 
 describe("記事 worked example: 昇給の限界手取り率（shokyu-tedori-fueni-kui 記事の裏取り）", () => {
   // 年収を100万円ずつ上げたときの手取り増分（限界手取り率が下がる）を固定（品質ゲート①）。
-  it("+100万の手取り増: 300→400=763,277 / 400→500=734,101 / 500→600=720,878 / 600→700=683,490 / 700→800=636,308", () => {
+  it("+100万の手取り増: 300→400=763,250 / 400→500=734,150 / 500→600=720,850 / 600→700=683,550 / 700→800=636,250", () => {
     const th = (inc: number) => calculateNetSalary({ annualIncome: inc, isOver40: false }).takeHome;
-    expect(th(4_000_000) - th(3_000_000)).toBe(763_277);
-    expect(th(5_000_000) - th(4_000_000)).toBe(734_101);
-    expect(th(6_000_000) - th(5_000_000)).toBe(720_878);
-    expect(th(7_000_000) - th(6_000_000)).toBe(683_490);
-    expect(th(8_000_000) - th(7_000_000)).toBe(636_308);
+    expect(th(4_000_000) - th(3_000_000)).toBe(763_250);
+    expect(th(5_000_000) - th(4_000_000)).toBe(734_150);
+    expect(th(6_000_000) - th(5_000_000)).toBe(720_850);
+    expect(th(7_000_000) - th(6_000_000)).toBe(683_550);
+    expect(th(8_000_000) - th(7_000_000)).toBe(636_250);
     // 限界手取り率は逓減する（記事の主張）
     expect(th(4_000_000) - th(3_000_000)).toBeGreaterThan(th(8_000_000) - th(7_000_000));
   });
@@ -220,11 +220,11 @@ describe("記事 worked example: 手取りから年収逆算の早見表（tedor
   // 会社員・扶養なし・40歳未満の年収→手取り（記事の早見表の各行）
   const table: Array<[number, number, number]> = [
     // [annualIncome, takeHome, takeHomeMonthly]
-    [3_000_000, 2_403_118, 200_260],
-    [4_000_000, 3_166_395, 263_866],
-    [5_000_000, 3_900_496, 325_041],
-    [6_000_000, 4_621_374, 385_115],
-    [7_000_000, 5_304_864, 442_072],
+    [3_000_000, 2_403_150, 200_263],
+    [4_000_000, 3_166_400, 263_867],
+    [5_000_000, 3_900_550, 325_046],
+    [6_000_000, 4_621_400, 385_117],
+    [7_000_000, 5_304_950, 442_079],
   ];
   for (const [inc, takeHome, monthly] of table) {
     it(`年収${inc / 10_000}万: 手取り${takeHome}・月${monthly}`, () => {
@@ -243,15 +243,15 @@ describe("記事 worked example: 手取りから年収逆算の早見表（tedor
 });
 
 describe("記事 worked example: 手取り月額 vs 年収÷12（tedori-getsugaku-nenshu-12 記事の裏取り）", () => {
-  it("年収500万: 手取り月額325,041 は 額面月額416,667 より小さい", () => {
+  it("年収500万: 手取り月額325,046 は 額面月額416,667 より小さい", () => {
     const r = calculateNetSalary({ annualIncome: 5_000_000, isOver40: false });
-    expect(r.takeHomeMonthly).toBe(325_041);
+    expect(r.takeHomeMonthly).toBe(325_046);
     expect(Math.round(5_000_000 / 12)).toBe(416_667);
     expect(r.takeHomeMonthly).toBeLessThan(Math.round(5_000_000 / 12));
   });
-  it("年収400万: 手取り月額263,866 vs 額面月額333,333", () => {
+  it("年収400万: 手取り月額263,867 vs 額面月額333,333", () => {
     const r = calculateNetSalary({ annualIncome: 4_000_000, isOver40: false });
-    expect(r.takeHomeMonthly).toBe(263_866);
+    expect(r.takeHomeMonthly).toBe(263_867);
     expect(Math.round(4_000_000 / 12)).toBe(333_333);
   });
 });
@@ -260,16 +260,16 @@ describe("記事 gakumen-tedori-hayamihyo（MB5・早見表）の数値二重化
   // auto-backlog Tier B MB5: 記事本文の早見表の各手取り額を calc 出力で固定する
   //（§品質ゲート①：誤値は CI で赤）。前提は会社員・扶養なし・40歳未満。
   const rows: Array<[number, number]> = [
-    [2_000_000, 1_637_372],
-    [3_000_000, 2_403_118],
-    [4_000_000, 3_166_395],
-    [5_000_000, 3_900_496],
-    [6_000_000, 4_621_374],
-    [7_000_000, 5_304_864],
-    [8_000_000, 5_941_172],
-    [10_000_000, 7_260_542],
-    [12_000_000, 8_539_751],
-    [15_000_000, 10_228_094],
+    [2_000_000, 1_637_400],
+    [3_000_000, 2_403_150],
+    [4_000_000, 3_166_400],
+    [5_000_000, 3_900_550],
+    [6_000_000, 4_621_400],
+    [7_000_000, 5_304_950],
+    [8_000_000, 5_941_200],
+    [10_000_000, 7_260_600],
+    [12_000_000, 8_539_800],
+    [15_000_000, 10_228_150],
   ];
   for (const [income, takeHome] of rows) {
     it(`年収${income / 10_000}万の手取りは ${takeHome}円`, () => {
@@ -278,17 +278,17 @@ describe("記事 gakumen-tedori-hayamihyo（MB5・早見表）の数値二重化
     });
   }
 
-  it("年収500万の内訳（社保735,750 / 所得税119,354 / 住民税244,400）", () => {
+  it("年収500万の内訳（社保735,750 / 所得税119,300 / 住民税244,400）", () => {
     const r = calculateNetSalary({ annualIncome: 5_000_000, isOver40: false });
     expect(r.socialInsurance).toBe(735_750);
-    expect(r.incomeTax).toBe(119_354);
+    expect(r.incomeTax).toBe(119_300);
     expect(r.residentTax).toBe(244_400);
   });
 
-  it("年収500万・40歳以上は介護保険40,500で手取り3,868,282（40歳未満より約3.2万円減）", () => {
+  it("年収500万・40歳以上は介護保険40,500で手取り3,868,350（40歳未満より約3.2万円減）", () => {
     const r = calculateNetSalary({ annualIncome: 5_000_000, isOver40: true });
     expect(r.nursingInsurance).toBe(40_500);
-    expect(r.takeHome).toBe(3_868_282);
+    expect(r.takeHome).toBe(3_868_350);
   });
 });
 
@@ -356,7 +356,7 @@ describe("記事本文の scenario lock（給与側・入力と出力を1つの�
   });
 
   it("tedori-meyasu-nenshu と兄弟記事が同じ年収に同じ手取りを載せている（Defect 3）", () => {
-    // 丸め表記（約317万円）と確定値（3,166,395円）は同じ takeHome から作る。
+    // 丸め表記（約317万円）と確定値（3,166,400円）は同じ takeHome から作る。
     // どちらか片方だけを書き換えると、この照合が作れなくなって赤になる。
     const meyasu = bodyOf("tedori-meyasu-nenshu");
     const gyakusan = bodyOf("tedori-kara-nenshu-gyakusan");

@@ -16,11 +16,11 @@ describe("E12 tedori 結果テキスト化", () => {
   });
 
   it("手取り・月額・率・社保・所得税・住民税の calc 値を含む", () => {
-    expect(text).toContain("3,166,395円"); // 手取り年額
-    expect(text).toContain("263,866円"); // 手取り月額
+    expect(text).toContain("3,166,400円"); // 手取り年額
+    expect(text).toContain("263,867円"); // 手取り月額
     expect(text).toContain("79.2%"); // 手取り率
     expect(text).toContain("588,600円"); // 社会保険料
-    expect(text).toContain("65,905円"); // 所得税
+    expect(text).toContain("65,900円"); // 所得税
     expect(text).toContain("179,100円"); // 住民税
   });
 
