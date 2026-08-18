@@ -44,6 +44,12 @@ export interface NetSalaryInput {
    * 未指定なら全国平均の健康保険料率を使う。健康保険料率だけが都道府県で変わる。
    */
   prefecture?: Prefecture;
+  /**
+   * 扶養控除・配偶者控除などの人的控除（円）。所得税と住民税で額が違うので別々に渡す。
+   * 未指定なら0＝扶養なしとして計算する（既定の挙動は従来どおり）。
+   * 額の算出は lib/tedori/dependents.ts（扶養）・lib/nenshu-kabe/spouse-deduction.ts（配偶者）。
+   */
+  personalDeduction?: { incomeTax?: number; residentTax?: number };
 }
 
 /** 計算結果（内訳つき・すべて年額の円） */
@@ -184,16 +190,22 @@ export function calculateNetSalary(input: NetSalaryInput): NetSalaryResult {
   const salaryDeduction = salaryIncomeDeduction(income);
   const employmentIncome = Math.max(0, income - salaryDeduction);
 
+  // 人的控除（扶養控除・配偶者控除など）。所得税と住民税で額が違う。
+  const personalIt = clampNonNeg(input.personalDeduction?.incomeTax ?? 0);
+  const personalRt = clampNonNeg(input.personalDeduction?.residentTax ?? 0);
+
   // 所得税
   const basicIt = basicDeductionIncomeTax(employmentIncome);
-  const taxableIt = floorTo1000(Math.max(0, employmentIncome - si.total - basicIt));
+  const taxableIt = floorTo1000(Math.max(0, employmentIncome - si.total - basicIt - personalIt));
   const incomeTaxBase = Math.floor(incomeTaxByBracket(taxableIt));
   // 年税額は所得税と復興特別所得税の合計で100円未満を切り捨てる
   // （復興財源確保法30条1項2号＝年末調整の年調年税額／確定申告なら国税通則法119条1項）。
   const incomeTax = Math.floor((incomeTaxBase * 1021) / 1000 / 100) * 100;
 
   // 住民税（概算）: 所得割10%（100円未満切捨）＋ 均等割
-  const taxableRt = floorTo1000(Math.max(0, employmentIncome - si.total - BASIC_DEDUCTION_RESIDENT));
+  const taxableRt = floorTo1000(
+    Math.max(0, employmentIncome - si.total - BASIC_DEDUCTION_RESIDENT - personalRt),
+  );
   const residentLevy = Math.floor(taxableRt / 1000) * 100; // = taxableRt × 10% を100円未満切捨
   const residentTax = taxableRt > 0 ? residentLevy + JUMINZEI_KINTOWARI : 0;
 
@@ -217,4 +229,24 @@ export function calculateNetSalary(input: NetSalaryInput): NetSalaryResult {
     takeHomeMonthly: Math.round(takeHome / 12),
     takeHomeRate: income > 0 ? takeHome / income : 0,
   };
+}
+
+/**
+ * 指定した合計所得金額になる給与収入（円）を、給与所得控除から逆算する。
+ *
+ * 壁はすべて合計所得金額で定義されており、給与収入の額はそこからの従属値。
+ * 給与所得控除が改正されれば壁も動くので、数値を直書きしない。
+ */
+export function salaryForTotalIncome(targetTotalIncome: number): number {
+  const target = Number.isFinite(targetTotalIncome) && targetTotalIncome > 0 ? targetTotalIncome : 0;
+  if (target === 0) return 0;
+  const income = (salary: number): number => Math.max(0, salary - salaryIncomeDeduction(salary));
+  let lo = 0;
+  let hi = 20_000_000;
+  while (lo < hi) {
+    const mid = Math.floor((lo + hi) / 2);
+    if (income(mid) >= target) hi = mid;
+    else lo = mid + 1;
+  }
+  return lo;
 }
