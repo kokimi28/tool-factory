@@ -181,3 +181,80 @@ export function estimateFurusatoLimitFromSalary(
   const estimatedTaxableIncome = estimateTaxableIncomeFromSalary(input);
   return { estimatedTaxableIncome, ...calcFurusatoLimit(estimatedTaxableIncome) };
 }
+
+// ============================================================
+// 控除の内訳（所得税分・住民税基本分・住民税特例分）
+// ============================================================
+
+/**
+ * 寄付額に対する控除の内訳。
+ *
+ * 総務省「ふるさと納税ポータルサイト（控除額の計算）」の3本立てをそのまま実装する
+ * （最終確認日: 2026-08-18・一次資料の HTML を実測）:
+ *
+ *   (1) 所得税からの控除     = (寄付額 − 2,000) × 所得税の税率（復興特別所得税込み）
+ *   (2) 住民税からの控除(基本分) = (寄付額 − 2,000) × 10%
+ *   (3) 住民税からの控除(特例分) = (寄付額 − 2,000) × (90% − 所得税の税率)
+ *       ただし特例分が住民税所得割額の20%を超える場合は (3)' 住民税所得割額 × 20%
+ *
+ * この内訳が要る理由（D11）: 確定申告で住宅ローン控除と併用すると、(1) の所得税分が
+ * 住宅ローン控除と同じ所得税の枠を取り合う。ワンストップ特例なら (1) が発生せず
+ * 全額が住民税から控除されるので取り合いが起きない。
+ * **「取り合いの対象になる額」＝(1) は本関数で出せる**が、実際にいくら目減りするかは
+ * 住宅ローン控除可能額と居住開始年（住民税側の控除上限が変わる）に依存し、
+ * 本ツールの入力には無いので算出しない。
+ *
+ * ※対象寄付額の上限（総所得金額等の40%／30%）は総所得金額等を受け取らないため適用しない。
+ *   控除上限額の近辺までの通常の寄付額を想定した内訳である。
+ */
+export type DeductionBreakdown = {
+  /** (1) 所得税からの控除（円）。確定申告時のみ発生し、住宅ローン控除と枠を取り合う。 */
+  incomeTaxPortion: number;
+  /** (2) 住民税からの控除・基本分（円） */
+  residentBasicPortion: number;
+  /** (3) 住民税からの控除・特例分（円） */
+  residentSpecialPortion: number;
+  /** 控除の合計（円） */
+  totalDeduction: number;
+  /** 実質の自己負担額（円）。上限内なら 2,000 になる。 */
+  selfPayment: number;
+  /** 特例分が住民税所得割額の20%上限に当たったか（＝自己負担が2,000円を超える） */
+  specialPortionCapped: boolean;
+};
+
+/**
+ * 寄付額と課税総所得金額から控除の内訳を求める。
+ *
+ * @param donation 寄付額（円）
+ * @param taxableTotalIncome 課税総所得金額（円）
+ */
+export function donationDeductionBreakdown(
+  donation: number,
+  taxableTotalIncome: number,
+): DeductionBreakdown {
+  const d = clampNonNeg(donation);
+  const base = Math.max(0, d - SELF_PAYMENT);
+  const rate = marginalIncomeTaxRate(taxableTotalIncome);
+  const rateWithReconstruction = rate * RECONSTRUCTION_TAX_MULTIPLIER;
+  const residentLevy = residentTaxLevy(taxableTotalIncome);
+
+  const incomeTaxPortion = Math.floor(base * rateWithReconstruction);
+  const residentBasicPortion = Math.floor(base * (1 - RESIDENT_BASIC_CREDIT_RATE));
+  const specialUncapped = base * (RESIDENT_BASIC_CREDIT_RATE - rateWithReconstruction);
+  const specialCap = residentLevy * 0.2;
+  const specialPortionCapped = specialUncapped > specialCap;
+  const residentSpecialPortion = Math.floor(
+    Math.min(specialUncapped, specialCap),
+  );
+
+  const totalDeduction =
+    incomeTaxPortion + residentBasicPortion + residentSpecialPortion;
+  return {
+    incomeTaxPortion,
+    residentBasicPortion,
+    residentSpecialPortion,
+    totalDeduction,
+    selfPayment: d - totalDeduction,
+    specialPortionCapped,
+  };
+}
