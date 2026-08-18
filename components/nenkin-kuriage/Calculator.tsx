@@ -7,6 +7,7 @@ import {
   monthsFrom65,
   ratePerMonth,
 } from "@/lib/nenkin-kuriage/calculations";
+import { netScenario } from "@/lib/nenkin-kuriage/net";
 import { PENSION_MONTHLY_PRESETS } from "@/lib/nenkin-kuriage/presets";
 import { clampStartAge } from "@/lib/nenkin-kuriage/share";
 import { resultToClipboardText } from "@/lib/nenkin-kuriage/result-text";
@@ -23,6 +24,11 @@ const AGES = [60, 62, 65, 66, 68, 70, 72, 75];
 export default function Calculator() {
   const [baseMonthly, setBaseMonthly] = useState("150000");
   const [startAge, setStartAge] = useState(70);
+  // 手取り（税引後）で見るモード。既定は額面のまま（従来の挙動）。
+  const [netMode, setNetMode] = useState(false);
+  // 国保・介護保険料は自治体で決まるので、見たい人だけが入れる任意入力。
+  const [insuranceFlat, setInsuranceFlat] = useState("0");
+  const [insuranceRate, setInsuranceRate] = useState("0");
   const hydrated = useRef(false);
   const [copied, setCopied] = useState(false);
 
@@ -63,9 +69,28 @@ export default function Calculator() {
   const scenario = useMemo(() => pensionScenario(base, startAge), [base, startAge]);
   const breakEven = useMemo(() => breakEvenAgeVs65(startAge), [startAge]);
 
+  const netOptions = useMemo(
+    () => ({
+      socialInsurance: toNumber(insuranceFlat),
+      socialInsuranceRate: toNumber(insuranceRate) / 100,
+    }),
+    [insuranceFlat, insuranceRate],
+  );
+  const net = useMemo(
+    () => netScenario(base, startAge, netOptions),
+    [base, startAge, netOptions],
+  );
+
   const rows = useMemo(
-    () => AGES.map((a) => ({ age: a, ...pensionScenario(base, a), be: breakEvenAgeVs65(a) })),
-    [base],
+    () =>
+      AGES.map((a) => ({
+        age: a,
+        ...pensionScenario(base, a),
+        be: breakEvenAgeVs65(a),
+        netBe: netScenario(base, a, netOptions).breakEven,
+        netAnnual: netScenario(base, a, netOptions).from65.net,
+      })),
+    [base, netOptions],
   );
 
   const kind =
@@ -125,16 +150,93 @@ export default function Calculator() {
             <span>75歳</span>
           </div>
         </label>
+
+        <div className="border-t border-gray-100 pt-4">
+          <label className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={netMode}
+              onChange={(e) => setNetMode(e.target.checked)}
+              className="h-4 w-4"
+            />
+            <span className="text-sm font-medium text-gray-800">
+              税引後（手取り）で見る
+            </span>
+          </label>
+          <p className="mt-1 text-xs text-gray-500">
+            所得税・復興特別所得税・住民税を差し引きます（65歳以上・他に所得なし・単身の前提）。
+          </p>
+
+          {netMode && (
+            <details className="mt-3 rounded-lg bg-gray-50 p-3">
+              <summary className="cursor-pointer text-xs font-medium text-gray-700">
+                国民健康保険料・介護保険料も入れる（任意）
+              </summary>
+              <p className="mt-2 text-xs text-gray-500">
+                保険料は市区町村ごとに決まるため計算に含めていません。お手元の通知書の額を入れると反映されます。
+              </p>
+              <div className="mt-2 grid grid-cols-2 gap-3">
+                <label className="block">
+                  <span className="text-xs text-gray-600">定額部分（円/年）</span>
+                  <input
+                    inputMode="numeric"
+                    value={insuranceFlat}
+                    onChange={(e) => setInsuranceFlat(e.target.value)}
+                    className="mt-1 w-full rounded-lg border border-gray-300 px-2 py-1 text-right text-sm"
+                  />
+                </label>
+                <label className="block">
+                  <span className="text-xs text-gray-600">所得比例部分（％）</span>
+                  <input
+                    inputMode="decimal"
+                    value={insuranceRate}
+                    onChange={(e) => setInsuranceRate(e.target.value)}
+                    className="mt-1 w-full rounded-lg border border-gray-300 px-2 py-1 text-right text-sm"
+                  />
+                </label>
+              </div>
+            </details>
+          )}
+        </div>
       </div>
 
       {/* この開始年齢のサマリ */}
       <div className="mt-6 rounded-xl border border-indigo-200 bg-indigo-50 p-6 text-center">
         <p className="text-sm text-indigo-700">
-          {startAge}歳から受給した場合の月額（受給率 {pct(scenario.rate)}）
+          {startAge}歳から受給した場合の{netMode ? "手取り" : ""}月額（受給率 {pct(scenario.rate)}）
         </p>
-        <p className="mt-1 text-3xl font-bold text-indigo-900">{yen(scenario.monthly)}</p>
-        <p className="mt-1 text-sm text-indigo-700">年額 {yen(scenario.annual)}</p>
-        {breakEven.years !== null ? (
+        <p className="mt-1 text-3xl font-bold text-indigo-900">
+          {yen(netMode ? net.from65.net / 12 : scenario.monthly)}
+        </p>
+        <p className="mt-1 text-sm text-indigo-700">
+          年額 {yen(netMode ? net.from65.net : scenario.annual)}
+          {netMode && (
+            <span className="text-indigo-600">
+              {" "}
+              （額面 {yen(scenario.annual)}／税・保険料 {yen(net.from65.totalTax + net.from65.socialInsurance)}）
+            </span>
+          )}
+        </p>
+        {netMode && net.differsBefore65 && (
+          <p className="mt-1 text-xs text-indigo-600">
+            65歳になるまでは公的年金等控除の下限が低いため、手取りは年 {yen(net.atStart.net)} です。
+          </p>
+        )}
+        {netMode ? (
+          net.breakEven.years !== null ? (
+            <p className="mt-3 text-sm text-indigo-800">
+              65歳受給との損益分岐は
+              <span className="font-bold">
+                {" "}
+                {net.breakEven.years}歳{net.breakEven.months}か月
+              </span>
+              （額面なら {breakEven.years}歳{breakEven.months}か月）。
+              {startAge < 65 ? "これより長生きすると65歳受給の方が有利。" : "これより長生きすると繰下げの方が有利。"}
+            </p>
+          ) : (
+            <p className="mt-3 text-sm text-indigo-800">65歳受給（基準）です。</p>
+          )
+        ) : breakEven.years !== null ? (
           <p className="mt-3 text-sm text-indigo-800">
             65歳受給との損益分岐は
             <span className="font-bold">
@@ -190,7 +292,7 @@ export default function Calculator() {
             <tr className="border-b border-gray-200 text-left text-gray-500">
               <th className="py-2 pr-2 font-medium">開始年齢</th>
               <th className="py-2 px-2 font-medium">受給率</th>
-              <th className="py-2 px-2 font-medium text-right">月額</th>
+              <th className="py-2 px-2 font-medium text-right">{netMode ? "手取り月額" : "月額"}</th>
               <th className="py-2 pl-2 font-medium text-right">65歳との損益分岐</th>
             </tr>
           </thead>
@@ -202,9 +304,17 @@ export default function Calculator() {
               >
                 <td className="py-1.5 pr-2">{r.age}歳</td>
                 <td className="py-1.5 px-2">{pct(r.rate)}</td>
-                <td className="py-1.5 px-2 text-right tabular-nums">{yen(r.monthly)}</td>
+                <td className="py-1.5 px-2 text-right tabular-nums">
+                  {yen(netMode ? r.netAnnual / 12 : r.monthly)}
+                </td>
                 <td className="py-1.5 pl-2 text-right tabular-nums">
-                  {r.be.years !== null ? `${r.be.years}歳${r.be.months}か月` : "—"}
+                  {netMode
+                    ? r.netBe.years !== null
+                      ? `${r.netBe.years}歳${r.netBe.months}か月`
+                      : "—"
+                    : r.be.years !== null
+                      ? `${r.be.years}歳${r.be.months}か月`
+                      : "—"}
                 </td>
               </tr>
             ))}
@@ -226,7 +336,11 @@ export default function Calculator() {
       </div>
 
       <p className="mt-4 text-xs text-gray-500 leading-relaxed">
-        繰上げは1か月あたり0.4%減額（60歳で−24%）、繰下げは1か月あたり0.7%増額（75歳で+84%）で計算しています（昭和37年4月2日以降生まれ）。損益分岐年齢は累計受給額が65歳受給に追いつく年齢で、年金額に関わらず受給率だけで決まります。加給年金・振替加算・在職老齢年金・税・社会保険料は含めていません。本サイトの計算結果は概算・参考値です。
+        繰上げは1か月あたり0.4%減額（60歳で−24%）、繰下げは1か月あたり0.7%増額（75歳で+84%）で計算しています（昭和37年4月2日以降生まれ）。
+        {netMode
+          ? "手取りは公的年金等控除（所得税法35条4項・租税特別措置法41条の15の3）を差し引いた雑所得に、所得税・復興特別所得税と住民税（所得割10%・基礎控除43万円・均等割5,000円）をかけて計算しています。他に所得がなく単身の前提で、住民税は標準税率です。均等割・非課税限度額は自治体で変わります。損益分岐年齢は額面と違い年金額によって変わります。国民健康保険料・介護保険料は上の任意入力を使わないかぎり含みません。"
+          : "損益分岐年齢は累計受給額が65歳受給に追いつく年齢で、年金額に関わらず受給率だけで決まります。税・社会保険料は含めていません（「税引後（手取り）で見る」で切り替えられます）。"}
+        加給年金・振替加算・在職老齢年金は含めていません。本サイトの計算結果は概算・参考値です。
       </p>
     </div>
   );
