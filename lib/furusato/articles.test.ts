@@ -16,7 +16,12 @@
 import { describe, expect, it } from 'vitest';
 
 import { ARTICLES, getArticle } from './articles';
-import { estimateFurusatoLimitFromSalary, calcFurusatoLimit } from './calculations';
+import {
+  calcFurusatoLimit,
+  deductionTaxSaving,
+  deductionTradeoff,
+  estimateFurusatoLimitFromSalary,
+} from './calculations';
 
 const yen = (n: number): string => n.toLocaleString('en-US');
 
@@ -95,5 +100,86 @@ describe('記事全体の整合', () => {
 
   it('レンダラが解釈しない markdown 記法が残っていない', () => {
     expect(allBody).not.toContain('**');
+  });
+});
+
+describe('記事 furusato-ideco-iryohi のトレードオフが実装と一致している（G4）', () => {
+  const article = getArticle('furusato-ideco-iryohi')!;
+  const units = [
+    article.title, article.description, article.lead,
+    ...article.sections.flatMap((s) => [s.heading ?? '', ...s.paragraphs, ...(s.bullets ?? [])]),
+    ...(article.faqs ?? []).map((f) => `${f.question}\n${f.answer}`),
+  ];
+  const body = units.join('\n');
+  const yen = (n: number): string => n.toLocaleString('en-US');
+  const ideco = deductionTradeoff(3_000_000, 276_000);
+  const medical = deductionTradeoff(3_000_000, 300_000);
+  const lowIncome = deductionTradeoff(2_000_000, 276_000);
+
+  it('iDeCo の3点（目減り・節税・差引）を実額で載せている', () => {
+    expect(body).toContain(
+      `ふるさと納税の限度額は${yen(ideco.limitDecrease)}円下がります`,
+    );
+    expect(body).toContain(`節税は${yen(ideco.taxSaving)}円`);
+    expect(body).toContain(`差引で${yen(ideco.netGain)}円のプラス`);
+  });
+
+  it('節税の内訳（所得税・住民税）が実装と一致する', () => {
+    const s = deductionTaxSaving(276_000, 3_000_000);
+    expect(body).toContain(`（所得税${yen(s.incomeTax)}円＋住民税${yen(s.residentTax)}円）`);
+  });
+
+  it('医療費控除の例も実額で載せている', () => {
+    expect(body).toContain(
+      `限度額は${yen(medical.limitDecrease)}円下がる一方、節税は${yen(medical.taxSaving)}円。差引${yen(medical.netGain)}円のプラス`,
+    );
+  });
+
+  it('倍率を載せていて、実装が出す倍率と一致する', () => {
+    expect(body).toContain(`約${ideco.ratio.toFixed(1)}倍`);
+    expect(body).toContain(`約${lowIncome.ratio.toFixed(1)}倍`);
+  });
+
+  it('所得が低いほど倍率が下がるが結論は変わらない、と書いている', () => {
+    expect(lowIncome.ratio).toBeLessThan(ideco.ratio); // 前提が崩れたら本文も直す
+    expect(lowIncome.netGain).toBeGreaterThan(0);
+    expect(body).toContain('所得が低いほど倍率は下がるが、結論は変わらない');
+  });
+
+  it('本文に出るすべての「◯倍」が実装が出す倍率と一致する', () => {
+    // 倍率は本文と FAQ の2箇所に出る。片方だけ直して片方が古いまま、を防ぐため
+    // toContain ではなく全出現を集合で照合する（KAIZEN 2026-08-18 の既定形）。
+    const allowed = new Set(
+      [ideco, medical, lowIncome, deductionTradeoff(5_000_000, 276_000)].map(
+        (t) => `約${t.ratio.toFixed(1)}倍`,
+      ),
+    );
+    const found = [...body.matchAll(/約\d+(?:\.\d+)?倍/g)].map((m) => m[0]!);
+    expect(found.length).toBeGreaterThanOrEqual(2);
+    for (const f of found) expect([...allowed]).toContain(f);
+  });
+
+  it('本文に出るトレードオフの金額がすべて実装の値と一致する', () => {
+    const allowed = new Set<string>();
+    for (const t of [ideco, medical, lowIncome]) {
+      for (const v of [t.deduction, t.limitBefore, t.limitAfter, t.limitDecrease, t.taxSaving, t.netGain]) {
+        allowed.add(yen(v));
+      }
+      const sv = deductionTaxSaving(t.deduction, 3_000_000);
+      allowed.add(yen(sv.incomeTax));
+      allowed.add(yen(sv.residentTax));
+    }
+    // 低所得の例だけ限界税率が違うので、その内訳も許容集合に入れる
+    const svLow = deductionTaxSaving(lowIncome.deduction, 2_000_000);
+    allowed.add(yen(svLow.incomeTax));
+    allowed.add(yen(svLow.residentTax));
+    // 「◯円下がります」「節税は◯円」「差引◯円」に現れる4桁以上の金額だけを対象にする
+    const found = [...body.matchAll(/\d{1,3}(?:,\d{3})+(?=円)/g)].map((m) => m[0]!);
+    expect(found.length).toBeGreaterThanOrEqual(8);
+    for (const f of found) expect([...allowed]).toContain(f);
+  });
+
+  it('定量化を避けた古い言い回しが残っていない', () => {
+    expect(body).not.toContain('通常は大きく');
   });
 });

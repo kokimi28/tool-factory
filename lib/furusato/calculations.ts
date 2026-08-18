@@ -359,3 +359,74 @@ export function donationDeductionBreakdown(
     specialPortionCapped,
   };
 }
+
+// ============================================================
+// 所得控除のトレードオフ（限度額は下がるが税は減る）
+// ============================================================
+
+/**
+ * 所得控除1円あたりの節税額の内訳。
+ *
+ * 所得控除は所得税と住民税の両方の課税所得を下げるので、節税額は
+ *   控除額 ×（住民税の所得割10% ＋ 所得税の限界税率 × 1.021）
+ * になる（1.021 は復興特別所得税込み）。ふるさと納税の限度額の式と同じ材料で出せる。
+ */
+export function deductionTaxSaving(
+  deduction: number,
+  taxableTotalIncome: number,
+): { incomeTax: number; residentTax: number; total: number; marginalRate: number } {
+  const amount = clampNonNeg(deduction);
+  const marginalRate = marginalIncomeTaxRate(taxableTotalIncome);
+  const incomeTax = Math.floor(amount * marginalRate * RECONSTRUCTION_TAX_MULTIPLIER);
+  const residentTax = Math.floor(amount * RESIDENT_TAX_LEVY_RATE);
+  return { incomeTax, residentTax, total: incomeTax + residentTax, marginalRate };
+}
+
+export interface DeductionTradeoff {
+  /** 追加した所得控除の額（円） */
+  deduction: number;
+  /** 控除前のふるさと納税 控除上限額（円） */
+  limitBefore: number;
+  /** 控除後のふるさと納税 控除上限額（円） */
+  limitAfter: number;
+  /** 限度額の目減り（円） */
+  limitDecrease: number;
+  /** その控除による節税額（円） */
+  taxSaving: number;
+  /** 節税額 − 限度額の目減り（円）。プラスなら控除を使ったほうが得。 */
+  netGain: number;
+  /** 節税額が限度額の目減りの何倍か */
+  ratio: number;
+}
+
+/**
+ * 「所得控除を使うとふるさと納税の限度額が下がって損なのか」に数字で答える。
+ *
+ * 記事は「iDeCoによる節税効果のほうが…通常は大きく、トータルでは有利です」と
+ * 定性的に書くだけで額を示せていなかった。限度額の目減りも節税額も同じ材料
+ * （課税総所得金額と限界税率）から出せるので、比較して返す。
+ *
+ * @param taxableTotalIncome 控除を使う前の課税総所得金額（円）
+ * @param deduction          追加する所得控除の額（円）
+ */
+export function deductionTradeoff(
+  taxableTotalIncome: number,
+  deduction: number,
+): DeductionTradeoff {
+  const before = clampNonNeg(taxableTotalIncome);
+  const amount = clampNonNeg(deduction);
+  const after = Math.max(0, before - amount);
+  const limitBefore = calcFurusatoLimit(before).limit;
+  const limitAfter = calcFurusatoLimit(after).limit;
+  const limitDecrease = Math.max(0, limitBefore - limitAfter);
+  const taxSaving = deductionTaxSaving(amount, before).total;
+  return {
+    deduction: amount,
+    limitBefore,
+    limitAfter,
+    limitDecrease,
+    taxSaving,
+    netGain: taxSaving - limitDecrease,
+    ratio: limitDecrease > 0 ? taxSaving / limitDecrease : Number.POSITIVE_INFINITY,
+  };
+}

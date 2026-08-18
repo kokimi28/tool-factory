@@ -7,6 +7,8 @@ import { describe, it, expect } from "vitest";
 import {
   PERSONAL_DEDUCTION_DIFFERENCE,
   calcFurusatoLimit,
+  deductionTaxSaving,
+  deductionTradeoff,
   estimateFurusatoLimitFromSalary,
   estimateTaxableIncomeFromSalary,
   marginalIncomeTaxRate,
@@ -387,5 +389,53 @@ describe('年収からの概算は住民税ベースの人的控除を使う', (
   it('基礎控除は住民税の43万円（所得税の48万・58万ではない）', () => {
     const r = estimateFurusatoLimitFromSalary({ annualIncome: 6_000_000 });
     expect(r.estimatedTaxableIncome).toBe(3_047_000);
+  });
+});
+
+describe('所得控除のトレードオフ（限度額は下がるが税はもっと減る）', () => {
+  it('節税額は 控除額 ×（住民税10% ＋ 所得税限界税率×1.021）', () => {
+    const r = deductionTaxSaving(276_000, 3_000_000);
+    expect(r.marginalRate).toBe(0.1);
+    expect(r.residentTax).toBe(Math.floor(276_000 * 0.1));
+    expect(r.incomeTax).toBe(Math.floor(276_000 * 0.1 * 1.021));
+    expect(r.total).toBe(r.incomeTax + r.residentTax);
+  });
+
+  it('限界税率が上がると節税額も増える', () => {
+    const low = deductionTaxSaving(276_000, 3_000_000).total;
+    const high = deductionTaxSaving(276_000, 5_000_000).total;
+    expect(high).toBeGreaterThan(low);
+  });
+
+  it('記事の例（課税所得300万・iDeCo27.6万）が実装と一致する', () => {
+    const t = deductionTradeoff(3_000_000, 276_000);
+    expect(t.limitBefore).toBe(77_197);
+    expect(t.limitAfter).toBe(70_279);
+    expect(t.limitDecrease).toBe(6_918);
+    expect(t.taxSaving).toBe(55_779);
+    expect(t.netGain).toBe(48_861);
+  });
+
+  it('どの課税所得でも節税額のほうが限度額の目減りより大きい（向きが変わらない）', () => {
+    for (let taxable = 500_000; taxable <= 20_000_000; taxable += 500_000) {
+      const t = deductionTradeoff(taxable, 276_000);
+      expect(t.netGain).toBeGreaterThan(0);
+      expect(t.ratio).toBeGreaterThan(1);
+    }
+  });
+
+  it('課税所得が高いほど倍率が大きい（節税は累進・目減りは一律10%のため）', () => {
+    const low = deductionTradeoff(2_000_000, 276_000).ratio;
+    const mid = deductionTradeoff(3_000_000, 276_000).ratio;
+    const high = deductionTradeoff(5_000_000, 276_000).ratio;
+    expect(mid).toBeGreaterThan(low);
+    expect(high).toBeGreaterThan(mid);
+  });
+
+  it('控除0なら何も起きない', () => {
+    const t = deductionTradeoff(3_000_000, 0);
+    expect(t.limitDecrease).toBe(0);
+    expect(t.taxSaving).toBe(0);
+    expect(t.ratio).toBe(Number.POSITIVE_INFINITY);
   });
 });
