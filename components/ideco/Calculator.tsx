@@ -27,6 +27,7 @@ import { encodeShareParams, decodeShareParams } from '@/lib/share-url';
 import { encodeIdecoInputs, decodeIdecoInputs } from '@/lib/ideco/share';
 import { resultToClipboardText } from '@/lib/ideco/result-text';
 import CopyResult from '@/components/ideco/CopyResult';
+import { validateNumberInput } from '@/lib/validate-input';
 
 // ============================================================
 // 表示ヘルパー
@@ -360,6 +361,29 @@ export default function Calculator() {
 
   // bg/text を明示固定。globals.css の prefers-color-scheme: dark で body の
   // foreground が薄色(#ededed)になり、色未指定だと白背景に白文字で読めなくなるのを防ぐ。
+  // E9: 入力の妥当性メッセージ。年は西暦の範囲、金額は上限で検証する。
+  // 計算側は従来どおり安全側に丸めるが、丸めた理由を利用者に見せる。
+  const FIELD_RULES: Record<string, { min?: number; max?: number }> = {
+    nyushaYear: { min: 1900, max: 2100 },
+    taishokuYear: { min: 1900, max: 2100 },
+    idecoStartYear: { min: 1900, max: 2100 },
+    idecoReceiptYear: { min: 1900, max: 2100 },
+    idecoEndYear: { min: 1900, max: 2100 },
+    taishokuMan: { max: 100_000 },
+    idecoMan: { max: 100_000 },
+  };
+  const fieldError = (key: keyof RawInputs): string | null =>
+    validateNumberInput(String(raw[key] ?? ''), FIELD_RULES[key as string] ?? {}).error;
+  /** 入力直後にエラー文を出す（id は input の aria-describedby と対応させる）。 */
+  const errorNode = (key: keyof RawInputs) => {
+    const msg = fieldError(key);
+    return msg ? (
+      <p id={`${key}-error`} role="alert" className="mt-1 text-xs text-rose-600">
+        {msg}
+      </p>
+    ) : null;
+  };
+
   const inputClass =
     'w-full rounded border border-gray-300 bg-white px-3 py-2 text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500';
 
@@ -395,20 +419,23 @@ export default function Calculator() {
               <label htmlFor="nyushaYear" className="block text-sm font-medium text-gray-700 mb-1">
                 入社年（西暦）
               </label>
-              <input id="nyushaYear" type="text" inputMode="numeric" value={raw.nyushaYear} onChange={set('nyushaYear')} className={inputClass} placeholder="例: 1995" />
+              <input id="nyushaYear" type="text" inputMode="numeric" value={raw.nyushaYear} onChange={set('nyushaYear')} className={inputClass} placeholder="例: 1995"  aria-invalid={fieldError("nyushaYear") !== null} aria-describedby={fieldError("nyushaYear") ? "nyushaYear-error" : undefined} />
+              {errorNode("nyushaYear")}
             </div>
             <div>
               <label htmlFor="taishokuYear" className="block text-sm font-medium text-gray-700 mb-1">
                 退職年（＝退職金の受給年）
               </label>
-              <input id="taishokuYear" type="text" inputMode="numeric" value={raw.taishokuYear} onChange={set('taishokuYear')} className={inputClass} placeholder="例: 2025" />
+              <input id="taishokuYear" type="text" inputMode="numeric" value={raw.taishokuYear} onChange={set('taishokuYear')} className={inputClass} placeholder="例: 2025"  aria-invalid={fieldError("taishokuYear") !== null} aria-describedby={fieldError("taishokuYear") ? "taishokuYear-error" : undefined} />
+              {errorNode("taishokuYear")}
             </div>
           </div>
           <div className="mt-3">
             <label htmlFor="taishokuMan" className="block text-sm font-medium text-gray-700 mb-1">
               退職金額（万円）
             </label>
-            <input id="taishokuMan" type="text" inputMode="numeric" value={raw.taishokuMan} onChange={set('taishokuMan')} className={inputClass} placeholder="例: 2000" />
+            <input id="taishokuMan" type="text" inputMode="numeric" value={raw.taishokuMan} onChange={set('taishokuMan')} className={inputClass} placeholder="例: 2000"  aria-invalid={fieldError("taishokuMan") !== null} aria-describedby={fieldError("taishokuMan") ? "taishokuMan-error" : undefined} />
+            {errorNode("taishokuMan")}
           </div>
         </fieldset>
 
@@ -420,26 +447,30 @@ export default function Calculator() {
               <label htmlFor="idecoStartYear" className="block text-sm font-medium text-gray-700 mb-1">
                 加入開始年（西暦）
               </label>
-              <input id="idecoStartYear" type="text" inputMode="numeric" value={raw.idecoStartYear} onChange={set('idecoStartYear')} className={inputClass} placeholder="例: 2015" />
+              <input id="idecoStartYear" type="text" inputMode="numeric" value={raw.idecoStartYear} onChange={set('idecoStartYear')} className={inputClass} placeholder="例: 2015"  aria-invalid={fieldError("idecoStartYear") !== null} aria-describedby={fieldError("idecoStartYear") ? "idecoStartYear-error" : undefined} />
+              {errorNode("idecoStartYear")}
             </div>
             <div>
               <label htmlFor="idecoReceiptYear" className="block text-sm font-medium text-gray-700 mb-1">
                 受給年（一時金を受け取る年）
               </label>
-              <input id="idecoReceiptYear" type="text" inputMode="numeric" value={raw.idecoReceiptYear} onChange={set('idecoReceiptYear')} className={inputClass} placeholder="例: 2030" />
+              <input id="idecoReceiptYear" type="text" inputMode="numeric" value={raw.idecoReceiptYear} onChange={set('idecoReceiptYear')} className={inputClass} placeholder="例: 2030"  aria-invalid={fieldError("idecoReceiptYear") !== null} aria-describedby={fieldError("idecoReceiptYear") ? "idecoReceiptYear-error" : undefined} />
+              {errorNode("idecoReceiptYear")}
             </div>
           </div>
           <div className="mt-3">
             <label htmlFor="idecoMan" className="block text-sm font-medium text-gray-700 mb-1">
               iDeCo一時金額（万円）
             </label>
-            <input id="idecoMan" type="text" inputMode="numeric" value={raw.idecoMan} onChange={set('idecoMan')} className={inputClass} placeholder="例: 500" />
+            <input id="idecoMan" type="text" inputMode="numeric" value={raw.idecoMan} onChange={set('idecoMan')} className={inputClass} placeholder="例: 500"  aria-invalid={fieldError("idecoMan") !== null} aria-describedby={fieldError("idecoMan") ? "idecoMan-error" : undefined} />
+            {errorNode("idecoMan")}
           </div>
           <div className="mt-3">
             <label htmlFor="idecoEndYear" className="block text-sm font-medium text-gray-700 mb-1">
               拠出終了年（任意・上級）
             </label>
-            <input id="idecoEndYear" type="text" inputMode="numeric" value={raw.idecoEndYear} onChange={set('idecoEndYear')} className={inputClass} placeholder="未入力なら受給年とみなします" />
+            <input id="idecoEndYear" type="text" inputMode="numeric" value={raw.idecoEndYear} onChange={set('idecoEndYear')} className={inputClass} placeholder="未入力なら受給年とみなします"  aria-invalid={fieldError("idecoEndYear") !== null} aria-describedby={fieldError("idecoEndYear") ? "idecoEndYear-error" : undefined} />
+            {errorNode("idecoEndYear")}
             <p className="text-xs text-gray-500 mt-1">
               ※ 掛金の拠出を受給年より前にやめた場合のみ入力してください。iDeCoの「加入年数」は
               <strong>加入開始年〜拠出終了年</strong>で計算します（未入力時は受給年まで拠出したものとして扱います）。

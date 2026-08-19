@@ -23,6 +23,7 @@ import { encodeShareParams, decodeShareParams } from '@/lib/share-url';
 import { parseSeparation, boolToFlag, flagToBool } from '@/lib/taishokukin/share';
 import { resultToClipboardText } from '@/lib/taishokukin/result-text';
 import CopyResult from '@/components/taishokukin/CopyResult';
+import { validateNumberInput } from '@/lib/validate-input';
 
 /** 金額を「○○円」形式（カンマ区切り）でフォーマット */
 function yen(n: number): string {
@@ -52,6 +53,21 @@ export default function Calculator() {
   const [separation, setSeparation] = useState<SeparationReason>('voluntary');
   const hydrated = useRef(false);
   const [copied, setCopied] = useState(false);
+
+  // E9: 入力の妥当性メッセージ。計算は既存どおり安全側に丸めるが、
+  // 「なぜその値になったか」を利用者に伝える（サイレント clamp をやめる）。
+  const retirementError = useMemo(
+    () => validateNumberInput(retirementMan, { max: 100_000 }).error,
+    [retirementMan],
+  );
+  const yearsError = useMemo(
+    () => validateNumberInput(years, { max: 70 }).error,
+    [years],
+  );
+  const monthsError = useMemo(
+    () => validateNumberInput(months, { max: 11 }).error,
+    [months],
+  );
 
   // マウント時に URL のクエリから入力を復元（共有リンクで同じ結果を再現）。
   useEffect(() => {
@@ -133,7 +149,14 @@ export default function Calculator() {
               onChange={(e) => setRetirementMan(e.target.value)}
               className="w-full rounded border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               placeholder="例: 2000"
+              aria-invalid={retirementError !== null}
+              aria-describedby={retirementError ? "taishokukin-amount-error" : undefined}
             />
+            {retirementError && (
+              <p id="taishokukin-amount-error" role="alert" className="mt-1 text-xs text-rose-600">
+                {retirementError}
+              </p>
+            )}
             <div className="mt-2 flex flex-wrap gap-2" role="group" aria-label="退職金額プリセット">
               {TAISHOKUKIN_PRESETS.map((p) => (
                 <button
@@ -162,7 +185,14 @@ export default function Calculator() {
                 value={years}
                 onChange={(e) => setYears(e.target.value)}
                 className="w-full rounded border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                aria-invalid={yearsError !== null}
+                aria-describedby={yearsError ? "taishokukin-years-error" : undefined}
               />
+              {yearsError && (
+                <p id="taishokukin-years-error" role="alert" className="mt-1 text-xs text-rose-600">
+                  {yearsError}
+                </p>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -177,7 +207,14 @@ export default function Calculator() {
                 value={months}
                 onChange={(e) => setMonths(e.target.value)}
                 className="w-full rounded border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                aria-invalid={monthsError !== null}
+                aria-describedby={monthsError ? "taishokukin-months-error" : undefined}
               />
+              {monthsError && (
+                <p id="taishokukin-months-error" role="alert" className="mt-1 text-xs text-rose-600">
+                  {monthsError}
+                </p>
+              )}
             </div>
           </div>
           <p className="text-xs text-gray-500">※ 端数月が1ヶ月以上ある場合、勤続年数は切り上げ（例: 19年5ヶ月 → 20年）</p>
