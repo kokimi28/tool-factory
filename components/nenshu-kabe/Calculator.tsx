@@ -14,6 +14,7 @@ import { wallToCode, codeToWall } from "@/lib/nenshu-kabe/share";
 import { resultToClipboardText } from "@/lib/nenshu-kabe/result-text";
 import CopyResult from "@/components/nenshu-kabe/CopyResult";
 import WallCurveTable from "@/components/nenshu-kabe/WallCurveTable";
+import ScenarioCompare from "@/components/nenshu-kabe/ScenarioCompare";
 
 const yen = (n: number) => `${Math.round(n).toLocaleString("ja-JP")}円`;
 const man = (n: number) => `${Math.round(n / 10000).toLocaleString("ja-JP")}万円`;
@@ -63,12 +64,6 @@ export default function Calculator() {
     () => takeHomeWithWall(toNumber(income), wall),
     [income, wall],
   );
-
-  // 壁の前後の比較（壁−1万 / 壁 / 回復年収）
-  const rows = useMemo(() => {
-    const points = [wall - 10_000, wall, reversal.recoveryIncome];
-    return points.map((p) => takeHomeWithWall(p, wall));
-  }, [wall, reversal.recoveryIncome]);
 
   return (
     <div className="w-full max-w-2xl mx-auto">
@@ -173,26 +168,9 @@ export default function Calculator() {
         </p>
       </div>
 
-      {/* 比較テーブル */}
-      <div className="mt-6 overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-gray-200 text-left text-gray-500">
-              <th className="py-2 pr-2 font-medium">年収</th>
-              <th className="py-2 px-2 font-medium">社保</th>
-              <th className="py-2 pl-2 font-medium text-right">手取り</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((r) => (
-              <tr key={r.income} className="border-b border-gray-100">
-                <td className="py-1.5 pr-2 tabular-nums">{yen(r.income)}</td>
-                <td className="py-1.5 px-2">{r.enrolled ? "加入" : "扶養内"}</td>
-                <td className="py-1.5 pl-2 text-right font-semibold tabular-nums">{yen(r.takeHome)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      {/* 3シナリオ横並び比較（E5）＝本人の手取り＋扶養している側の追加負担 */}
+      <div className="mt-6">
+        <ScenarioCompare wall={wall} />
       </div>
 
       {/* 壁をまたぐ手取り曲線（壁の上下に広げたデータ表・E6） */}
@@ -214,7 +192,7 @@ export default function Calculator() {
       </div>
 
       <p className="mt-4 text-xs text-gray-500 leading-relaxed">
-        本ツールは「本人」の手取りを、tedori（年収の手取り計算）と同じ計算で算定しています。壁の下では本人の社会保険料は0（扶養内）、壁以上では社会保険に加入する前提です。106万/130万のどちらが適用されるかは勤務先の規模・労働時間等で決まります。配偶者控除・配偶者特別控除（世帯側の税）や、社会保険加入で将来の年金・保障が増える点は含めていません。本サイトの計算結果は概算・参考値です。
+        本ツールは「本人」の手取りを、tedori（年収の手取り計算）と同じ計算で算定しています。壁の下では本人の社会保険料は0（扶養内）、壁以上では社会保険に加入する前提です。106万/130万のどちらが適用されるかは勤務先の規模・労働時間等で決まります。扶養している側の税は「3つの選び方」の表で配偶者（特別）控除の増減として反映しています。社会保険に加入すると将来の年金・保障が増える点は含めていません。本サイトの計算結果は概算・参考値です。
       </p>
     </div>
   );
