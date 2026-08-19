@@ -4,6 +4,7 @@ import RelatedTools from '@/components/RelatedTools';
 import ToolBreadcrumbJsonLd from '@/components/ToolBreadcrumbJsonLd';
 import ToolHowToJsonLd from '@/components/ToolHowToJsonLd';
 import LawBasis from '@/components/LawBasis';
+import { SITE_META } from '@/lib/taishokukin/site-meta';
 import { ogImage } from "@/lib/og";
 
 export const metadata: Metadata = {
@@ -163,7 +164,7 @@ export default function Home() {
             <ToolBreadcrumbJsonLd slug="taishokukin" />
             <ToolHowToJsonLd slug="taishokukin" />
             <RelatedTools currentSlug="taishokukin" />
-            <LawBasis basis="計算の根拠：所得税法第30条（退職所得控除・課税退職所得金額）／退職所得の源泉徴収税額の速算表（復興特別所得税込み）／地方税法（住民税所得割10%）。国税庁タックスアンサー No.1420・No.2732・No.2740 等。" />
+            <LawBasis basis="計算の根拠：所得税法第30条（退職所得控除・課税退職所得金額）／退職所得の源泉徴収税額の速算表（復興特別所得税込み）／地方税法（住民税所得割10%）。国税庁タックスアンサー No.1420・No.2732・No.2740 等。" checkedAt={SITE_META.lastUpdated} />
           </div>
         </div>
       </div>

@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import LawBasis from "@/components/LawBasis";
+import { SITE_META } from "@/lib/nenkin-kuriage/site-meta";
 import Calculator from "@/components/nenkin-kuriage/Calculator";
 import RelatedTools from "@/components/RelatedTools";
 import ToolBreadcrumbJsonLd from "@/components/ToolBreadcrumbJsonLd";
@@ -112,9 +114,7 @@ export default function NenkinKuriagePage() {
         <RelatedTools currentSlug="nenkin-kuriage" />
       </div>
 
-      <p className="mt-10 text-xs text-gray-500 max-w-2xl mx-auto">
-        計算の根拠：日本年金機構「年金の繰上げ受給／繰下げ受給」（繰上げ0.4%/月・繰下げ0.7%/月、昭和37年4月2日以降生まれ）。損益分岐年齢は受給率のみで決まり年金額に依りません。本サイトの計算結果は概算・参考値です。最終確認日 2026-07-24。
-      </p>
+      <LawBasis basis="計算の根拠：日本年金機構「年金の繰上げ受給／繰下げ受給」（繰上げ0.4%/月・繰下げ0.7%/月、昭和37年4月2日以降生まれ）。損益分岐年齢は受給率のみで決まり年金額に依りません。" checkedAt={SITE_META.lastUpdated} />
     </>
   );
 }
