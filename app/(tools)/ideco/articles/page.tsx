@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import LinkPending from '@/components/LinkPending';
 import { ARTICLES } from '@/lib/ideco/articles';
 
 export const metadata: Metadata = {
@@ -34,7 +35,8 @@ export default function ArticlesIndexPage() {
                 <h2 className="text-base font-bold text-gray-900">{a.title}</h2>
                 <p className="text-sm text-gray-600 mt-1">{a.lead}</p>
                 <p className="text-xs text-gray-500 mt-2">最終更新：{a.updated}</p>
-              </Link>
+                      <LinkPending />
+                    </Link>
             </li>
           ))}
         </ul>

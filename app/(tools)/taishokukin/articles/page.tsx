@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import LinkPending from '@/components/LinkPending';
 import { ARTICLES } from '@/lib/taishokukin/articles';
 
 export const metadata: Metadata = {
@@ -36,7 +37,8 @@ export default function ArticlesIndexPage() {
                 <p className="text-xs text-gray-500 mt-2">
                   最終更新：{a.updated}
                 </p>
-              </Link>
+                      <LinkPending />
+                    </Link>
             </li>
           ))}
         </ul>

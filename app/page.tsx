@@ -1,4 +1,5 @@
 import Link from "next/link";
+import LinkPending from "@/components/LinkPending";
 import type { Metadata } from "next";
 import { SITE } from "@/lib/site";
 import { TOOLS, liveTools } from "@/lib/tools-registry";
@@ -70,7 +71,8 @@ export default function HomePage() {
                   className="block transition-colors hover:[&>div]:border-black/30"
                 >
                   {card}
-                </Link>
+                      <LinkPending />
+                    </Link>
               ) : (
                 card
               )}
