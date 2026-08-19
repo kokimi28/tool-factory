@@ -12,6 +12,9 @@ import { PENSION_MONTHLY_PRESETS } from "@/lib/nenkin-kuriage/presets";
 import { clampStartAge } from "@/lib/nenkin-kuriage/share";
 import { resultToClipboardText } from "@/lib/nenkin-kuriage/result-text";
 import CopyResult from "@/components/nenkin-kuriage/CopyResult";
+import WorkingPension from "@/components/nenkin-kuriage/WorkingPension";
+import FamilyAddition from "@/components/nenkin-kuriage/FamilyAddition";
+import { ZAISHOKU_CHECKED_AT } from "@/lib/nenkin-kuriage/zaishoku";
 import { encodeShareParams, decodeShareParams } from "@/lib/share-url";
 import { parseNonNegativeNumber as toNumber } from "@/lib/input";
 import { validateNumberInput } from "@/lib/validate-input";
@@ -30,6 +33,9 @@ export default function Calculator() {
   const [insuranceFlat, setInsuranceFlat] = useState("0");
   const [insuranceRate, setInsuranceRate] = useState("0");
   const hydrated = useRef(false);
+  // H6: 在職老齢年金の基準額は年度で変わる。静的生成でビルド日に固まらないよう、
+  // 定数で描画してからマウント後に今日へ差し替える（H3 と同じ手当て）。
+  const [asOf, setAsOf] = useState(ZAISHOKU_CHECKED_AT);
   const [copied, setCopied] = useState(false);
 
   // マウント時に URL のクエリから入力を復元（共有リンクで同じ結果を再現）。
@@ -37,6 +43,7 @@ export default function Calculator() {
     const p = decodeShareParams(window.location.search);
     if (p.base) setBaseMonthly(String(toNumber(p.base)));
     if (p.age) setStartAge(clampStartAge(Number(p.age)));
+    setAsOf(new Date().toISOString().slice(0, 10));
     hydrated.current = true;
   }, []);
 
@@ -340,8 +347,14 @@ export default function Calculator() {
         {netMode
           ? "手取りは公的年金等控除（所得税法35条4項・租税特別措置法41条の15の3）を差し引いた雑所得に、所得税・復興特別所得税と住民税（所得割10%・基礎控除43万円・均等割5,000円）をかけて計算しています。他に所得がなく単身の前提で、住民税は標準税率です。均等割・非課税限度額は自治体で変わります。損益分岐年齢は額面と違い年金額によって変わります。国民健康保険料・介護保険料は上の任意入力を使わないかぎり含みません。"
           : "損益分岐年齢は累計受給額が65歳受給に追いつく年齢で、年金額に関わらず受給率だけで決まります。税・社会保険料は含めていません（「税引後（手取り）で見る」で切り替えられます）。"}
-        加給年金・振替加算・在職老齢年金は含めていません。本サイトの計算結果は概算・参考値です。
+        加給年金・振替加算・在職老齢年金は、上の損益分岐の計算には含めていません（下の2つの計算で別に確認できます）。本サイトの計算結果は概算・参考値です。
       </p>
+
+      {/* 損益分岐に折り込まず、別の計算として出す（H6・H7） */}
+      <div className="mt-6 space-y-6">
+        <WorkingPension asOf={asOf} />
+        <FamilyAddition />
+      </div>
     </div>
   );
 }
