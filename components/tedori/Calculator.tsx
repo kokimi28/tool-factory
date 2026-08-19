@@ -9,6 +9,7 @@ import ResultDisplay from "@/components/tedori/ResultDisplay";
 import ScenarioCompare from "@/components/tedori/ScenarioCompare";
 import ReverseLookup from "@/components/tedori/ReverseLookup";
 import CTA from "@/components/tedori/CTA";
+import BonusCalculator from "@/components/tedori/BonusCalculator";
 import FamilyFields from "@/components/tedori/FamilyFields";
 
 type State = {
@@ -208,6 +209,7 @@ export default function Calculator() {
         <ResultDisplay result={result} />
         <ScenarioCompare isOver40={state.isOver40} />
         <ReverseLookup isOver40={state.isOver40} />
+        <BonusCalculator />
         <CTA />
       </div>
     </div>
