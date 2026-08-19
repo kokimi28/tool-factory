@@ -25,10 +25,6 @@ const ROOT = normalize(join(dirname(fileURLToPath(import.meta.url)), '..'));
 const UNCONNECTED: Record<string, string> = {
   'lib/links.ts':
     '内部リンクの検証ユーティリティ。QC13 の内部リンクテストから使う test 専用で、画面には出さない',
-  'lib/ideco/limits.ts':
-    'iDeCo の拠出限度額（加入区分別）。記事の根拠として使用中。UI への接続は backlog 起票済',
-  'lib/ideco/receipt-comparison.ts':
-    '一時金と年金の受取比較（G3）。記事の根拠として使用中。UI への接続は backlog 起票済',
   'lib/nenkin-kuriage/zaishoku.ts':
     '在職老齢年金の支給停止。記事の根拠として使用中。UI への接続は backlog 起票済',
   'lib/nenkin-kuriage/kakyu.ts':
@@ -119,6 +115,8 @@ describe('未接続モジュールの検出', () => {
       'lib/tedori/bonus.ts',
       'lib/tedori/bonus-ui.ts',
       'lib/nenshu-kabe/eligibility.ts',
+      'lib/ideco/limits.ts',
+      'lib/ideco/receipt-comparison.ts',
     ]) {
       expect(reached.has(core)).toBe(true);
     }

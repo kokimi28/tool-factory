@@ -27,6 +27,8 @@ import { encodeShareParams, decodeShareParams } from '@/lib/share-url';
 import { encodeIdecoInputs, decodeIdecoInputs } from '@/lib/ideco/share';
 import { resultToClipboardText } from '@/lib/ideco/result-text';
 import CopyResult from '@/components/ideco/CopyResult';
+import ContributionLimit from '@/components/ideco/ContributionLimit';
+import ReceiptCompare from '@/components/ideco/ReceiptCompare';
 import { validateNumberInput } from '@/lib/validate-input';
 
 // ============================================================
@@ -756,6 +758,10 @@ export default function Calculator() {
           </details>
         </section>
       )}
+
+      {/* 拠出限度額（H5）と受取方法の比較（H4）。どちらもモデルはあったが画面に無かった */}
+      <ContributionLimit />
+      <ReceiptCompare />
     </div>
   );
 }
