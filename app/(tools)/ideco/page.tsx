@@ -117,7 +117,7 @@ export default function Home() {
           </div>
         </header>
 
-        <main className="px-4 py-8">
+        <div className="px-4 py-8">
           {/* イントロ */}
           <section className="w-full max-w-3xl mx-auto mb-6">
             <div className="bg-white border border-gray-200 rounded-lg p-6">
@@ -153,7 +153,7 @@ export default function Home() {
             <ToolHowToJsonLd slug="ideco" />
             <RelatedTools currentSlug="ideco" />
           </div>
-        </main>
+        </div>
       </div>
     </>
   );

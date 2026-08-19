@@ -34,9 +34,9 @@ export default function FamilyAddition() {
       className="rounded-2xl border border-gray-200 bg-white p-5"
       aria-labelledby="kakyu-heading"
     >
-      <h3 id="kakyu-heading" className="text-sm font-bold text-gray-800">
+      <h2 id="kakyu-heading" className="text-sm font-bold text-gray-800">
         配偶者・子がいる場合の上乗せ（加給年金・振替加算）
-      </h3>
+      </h2>
       <p className="mt-2 text-xs text-gray-600 leading-relaxed">
         生計を維持している65歳未満の配偶者や、年齢制限を満たす子がいると老齢厚生年金に上乗せされます。特別加算は<strong>受給権者本人の生年月日</strong>で、振替加算は<strong>配偶者の生年月日</strong>で額が決まります。
       </p>
@@ -109,7 +109,7 @@ export default function FamilyAddition() {
         </p>
       </div>
 
-      <p className="mt-3 text-xs text-gray-400">
+      <p className="mt-3 text-xs text-gray-500">
         子は2人目まで1人あたり年{yen(KAKYU_AMOUNT.childFirstSecond)}、3人目以降は年
         {yen(KAKYU_AMOUNT.childThirdOnward)}です。繰下げ待機中は老齢厚生年金が支給されないため加給年金も出ません。
       </p>

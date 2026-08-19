@@ -49,9 +49,9 @@ export default function PrincipalScenarioTable({
       className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm"
       aria-label="借入額別の返済と控除の比較"
     >
-      <h3 className="mb-3 text-sm font-bold text-gray-800">
+      <h2 className="mb-3 text-sm font-bold text-gray-800">
         借入額別の返済額と控除総額（金利・期間・住宅種別は現在の条件）
-      </h3>
+      </h2>
       <div className="overflow-x-auto">
         <table className="w-full text-sm tabular-nums">
           <thead>
@@ -72,7 +72,7 @@ export default function PrincipalScenarioTable({
           </tbody>
         </table>
       </div>
-      <p className="mt-2 text-xs text-gray-400">
+      <p className="mt-2 text-xs text-gray-500">
         借入額を増やすほど毎月の返済は増えますが、控除総額は借入限度額で頭打ちになります。概算・参考値です。
       </p>
     </section>

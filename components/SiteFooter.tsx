@@ -37,7 +37,7 @@ export default function SiteFooter() {
             免責事項
           </Link>
         </div>
-        <p className="text-xs text-black/40">
+        <p className="text-xs text-slate-500">
           © {SITE.name}. 本サイトの計算結果は概算・参考値です。実際の税額は個別事情により変わります。
         </p>
       </div>

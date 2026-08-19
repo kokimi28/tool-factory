@@ -220,7 +220,7 @@ function ReceiptCard({ r }: { r: ReceiptBreakdown }) {
   const adjusted = r.overlapReduction > 0;
   return (
     <div className="bg-white border border-gray-200 rounded-lg p-4">
-      <h4 className="font-bold text-gray-900 mb-3">{r.label}</h4>
+      <h3 className="font-bold text-gray-900 mb-3">{r.label}</h3>
       <dl className="space-y-1.5 text-sm">
         <div className="flex justify-between py-1 border-b border-gray-100">
           <dt className="text-gray-600">収入金額</dt>
@@ -232,8 +232,8 @@ function ReceiptCard({ r }: { r: ReceiptBreakdown }) {
         </div>
         {adjusted && (
           <div className="flex justify-between py-1 border-b border-gray-100">
-            <dt className="text-rose-600">　└ 重複による減額</dt>
-            <dd className="font-medium text-rose-600">−{yen(r.overlapReduction)}</dd>
+            <dt className="text-rose-700">　└ 重複による減額</dt>
+            <dd className="font-medium text-rose-700">−{yen(r.overlapReduction)}</dd>
           </div>
         )}
         <div className="flex justify-between py-1 border-b border-gray-100">
@@ -380,14 +380,14 @@ export default function Calculator() {
   const errorNode = (key: keyof RawInputs) => {
     const msg = fieldError(key);
     return msg ? (
-      <p id={`${key}-error`} role="alert" className="mt-1 text-xs text-rose-600">
+      <p id={`${key}-error`} role="alert" className="mt-1 text-xs text-rose-700">
         {msg}
       </p>
     ) : null;
   };
 
   const inputClass =
-    'w-full rounded border border-gray-300 bg-white px-3 py-2 text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500';
+    'w-full rounded border border-gray-300 bg-white px-3 py-2 text-gray-900 placeholder:text-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500';
 
   return (
     <div className="w-full max-w-3xl mx-auto space-y-6">
@@ -611,7 +611,7 @@ export default function Calculator() {
               <span className="text-amber-900">{variants.reversed.label}</span>
               <span className="text-right">
                 <span className="font-bold text-amber-900">{yen(variants.reversed.result.totalNet)}</span>
-                <span className={`ml-2 text-xs ${variants.reversed.diff > 0 ? 'text-emerald-700' : variants.reversed.diff < 0 ? 'text-rose-600' : 'text-gray-500'}`}>
+                <span className={`ml-2 text-xs ${variants.reversed.diff > 0 ? 'text-emerald-700' : variants.reversed.diff < 0 ? 'text-rose-700' : 'text-gray-500'}`}>
                   （{signedYen(variants.reversed.diff)}）
                 </span>
               </span>
@@ -621,7 +621,7 @@ export default function Calculator() {
               <span className="text-amber-900">受取間隔を{variants.enoughGap.needGap}年以上空ける（調整なし）</span>
               <span className="text-right">
                 <span className="font-bold text-amber-900">{yen(variants.enoughGap.result.totalNet)}</span>
-                <span className={`ml-2 text-xs ${variants.enoughGap.diff > 0 ? 'text-emerald-700' : variants.enoughGap.diff < 0 ? 'text-rose-600' : 'text-gray-500'}`}>
+                <span className={`ml-2 text-xs ${variants.enoughGap.diff > 0 ? 'text-emerald-700' : variants.enoughGap.diff < 0 ? 'text-rose-700' : 'text-gray-500'}`}>
                   （{signedYen(variants.enoughGap.diff)}）
                 </span>
               </span>
@@ -695,7 +695,7 @@ export default function Calculator() {
               href="#"
               rel="sponsored nofollow noopener noreferrer"
               target="_blank"
-              className="inline-block bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-6 py-3 rounded transition-colors"
+              className="inline-block bg-emerald-700 hover:bg-emerald-800 text-white font-medium px-6 py-3 rounded transition-colors"
             >
               税理士を無料で探す →
             </a>

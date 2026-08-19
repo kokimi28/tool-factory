@@ -120,7 +120,7 @@ export default function Calculator() {
             <span className="text-gray-500">円</span>
           </div>
           {baseError && (
-            <p id="nenkin-base-error" role="alert" className="mt-1 text-xs text-rose-600">
+            <p id="nenkin-base-error" role="alert" className="mt-1 text-xs text-rose-700">
               {baseError}
             </p>
           )}
@@ -151,7 +151,7 @@ export default function Calculator() {
             onChange={(e) => setStartAge(Number(e.target.value))}
             className="mt-2 w-full"
           />
-          <div className="flex justify-between text-xs text-gray-400">
+          <div className="flex justify-between text-xs text-gray-500">
             <span>60歳</span>
             <span>65歳</span>
             <span>75歳</span>
@@ -287,7 +287,7 @@ export default function Calculator() {
             <span className="font-semibold tabular-nums">{yen(scenario.monthly)}</span>（年額 {yen(scenario.annual)}）
           </li>
         </ol>
-        <p className="mt-2 text-xs text-gray-400">
+        <p className="mt-2 text-xs text-gray-500">
           繰上げは1か月あたり0.4%減額（60歳で−24%）、繰下げは1か月あたり0.7%増額（75歳で+84%）。1円未満は切り捨て。
         </p>
       </details>

@@ -23,7 +23,7 @@ export default function ArticlesIndexPage() {
         </div>
       </header>
 
-      <main className="px-4 py-8">
+      <div className="px-4 py-8">
         <ul className="max-w-3xl mx-auto space-y-4">
           {ARTICLES.map((a) => (
             <li key={a.slug}>
@@ -33,14 +33,14 @@ export default function ArticlesIndexPage() {
               >
                 <h2 className="text-base font-bold text-gray-900">{a.title}</h2>
                 <p className="text-sm text-gray-600 mt-1">{a.lead}</p>
-                <p className="text-xs text-gray-400 mt-2">
+                <p className="text-xs text-gray-500 mt-2">
                   最終更新：{a.updated}
                 </p>
               </Link>
             </li>
           ))}
         </ul>
-      </main>
+      </div>
     </div>
   );
 }

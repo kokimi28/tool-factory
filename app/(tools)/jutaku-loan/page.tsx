@@ -112,7 +112,7 @@ export default function JutakuLoanPage() {
         <RelatedTools currentSlug="jutaku-loan" />
       </div>
 
-      <p className="mt-10 text-xs text-gray-400 max-w-2xl mx-auto">
+      <p className="mt-10 text-xs text-gray-500 max-w-2xl mx-auto">
         計算の根拠：国税庁タックスアンサー No.1211-1（住宅借入金等特別控除・令和4年以降入居）。最終確認日 2026-07-24。控除率0.7%・新築13年/中古10年。本サイトの計算結果は概算・参考値です。
       </p>
     </>

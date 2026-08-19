@@ -118,7 +118,7 @@ export default function Calculator() {
             <span className="text-gray-500">円</span>
           </div>
           {incomeError && (
-            <p id="nenshu-income-error" role="alert" className="mt-1 text-xs text-rose-600">
+            <p id="nenshu-income-error" role="alert" className="mt-1 text-xs text-rose-700">
               {incomeError}
             </p>
           )}
@@ -145,15 +145,15 @@ export default function Calculator() {
         <p className="mt-1 text-3xl font-bold text-rose-900">{yen(current.takeHome)}</p>
         <dl className="mt-4 grid grid-cols-3 gap-2 text-xs text-rose-800">
           <div>
-            <dt className="text-rose-600">社会保険料</dt>
+            <dt className="text-rose-700">社会保険料</dt>
             <dd className="font-semibold">{yen(current.socialInsurance)}</dd>
           </div>
           <div>
-            <dt className="text-rose-600">所得税</dt>
+            <dt className="text-rose-700">所得税</dt>
             <dd className="font-semibold">{yen(current.incomeTax)}</dd>
           </div>
           <div>
-            <dt className="text-rose-600">住民税</dt>
+            <dt className="text-rose-700">住民税</dt>
             <dd className="font-semibold">{yen(current.residentTax)}</dd>
           </div>
         </dl>

@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function AboutPage() {
   return (
-    <main className="mx-auto max-w-3xl px-4 py-12 space-y-4">
+    <div className="mx-auto max-w-3xl px-4 py-12 space-y-4">
       <h1 className="text-2xl font-bold">このサイトについて</h1>
       <p className="text-black/70">
         {SITE.name}は、退職金・iDeCo・年収の手取りなど、税金の「いくら？」に
@@ -21,6 +21,6 @@ export default function AboutPage() {
         法令確認日は {SITE.lawCheckedAt} 時点。実際の税額は個別の事情により
         変わるため、正確な金額は税理士・所轄税務署でご確認ください。
       </p>
-    </main>
+    </div>
   );
 }

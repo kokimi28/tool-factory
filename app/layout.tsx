@@ -70,9 +70,9 @@ export default function RootLayout({
         >
           本文へスキップ
         </a>
-        <div id="main-content" className="flex-1">
+        <main id="main-content" className="flex-1">
           {children}
-        </div>
+        </main>
         <SiteFooter />
         {/* QC14: GA タグは next/script の afterInteractive で読み込み、初期描画を妨げない
             （従来の <script async> はレンダーブロッキングとして Lighthouse に計上されうる）。 */}

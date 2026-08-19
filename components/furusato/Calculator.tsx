@@ -136,7 +136,7 @@ export default function Calculator() {
                 <span className="text-gray-500">円</span>
               </div>
               {incomeError && (
-                <p id="furusato-income-error" role="alert" className="mt-1 text-xs text-rose-600">
+                <p id="furusato-income-error" role="alert" className="mt-1 text-xs text-rose-700">
                   {incomeError}
                 </p>
               )}
@@ -208,7 +208,7 @@ export default function Calculator() {
               <span className="text-gray-500">円</span>
             </div>
             {taxableError && (
-              <p id="furusato-taxable-error" role="alert" className="mt-1 text-xs text-rose-600">
+              <p id="furusato-taxable-error" role="alert" className="mt-1 text-xs text-rose-700">
                 {taxableError}
               </p>
             )}
@@ -269,7 +269,7 @@ export default function Calculator() {
             <span className="font-semibold tabular-nums">{yen(result.limit)}</span>
           </li>
         </ol>
-        <p className="mt-2 text-xs text-gray-400">
+        <p className="mt-2 text-xs text-gray-500">
           総務省「ふるさと納税のしくみ（控除上限額）」の計算式に基づく概算です。自己負担 2,000 円で済む年間寄付額の目安を表します。
         </p>
       </details>

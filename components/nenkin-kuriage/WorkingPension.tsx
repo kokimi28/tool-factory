@@ -34,9 +34,9 @@ export default function WorkingPension({ asOf }: { asOf: string }) {
       className="rounded-2xl border border-gray-200 bg-white p-5"
       aria-labelledby="zaishoku-heading"
     >
-      <h3 id="zaishoku-heading" className="text-sm font-bold text-gray-800">
+      <h2 id="zaishoku-heading" className="text-sm font-bold text-gray-800">
         働きながら受け取る場合（在職老齢年金）
-      </h3>
+      </h2>
       <p className="mt-2 text-xs text-gray-600 leading-relaxed">
         老齢厚生年金は、<strong>基本月額</strong>と<strong>総報酬月額相当額</strong>の合計が基準額を超えると、超えた分の
         <strong>半分</strong>が止まります。止まるのは老齢厚生年金だけで、老齢基礎年金は減りません。
@@ -88,7 +88,7 @@ export default function WorkingPension({ asOf }: { asOf: string }) {
         </p>
       </div>
 
-      <p className="mt-3 text-xs text-gray-400">
+      <p className="mt-3 text-xs text-gray-500">
         基準額は年度で改定されます（
         {SUSPENSION_THRESHOLD_SCHEDULE.map((r) => `${r.label} ${yen(r.threshold)}`).join(" → ")}
         ）。判定日 {asOf} 時点の基準で計算しています。

@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 
 export default function NotFound() {
   return (
-    <main className="min-h-[60vh] bg-gray-50">
+    <div className="min-h-[60vh] bg-gray-50">
       <div className="mx-auto max-w-xl px-4 py-20 text-center">
         <p className="text-sm font-semibold text-blue-600">404</p>
         <h1 className="mt-2 text-2xl font-bold text-gray-900">
@@ -36,6 +36,6 @@ export default function NotFound() {
           </Link>
         </div>
       </div>
-    </main>
+    </div>
   );
 }

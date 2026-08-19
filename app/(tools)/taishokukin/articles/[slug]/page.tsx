@@ -89,7 +89,7 @@ export default async function ArticlePage({
         </div>
       </header>
 
-      <main className="px-4 py-8">
+      <div className="px-4 py-8">
         <article className="max-w-3xl mx-auto bg-white border border-gray-200 rounded-lg p-6 space-y-8 text-sm text-gray-800 leading-relaxed">
           <p className="text-base text-gray-900">{article.lead}</p>
 
@@ -144,7 +144,7 @@ export default async function ArticlePage({
         <div className="max-w-3xl mx-auto">
           <RelatedTools currentSlug="taishokukin" />
         </div>
-      </main>
+      </div>
     </div>
   );
 }

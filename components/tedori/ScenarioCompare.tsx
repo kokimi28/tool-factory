@@ -42,7 +42,7 @@ export default function ScenarioCompare({ isOver40 }: { isOver40: boolean }) {
           </tbody>
         </table>
       </div>
-      <p className="mt-2 text-xs text-slate-400">
+      <p className="mt-2 text-xs text-slate-500">
         {isOver40 ? "40歳以上（介護保険料あり）" : "40歳未満"}・扶養なしの概算です。年収を上げると手取り率は下がります。
       </p>
     </section>

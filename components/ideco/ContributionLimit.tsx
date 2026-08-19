@@ -120,7 +120,7 @@ export default function ContributionLimit() {
                     value={otherPlan}
                     onChange={(e) => setOtherPlan(e.target.value)}
                   />
-                  <span className="mt-1 block text-slate-400">
+                  <span className="mt-1 block text-slate-500">
                     共済は告示の額（国家・地方公務員{OTHER_PLAN_EQUIVALENT.nationalPublicServant.toLocaleString("ja-JP")}円／私学共済
                     {OTHER_PLAN_EQUIVALENT.privateSchool.toLocaleString("ja-JP")}円）。DB・厚生年金基金は規約の額
                   </span>

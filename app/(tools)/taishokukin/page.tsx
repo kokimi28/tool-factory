@@ -118,7 +118,7 @@ export default function Home() {
         </header>
 
         {/* メイン */}
-        <main className="px-4 py-8">
+        <div className="px-4 py-8">
           <Calculator />
 
           {/* FAQ */}
@@ -165,7 +165,7 @@ export default function Home() {
             <RelatedTools currentSlug="taishokukin" />
             <LawBasis basis="計算の根拠：所得税法第30条（退職所得控除・課税退職所得金額）／退職所得の源泉徴収税額の速算表（復興特別所得税込み）／地方税法（住民税所得割10%）。国税庁タックスアンサー No.1420・No.2732・No.2740 等。" />
           </div>
-        </main>
+        </div>
       </div>
     </>
   );

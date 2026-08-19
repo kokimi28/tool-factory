@@ -104,7 +104,7 @@ export default function Calculator() {
             <span className="text-gray-500">円</span>
           </div>
           {principalError && (
-            <p id="jutaku-principal-error" role="alert" className="mt-1 text-xs text-rose-600">
+            <p id="jutaku-principal-error" role="alert" className="mt-1 text-xs text-rose-700">
               {principalError}
             </p>
           )}
@@ -118,7 +118,7 @@ export default function Calculator() {
             className="mt-2 w-full"
             aria-label="借入額スライダー"
           />
-          <div className="flex justify-between text-xs text-gray-400">
+          <div className="flex justify-between text-xs text-gray-500">
             <span>1,000万円</span>
             <span>6,000万円</span>
           </div>
@@ -200,15 +200,15 @@ export default function Calculator() {
         </p>
         <dl className="mt-4 grid grid-cols-3 gap-2 text-xs text-emerald-800">
           <div>
-            <dt className="text-emerald-600">借入限度額</dt>
+            <dt className="text-emerald-800">借入限度額</dt>
             <dd className="font-semibold">{yen(result.limit)}</dd>
           </div>
           <div>
-            <dt className="text-emerald-600">控除期間</dt>
+            <dt className="text-emerald-800">控除期間</dt>
             <dd className="font-semibold">{result.years}年</dd>
           </div>
           <div>
-            <dt className="text-emerald-600">毎月返済額</dt>
+            <dt className="text-emerald-800">毎月返済額</dt>
             <dd className="font-semibold">{yen(result.monthlyPayment)}</dd>
           </div>
         </dl>

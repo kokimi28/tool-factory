@@ -112,7 +112,7 @@ export default function FurusatoPage() {
         <RelatedTools currentSlug="furusato" />
       </div>
 
-      <p className="mt-10 text-xs text-gray-400 max-w-2xl mx-auto">
+      <p className="mt-10 text-xs text-gray-500 max-w-2xl mx-auto">
         計算式の根拠：総務省ふるさと納税ポータルサイト（控除額の計算）／地方税法第37条の2・第314条の7。最終確認日 2026-07-24。本サイトの計算結果は概算・参考値です。
       </p>
     </>

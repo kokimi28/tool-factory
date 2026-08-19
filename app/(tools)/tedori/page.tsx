@@ -124,7 +124,7 @@ export default function HomePage() {
 
       <RelatedTools currentSlug="tedori" />
 
-      <p className="mt-10 text-xs text-slate-400">
+      <p className="mt-10 text-xs text-slate-500">
         計算ロジックの法令・料率確認日：{LAW_CHECKED_AT}。税制改正・料率改定により内容が変わる場合があります。
       </p>
     </>
