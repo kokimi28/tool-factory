@@ -3,6 +3,7 @@ import Calculator from "@/components/furusato/Calculator";
 import RelatedTools from "@/components/RelatedTools";
 import ToolBreadcrumbJsonLd from "@/components/ToolBreadcrumbJsonLd";
 import ToolHowToJsonLd from "@/components/ToolHowToJsonLd";
+import { ogImage } from "@/lib/og";
 
 export const metadata: Metadata = {
   title: "ふるさと納税 限度額シミュレーター｜自己負担2,000円で済む寄付上限を計算",
@@ -10,11 +11,16 @@ export const metadata: Metadata = {
     "年収や課税所得から、自己負担2,000円で済むふるさと納税の控除上限額の目安を計算。総務省の式（住民税所得割×20%÷(90%−所得税率×1.021)+2,000）に基づく無料シミュレーター。配偶者・扶養の有無にも対応。",
   alternates: { canonical: "/furusato" },
   openGraph: {
+    images: [ogImage("furusato")],
     title: "ふるさと納税 限度額シミュレーター",
     description:
       "年収・家族構成から、自己負担2,000円で済むふるさと納税の上限額の目安を即計算。",
     type: "website",
     locale: "ja_JP",
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: [ogImage("furusato").url],
   },
 };
 

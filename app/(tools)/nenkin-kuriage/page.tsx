@@ -3,6 +3,7 @@ import Calculator from "@/components/nenkin-kuriage/Calculator";
 import RelatedTools from "@/components/RelatedTools";
 import ToolBreadcrumbJsonLd from "@/components/ToolBreadcrumbJsonLd";
 import ToolHowToJsonLd from "@/components/ToolHowToJsonLd";
+import { ogImage } from "@/lib/og";
 
 export const metadata: Metadata = {
   title: "年金 繰上げ・繰下げ 損益分岐シミュレーター｜何歳から受給すると得？",
@@ -10,11 +11,16 @@ export const metadata: Metadata = {
     "年金の受給開始を早める繰上げ（0.4%/月減）・遅らせる繰下げ（0.7%/月増）で、月額と損益分岐年齢（累計が65歳受給に追いつく年齢）を計算。60〜75歳の受給率と損得を比較できる無料シミュレーター。",
   alternates: { canonical: "/nenkin-kuriage" },
   openGraph: {
+    images: [ogImage("nenkin-kuriage")],
     title: "年金 繰上げ・繰下げ 損益分岐シミュレーター",
     description:
       "受給開始年齢ごとの月額と、65歳受給との損益分岐年齢を即計算。",
     type: "website",
     locale: "ja_JP",
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: [ogImage("nenkin-kuriage").url],
   },
 };
 

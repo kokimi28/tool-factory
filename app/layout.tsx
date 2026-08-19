@@ -3,6 +3,7 @@ import Script from "next/script";
 import { Geist, Geist_Mono } from "next/font/google";
 import SiteFooter from "@/components/SiteFooter";
 import { SITE } from "@/lib/site";
+import { ogImage } from "@/lib/og";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -30,8 +31,8 @@ export const metadata: Metadata = {
   },
   // QC8: OGP / Twitter Card のサイト共通デフォルト。全ページ・全記事が継承し、
   // 個別ページ（記事など）が openGraph.title/description/url を上書きする。
-  // 画像アセットは未用意のため card は summary（画像なしでも成立）。取得後に
-  // openGraph.images / twitter.card=summary_large_image をここ1か所に足せば全ページに反映される。
+  // F5: OG 画像は public/og/*.png に静的生成済み（scripts/generate-og.mjs）。
+  // ここが既定で、各ツールのページが自分の画像で上書きする。
   openGraph: {
     type: "website",
     siteName: SITE.name,
@@ -39,11 +40,13 @@ export const metadata: Metadata = {
     url: SITE.url,
     title: SITE.name,
     description: SITE.description,
+    images: [ogImage()],
   },
   twitter: {
-    card: "summary",
+    card: "summary_large_image",
     title: SITE.name,
     description: SITE.description,
+    images: [ogImage().url],
   },
 };
 
