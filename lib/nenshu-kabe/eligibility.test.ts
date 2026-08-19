@@ -6,8 +6,10 @@
  * いちばん危ないので、施行日ちょうど・前日・翌日を明示的に置く。
  */
 import { describe, expect, it } from 'vitest';
+import { readFileSync } from 'node:fs';
 
 import {
+  ELIGIBILITY_CHECKED_AT,
   WALL_SCHEDULE,
   firmSizeThreshold,
   judgeWall,
@@ -158,5 +160,56 @@ describe('記事 nenshu-kabe-106-joken の日程が実装と一致している',
   it('本文にレンダラが解釈しない markdown 記法が残っていない', () => {
     // paragraphs は plain text として描画されるため ** はそのまま表示されてしまう
     expect(body).not.toContain('**');
+  });
+});
+
+// ============================================================
+// H3: 画面への接続（どちらの壁が効くかを利用者に選ばせない）
+// ============================================================
+describe('H3: 判定を画面につないだ部分', () => {
+  const src = readFileSync(
+    new URL('../../components/nenshu-kabe/WallJudge.tsx', import.meta.url),
+    'utf8',
+  );
+  const calcSrc = readFileSync(
+    new URL('../../components/nenshu-kabe/Calculator.tsx', import.meta.url),
+    'utf8',
+  );
+
+  it('既定の判定日は現行制度の側にある（51人・賃金要件あり）', () => {
+    expect(ELIGIBILITY_CHECKED_AT).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    expect(ELIGIBILITY_CHECKED_AT < WALL_SCHEDULE.wageRequirementRemovedOn).toBe(true);
+    expect(firmSizeThreshold(ELIGIBILITY_CHECKED_AT)).toBe(WALL_SCHEDULE.firmSizeThresholdNow);
+    expect(wageRequirementApplies(ELIGIBILITY_CHECKED_AT)).toBe(true);
+  });
+
+  it('判定結果を計算側の壁に反映している（表示だけで終わっていない）', () => {
+    expect(calcSrc).toMatch(/<WallJudge\s+asOf=\{asOf\}\s+onJudge=\{setWall\}/);
+    expect(src).toMatch(/onJudge\(result\.wall\)/);
+  });
+
+  it('しきい値・施行日を直書きせず WALL_SCHEDULE から描画している', () => {
+    for (const literal of ['51人', '36人', '2026-10-01', '2027-10-01', '88,000']) {
+      expect(src).not.toContain(literal);
+    }
+    expect(src).toContain('WALL_SCHEDULE.firmSizeThresholdNow');
+    expect(src).toContain('WALL_SCHEDULE.firmSizeThresholdAfter');
+    expect(src).toContain('WALL_SCHEDULE.wageRequirementRemovedOn');
+  });
+
+  it('賃金要件の入力は、要件が生きている間だけ出す', () => {
+    expect(src).toMatch(/result\.wageRequirementApplies\s*&&/);
+  });
+
+  it('満たしていない条件をそのまま列挙している（判定の理由を隠さない）', () => {
+    // 表示の有無を決める条件式と、実際に並べる map は別の事実なので別々に見る
+    // （同じ識別子が2つの役割で出るときは役割ごとに照合する＝#147/#145 の教訓）
+    expect(src).toMatch(/result\.unmetConditions\.length > 0\s*&&/);
+    expect(src).toMatch(/result\.unmetConditions\.map\(/);
+  });
+
+  it('判定日は定数で描画してからマウント後に今日へ差し替える（ハイドレーション不一致を作らない）', () => {
+    expect(calcSrc).toContain('useState(ELIGIBILITY_CHECKED_AT)');
+    expect(calcSrc).toMatch(/setAsOf\(new Date\(\)\.toISOString\(\)\.slice\(0, 10\)\)/);
   });
 });
