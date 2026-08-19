@@ -23,6 +23,7 @@ import {
   type ReceiptOrder,
 } from '@/lib/ideco/calculations';
 import { IDECO_PRESETS } from '@/lib/ideco/presets';
+import { SITE_META } from '@/lib/ideco/site-meta';
 import { encodeShareParams, decodeShareParams } from '@/lib/share-url';
 import { encodeIdecoInputs, decodeIdecoInputs } from '@/lib/ideco/share';
 import { resultToClipboardText } from '@/lib/ideco/result-text';
@@ -751,7 +752,7 @@ export default function Calculator() {
                   <a href="https://www.nta.go.jp/taxes/shiraberu/taxanswer/shotoku/1420.htm" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline mx-1">No.1420</a>/
                   <a href="https://www.nta.go.jp/taxes/shiraberu/taxanswer/shotoku/2732.htm" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline mx-1">No.2732</a>/
                   <a href="https://www.nta.go.jp/taxes/shiraberu/taxanswer/shotoku/2735.htm" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline mx-1">No.2735</a>
-                  （最終確認日：2026-06-21）
+                  （最終確認日：{SITE_META.lastUpdated}）
                 </p>
               </div>
             </div>

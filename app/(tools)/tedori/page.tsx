@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import LinkPending from "@/components/LinkPending";
 import Calculator from "@/components/tedori/Calculator";
+import LawBasis from "@/components/LawBasis";
 import RelatedTools from "@/components/RelatedTools";
 import ToolBreadcrumbJsonLd from "@/components/ToolBreadcrumbJsonLd";
 import ToolHowToJsonLd from "@/components/ToolHowToJsonLd";
@@ -126,9 +127,7 @@ export default function HomePage() {
 
       <RelatedTools currentSlug="tedori" />
 
-      <p className="mt-10 text-xs text-slate-500">
-        計算ロジックの法令・料率確認日：{LAW_CHECKED_AT}。税制改正・料率改定により内容が変わる場合があります。
-      </p>
+      <LawBasis basis="計算の根拠：所得税法（給与所得控除・基礎控除・速算表）／地方税法（住民税 所得割10%・均等割）／協会けんぽ・厚生年金・雇用保険・子ども・子育て支援金の各料率。" checkedAt={LAW_CHECKED_AT} />
     </>
   );
 }
