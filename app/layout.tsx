@@ -1,22 +1,9 @@
 import type { Metadata } from "next";
 import Script from "next/script";
-import { Geist, Geist_Mono } from "next/font/google";
 import SiteFooter from "@/components/SiteFooter";
 import { SITE } from "@/lib/site";
 import { ogImage } from "@/lib/og";
 import "./globals.css";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-  display: "swap",
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
@@ -62,7 +49,11 @@ export default function RootLayout({
   return (
     <html
       lang="ja"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      // F6: Geist / Geist_Mono は CSS 変数を定義するだけで一度も参照されておらず
+      // （ビルド後の CSS に var(--font-geist…) が0件）、本文は Tailwind 既定の
+      // システムフォントで描画されていた。読み込むだけ無駄なので外した。
+      // 実際にウェブフォントを使うときは、変数を消費する font-family 指定も必ず併せて入れる。
+      className="h-full antialiased"
     >
       <head>
         {/* QC14: GA を使うときだけ第三者オリジンへ preconnect し初回接続を短縮（Lighthouse 推奨）。 */}
