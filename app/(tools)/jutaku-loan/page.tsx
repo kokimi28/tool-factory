@@ -3,6 +3,7 @@ import Calculator from "@/components/jutaku-loan/Calculator";
 import RelatedTools from "@/components/RelatedTools";
 import ToolBreadcrumbJsonLd from "@/components/ToolBreadcrumbJsonLd";
 import ToolHowToJsonLd from "@/components/ToolHowToJsonLd";
+import { ogImage } from "@/lib/og";
 
 export const metadata: Metadata = {
   title: "住宅ローン控除シミュレーター｜年末残高×0.7%の控除額を年別に計算",
@@ -10,11 +11,16 @@ export const metadata: Metadata = {
     "借入額・金利・返済期間・住宅の環境性能から、住宅ローン控除（住宅借入金等特別控除）の各年・総額の控除見込みを計算。控除率0.7%・新築13年/中古10年・省エネ住宅の借入限度額に対応した無料シミュレーター（令和6年入居基準）。",
   alternates: { canonical: "/jutaku-loan" },
   openGraph: {
+    images: [ogImage("jutaku-loan")],
     title: "住宅ローン控除シミュレーター",
     description:
       "借入額・住宅性能から、住宅ローン控除の年別・総額の控除見込みを即計算（令和6年入居基準）。",
     type: "website",
     locale: "ja_JP",
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: [ogImage("jutaku-loan").url],
   },
 };
 

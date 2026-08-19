@@ -4,6 +4,7 @@ import RelatedTools from '@/components/RelatedTools';
 import ToolBreadcrumbJsonLd from '@/components/ToolBreadcrumbJsonLd';
 import ToolHowToJsonLd from '@/components/ToolHowToJsonLd';
 import { SITE_META } from '@/lib/ideco/site-meta';
+import { ogImage } from "@/lib/og";
 
 export const metadata: Metadata = {
   title: {
@@ -19,6 +20,7 @@ export const metadata: Metadata = {
     '19年ルール 退職所得控除',
   ],
   openGraph: {
+    images: [ogImage("ideco")],
     title: 'iDeCo・退職金 受取順序シミュレーター',
     description:
       'iDeCoと退職金の受取順序・間隔で、退職所得控除の重複調整込みの税額・手取りを即時計算。順序を逆／間隔を空けた場合の比較つき。2026年改正対応。',
@@ -26,10 +28,11 @@ export const metadata: Metadata = {
     locale: 'ja_JP',
   },
   twitter: {
-    card: 'summary',
+    card: 'summary_large_image',
     title: 'iDeCo・退職金 受取順序シミュレーター',
     description:
       'iDeCoと退職金、いつ・どの順で受け取ると手取りが増える？退職所得控除の重複調整込みで即時計算。2026年改正対応。',
+      images: [ogImage('ideco').url],
   },
   alternates: {
     canonical: '/ideco',

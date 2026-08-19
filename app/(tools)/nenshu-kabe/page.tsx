@@ -3,6 +3,7 @@ import Calculator from "@/components/nenshu-kabe/Calculator";
 import RelatedTools from "@/components/RelatedTools";
 import ToolBreadcrumbJsonLd from "@/components/ToolBreadcrumbJsonLd";
 import ToolHowToJsonLd from "@/components/ToolHowToJsonLd";
+import { ogImage } from "@/lib/og";
 
 export const metadata: Metadata = {
   title: "年収の壁 手取り逆転シミュレーター｜106万・130万の壁で手取りはいくら下がる？",
@@ -10,11 +11,16 @@ export const metadata: Metadata = {
     "パート・アルバイトの年収が106万円・130万円の壁を超えると、社会保険料で手取りが逆転（働き損）します。壁の前後の手取りと、手取りが元に戻る回復年収を計算する無料シミュレーター。",
   alternates: { canonical: "/nenshu-kabe" },
   openGraph: {
+    images: [ogImage("nenshu-kabe")],
     title: "年収の壁 手取り逆転シミュレーター",
     description:
       "106万・130万の壁で手取りがいくら下がり、いくら稼げば元に戻るかを即計算。",
     type: "website",
     locale: "ja_JP",
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: [ogImage("nenshu-kabe").url],
   },
 };
 

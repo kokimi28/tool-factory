@@ -4,12 +4,14 @@ import RelatedTools from '@/components/RelatedTools';
 import ToolBreadcrumbJsonLd from '@/components/ToolBreadcrumbJsonLd';
 import ToolHowToJsonLd from '@/components/ToolHowToJsonLd';
 import LawBasis from '@/components/LawBasis';
+import { ogImage } from "@/lib/og";
 
 export const metadata: Metadata = {
   title: '退職金課税シミュレーター | 退職所得控除・所得税・住民税・手取り額を即時計算',
   description:
     '退職金額と勤続年数を入力するだけで、退職所得控除額・所得税・住民税・手取り額をかんたんに計算。役員退職金・短期勤続・iDeCo併用にも対応。2026年改正（DC一時金10年ルール）にも対応した最新版。',
   openGraph: {
+    images: [ogImage("taishokukin")],
     title: '退職金課税シミュレーター',
     description:
       '退職金の手取り額を即時計算。「あと1年勤めると控除額がいくら増えるか」も自動で比較表示。',
@@ -17,10 +19,11 @@ export const metadata: Metadata = {
     locale: 'ja_JP',
   },
   twitter: {
-    card: 'summary',
+    card: 'summary_large_image',
     title: '退職金課税シミュレーター',
     description:
       '退職金の手取り額を即時計算。「あと1年勤めると控除額がいくら増えるか」も自動で比較表示。',
+      images: [ogImage('taishokukin').url],
   },
   alternates: {
     canonical: '/taishokukin',

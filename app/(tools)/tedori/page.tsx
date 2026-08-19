@@ -7,9 +7,17 @@ import ToolHowToJsonLd from "@/components/ToolHowToJsonLd";
 import { getAllArticles } from "@/lib/tedori/articles";
 import { FAQ_ITEMS } from "@/lib/tedori/faq";
 import { SITE_NAME, SITE_URL, SITE_DESCRIPTION, LAW_CHECKED_AT } from "@/lib/tedori/site";
+import { ogImage } from "@/lib/og";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/tedori" },
+  openGraph: {
+    images: [ogImage("tedori")],
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: [ogImage("tedori").url],
+  },
 };
 
 export default function HomePage() {
