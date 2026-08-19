@@ -128,7 +128,7 @@ export default function Calculator() {
               aria-describedby={incomeError ? "annualIncome-error" : undefined}
             />
             {incomeError ? (
-              <p id="annualIncome-error" role="alert" className="mt-1 text-right text-xs text-rose-600">
+              <p id="annualIncome-error" role="alert" className="mt-1 text-right text-xs text-rose-700">
                 {incomeError}
               </p>
             ) : (

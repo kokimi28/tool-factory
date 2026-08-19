@@ -18,7 +18,7 @@ function Row({
     <div className="flex items-baseline justify-between gap-3 py-2">
       <span className={strong ? "text-sm font-semibold text-slate-700" : "text-sm text-slate-600"}>
         {label}
-        {sub ? <span className="ml-1 text-xs text-slate-400">{sub}</span> : null}
+        {sub ? <span className="ml-1 text-xs text-slate-500">{sub}</span> : null}
       </span>
       <span
         className={
@@ -103,7 +103,7 @@ export default function ResultDisplay({ result }: { result: NetSalaryResult }) {
           <Row label="所得税" sub="復興特別所得税込み" value={yen(incomeTax)} />
           <Row label="住民税" sub="概算" value={yen(residentTax)} />
         </div>
-        <p className="mt-2 text-xs text-slate-400">
+        <p className="mt-2 text-xs text-slate-500">
           給与所得から社会保険料控除・基礎控除などを差し引いた課税所得に所得税がかかります。住民税は別途、前年所得ベースの概算です。
         </p>
       </details>

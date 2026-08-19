@@ -153,7 +153,7 @@ export default function Calculator() {
               aria-describedby={retirementError ? "taishokukin-amount-error" : undefined}
             />
             {retirementError && (
-              <p id="taishokukin-amount-error" role="alert" className="mt-1 text-xs text-rose-600">
+              <p id="taishokukin-amount-error" role="alert" className="mt-1 text-xs text-rose-700">
                 {retirementError}
               </p>
             )}
@@ -173,10 +173,11 @@ export default function Calculator() {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="taishokukin-years" className="block text-sm font-medium text-gray-700 mb-1">
                 勤続年数（年）
               </label>
               <input
+                id="taishokukin-years"
                 type="number"
                 inputMode="numeric"
                 min="0"
@@ -189,16 +190,17 @@ export default function Calculator() {
                 aria-describedby={yearsError ? "taishokukin-years-error" : undefined}
               />
               {yearsError && (
-                <p id="taishokukin-years-error" role="alert" className="mt-1 text-xs text-rose-600">
+                <p id="taishokukin-years-error" role="alert" className="mt-1 text-xs text-rose-700">
                   {yearsError}
                 </p>
               )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="taishokukin-months" className="block text-sm font-medium text-gray-700 mb-1">
                 端数月（任意）
               </label>
               <input
+                id="taishokukin-months"
                 type="number"
                 inputMode="numeric"
                 min="0"
@@ -211,7 +213,7 @@ export default function Calculator() {
                 aria-describedby={monthsError ? "taishokukin-months-error" : undefined}
               />
               {monthsError && (
-                <p id="taishokukin-months-error" role="alert" className="mt-1 text-xs text-rose-600">
+                <p id="taishokukin-months-error" role="alert" className="mt-1 text-xs text-rose-700">
                   {monthsError}
                 </p>
               )}
@@ -441,7 +443,7 @@ export default function Calculator() {
               href="#"
               rel="sponsored nofollow noopener noreferrer"
               target="_blank"
-              className="inline-block bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-6 py-3 rounded transition-colors"
+              className="inline-block bg-emerald-700 hover:bg-emerald-800 text-white font-medium px-6 py-3 rounded transition-colors"
             >
               税理士を無料で探す →
             </a>

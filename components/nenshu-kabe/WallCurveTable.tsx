@@ -23,9 +23,9 @@ export default function WallCurveTable({ wall }: { wall: SiWall }) {
       className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm"
       aria-label="壁をまたぐ手取りの変化"
     >
-      <h3 className="mb-3 text-sm font-bold text-gray-800">
+      <h2 className="mb-3 text-sm font-bold text-gray-800">
         {man(wall)}の壁をまたぐ手取りの変化
-      </h3>
+      </h2>
       <div className="overflow-x-auto">
         <table className="w-full text-sm tabular-nums">
           <thead>
@@ -44,7 +44,7 @@ export default function WallCurveTable({ wall }: { wall: SiWall }) {
                   {r.enrolled ? (
                     <span className="rounded bg-amber-100 px-1.5 py-0.5 text-xs text-amber-800">加入</span>
                   ) : (
-                    <span className="text-xs text-gray-400">扶養内</span>
+                    <span className="text-xs text-gray-500">扶養内</span>
                   )}
                 </td>
               </tr>
@@ -52,7 +52,7 @@ export default function WallCurveTable({ wall }: { wall: SiWall }) {
           </tbody>
         </table>
       </div>
-      <p className="mt-2 text-xs text-gray-400">
+      <p className="mt-2 text-xs text-gray-500">
         壁の直前（扶養内・社保なし）から壁で社会保険に加入すると、手取りが一時的に下がります（働き損の谷）。本人の手取りの概算です。
       </p>
     </section>

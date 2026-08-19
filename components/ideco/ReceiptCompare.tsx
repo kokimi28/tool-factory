@@ -127,7 +127,7 @@ export default function ReceiptCompare() {
             <tr className="border-b border-slate-100">
               <td className="py-1.5 pr-2 text-slate-700">
                 一時金
-                <span className="ml-1 text-xs text-slate-400">
+                <span className="ml-1 text-xs text-slate-500">
                   退職所得控除 {yen(c.lumpSum.deduction)}
                 </span>
               </td>

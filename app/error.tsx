@@ -20,7 +20,7 @@ export default function Error({
   }, [error]);
 
   return (
-    <main className="min-h-[60vh] bg-gray-50">
+    <div className="min-h-[60vh] bg-gray-50">
       <div className="mx-auto max-w-xl px-4 py-20 text-center">
         <h1 className="text-2xl font-bold text-gray-900">
           エラーが発生しました
@@ -44,6 +44,6 @@ export default function Error({
           </Link>
         </div>
       </div>
-    </main>
+    </div>
   );
 }

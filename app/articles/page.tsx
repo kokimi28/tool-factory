@@ -61,7 +61,7 @@ export default function AllArticlesPage() {
         </div>
       </header>
 
-      <main className="px-4 py-8">
+      <div className="px-4 py-8">
         <div className="max-w-3xl mx-auto space-y-10">
           {groups.map(({ tool, items }) => (
             <section key={tool.slug} aria-labelledby={`tool-${tool.slug}`}>
@@ -92,7 +92,7 @@ export default function AllArticlesPage() {
                       <p className="text-sm text-gray-600 mt-1">
                         {a.description}
                       </p>
-                      <p className="text-xs text-gray-400 mt-2">
+                      <p className="text-xs text-gray-500 mt-2">
                         最終更新：{a.updated}
                       </p>
                     </Link>
@@ -102,7 +102,7 @@ export default function AllArticlesPage() {
             </section>
           ))}
         </div>
-      </main>
+      </div>
     </div>
   );
 }

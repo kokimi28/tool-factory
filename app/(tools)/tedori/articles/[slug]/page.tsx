@@ -81,7 +81,7 @@ export default async function ArticlePage({
       </nav>
 
       <h1 className="text-2xl font-bold text-slate-900">{article.title}</h1>
-      <p className="mt-2 text-xs text-slate-400">最終更新：{article.updatedAt}</p>
+      <p className="mt-2 text-xs text-slate-500">最終更新：{article.updatedAt}</p>
 
       <div className="mt-6 space-y-6 text-slate-700">
         {article.sections.map((section, i) => (
@@ -108,7 +108,7 @@ export default async function ArticlePage({
         </p>
       </div>
 
-      <p className="mt-6 text-xs text-slate-400">
+      <p className="mt-6 text-xs text-slate-500">
         本記事は情報提供を目的としたもので、税務上の助言ではありません。金額は参考値です。
       </p>
 

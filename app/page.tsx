@@ -37,7 +37,7 @@ function itemListJsonLd() {
  */
 export default function HomePage() {
   return (
-    <main className="mx-auto max-w-3xl px-4 py-12">
+    <div className="mx-auto max-w-3xl px-4 py-12">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd()) }}
@@ -79,9 +79,9 @@ export default function HomePage() {
         })}
       </ul>
 
-      <p className="mt-10 text-xs text-black/40">
+      <p className="mt-10 text-xs text-slate-500">
         本サイトの計算結果は概算・参考値です。法令確認日: {SITE.lawCheckedAt}。
       </p>
-    </main>
+    </div>
   );
 }

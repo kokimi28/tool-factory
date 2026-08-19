@@ -7,7 +7,7 @@ import { SITE } from "@/lib/site";
  */
 export default function LawBasis({ basis }: { basis: string }) {
   return (
-    <p className="mt-10 text-xs text-gray-400 leading-relaxed">
+    <p className="mt-10 text-xs text-gray-500 leading-relaxed">
       {basis}　最終確認日 {SITE.lawCheckedAt}。税制改正・料率改定により内容が変わる場合があります。本サイトの計算結果は概算・参考値です。
     </p>
   );

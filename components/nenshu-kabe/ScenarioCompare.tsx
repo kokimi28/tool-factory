@@ -23,9 +23,9 @@ export default function ScenarioCompare({
 
   return (
     <section aria-label="3つの働き方の比較">
-      <h3 className="mb-3 text-sm font-bold text-gray-800">
+      <h2 className="mb-3 text-sm font-bold text-gray-800">
         {man(wall)}の壁：3つの選び方を並べる
-      </h3>
+      </h2>
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
@@ -42,7 +42,7 @@ export default function ScenarioCompare({
               <tr key={r.kind} className="border-b border-gray-100">
                 <td className="py-1.5 pr-2 text-gray-700">
                   {r.label}
-                  <span className="ml-1 text-xs text-gray-400">
+                  <span className="ml-1 text-xs text-gray-500">
                     {r.enrolled ? "（社保 加入）" : "（扶養内）"}
                   </span>
                 </td>

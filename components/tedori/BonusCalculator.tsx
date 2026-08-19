@@ -58,7 +58,7 @@ export default function BonusCalculator() {
             aria-describedby={bonusError ? "bonus-amount-error" : undefined}
           />
           {bonusError && (
-            <p id="bonus-amount-error" role="alert" className="mt-1 text-xs text-rose-600">
+            <p id="bonus-amount-error" role="alert" className="mt-1 text-xs text-rose-700">
               {bonusError}
             </p>
           )}
@@ -77,7 +77,7 @@ export default function BonusCalculator() {
             aria-describedby={prevError ? "bonus-prev-error" : undefined}
           />
           {prevError && (
-            <p id="bonus-prev-error" role="alert" className="mt-1 text-xs text-rose-600">
+            <p id="bonus-prev-error" role="alert" className="mt-1 text-xs text-rose-700">
               {prevError}
             </p>
           )}

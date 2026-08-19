@@ -58,7 +58,7 @@ export default function FamilyFields({
                 </label>
                 <button
                   type="button"
-                  className="ml-auto text-xs text-slate-500 underline underline-offset-2 hover:text-rose-600"
+                  className="ml-auto text-xs text-slate-500 underline underline-offset-2 hover:text-rose-700"
                   onClick={() => onChange(family.filter((_, j) => j !== i))}
                 >
                   削除

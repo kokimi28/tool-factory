@@ -32,7 +32,7 @@ export default function CTA() {
           </li>
         ))}
       </ul>
-      <p className="mt-3 text-xs text-slate-400">
+      <p className="mt-3 text-xs text-slate-500">
         ※本欄には広告（アフィリエイトプログラム）を含みます。掲載は当サイトの判断によるもので、税額の計算結果とは関係ありません。
       </p>
     </section>

@@ -41,9 +41,9 @@ export default function WallJudge({
       className="rounded-2xl border border-gray-200 bg-white p-5"
       aria-labelledby="wall-judge-heading"
     >
-      <h3 id="wall-judge-heading" className="text-sm font-bold text-gray-800">
+      <h2 id="wall-judge-heading" className="text-sm font-bold text-gray-800">
         どちらの壁が効くか判定する
-      </h3>
+      </h2>
       <p className="mt-2 text-xs text-gray-600 leading-relaxed">
         106万円の壁は年収だけでは決まりません。下の条件を<strong>すべて</strong>満たしたときだけ社会保険に加入し、1つでも欠けると106万円を超えても加入せず、扶養の判定は130万円で行われます。
       </p>
@@ -127,7 +127,7 @@ export default function WallJudge({
         </button>
       </div>
 
-      <p className="mt-3 text-xs text-gray-400 leading-relaxed">
+      <p className="mt-3 text-xs text-gray-500 leading-relaxed">
         判定日 {asOf} 時点の基準（企業規模 {result.firmSizeThreshold}人以上）で計算しています。
         企業規模の要件は {WALL_SCHEDULE.firmSizeLoweredOn} に
         {WALL_SCHEDULE.firmSizeThresholdNow}人以上 → {WALL_SCHEDULE.firmSizeThresholdAfter}人以上へ拡大し、
