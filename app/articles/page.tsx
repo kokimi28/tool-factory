@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import LinkPending from "@/components/LinkPending";
 import { SITE } from "@/lib/site";
 import { allArticles } from "@/lib/all-articles";
 import { liveTools } from "@/lib/tools-registry";
@@ -95,6 +96,7 @@ export default function AllArticlesPage() {
                       <p className="text-xs text-gray-500 mt-2">
                         最終更新：{a.updated}
                       </p>
+                      <LinkPending />
                     </Link>
                   </li>
                 ))}

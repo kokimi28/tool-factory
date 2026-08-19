@@ -1,4 +1,5 @@
 import Link from "next/link";
+import LinkPending from "@/components/LinkPending";
 import { relatedTools } from "@/lib/tools-registry";
 import { nextStep } from "@/lib/next-step";
 
@@ -27,6 +28,7 @@ export default function RelatedTools({ currentSlug }: { currentSlug: string }) {
           <span className="text-xs font-semibold text-blue-600">次の一手</span>
           <span className="mt-0.5 block font-semibold text-blue-900">{next.label} →</span>
           <span className="mt-1 block text-sm text-blue-800/80">{next.reason}</span>
+          <LinkPending />
         </Link>
       )}
       <h2 id="related-tools" className="text-lg font-bold mb-3">
@@ -43,6 +45,7 @@ export default function RelatedTools({ currentSlug }: { currentSlug: string }) {
               <span className="mt-1 block text-sm text-black/60">
                 {t.description}
               </span>
+              <LinkPending />
             </Link>
           </li>
         ))}

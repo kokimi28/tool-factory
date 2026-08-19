@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import LinkPending from "@/components/LinkPending";
 import Calculator from "@/components/tedori/Calculator";
 import RelatedTools from "@/components/RelatedTools";
 import ToolBreadcrumbJsonLd from "@/components/ToolBreadcrumbJsonLd";
@@ -102,7 +103,8 @@ export default function HomePage() {
               >
                 <span className="block font-semibold text-brand-dark">{article.title}</span>
                 <span className="mt-1 block text-sm text-slate-600">{article.description}</span>
-              </Link>
+                      <LinkPending />
+                    </Link>
             </li>
           ))}
         </ul>
