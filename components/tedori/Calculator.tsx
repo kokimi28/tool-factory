@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useReducer, useRef, useState } from "react";
-import { calculateNetSalary, type NetSalaryInput } from "@/lib/tedori/calculations";
+import { familyImpact, encodeFamily, decodeFamily, type FamilyInput } from "@/lib/tedori/family";
 import { encodeShareParams, decodeShareParams } from "@/lib/share-url";
 import { validateNumberInput } from "@/lib/validate-input";
 import { TEDORI_PRESETS } from "@/lib/tedori/presets";
@@ -9,6 +9,7 @@ import ResultDisplay from "@/components/tedori/ResultDisplay";
 import ScenarioCompare from "@/components/tedori/ScenarioCompare";
 import ReverseLookup from "@/components/tedori/ReverseLookup";
 import CTA from "@/components/tedori/CTA";
+import FamilyFields from "@/components/tedori/FamilyFields";
 
 type State = {
   annualIncome: string;
@@ -45,6 +46,8 @@ function toInt(raw: string): number {
 
 export default function Calculator() {
   const [state, dispatch] = useReducer(reducer, initialState);
+  // H1: 扶養家族（人数が変わる配列なので reducer ではなく単独の state で持つ）
+  const [family, setFamily] = useState<FamilyInput[]>([]);
   const hydrated = useRef(false);
   const [copied, setCopied] = useState(false);
 
@@ -57,6 +60,7 @@ export default function Calculator() {
     if (p.over40 === "1") {
       dispatch({ type: "set", field: "isOver40", value: true });
     }
+    if (p.fam) setFamily(decodeFamily(p.fam));
     hydrated.current = true;
   }, []);
 
@@ -66,9 +70,10 @@ export default function Calculator() {
     const qs = encodeShareParams({
       income: String(toInt(state.annualIncome)),
       over40: state.isOver40 ? "1" : "0",
+      fam: encodeFamily(family),
     });
     window.history.replaceState(null, "", qs || window.location.pathname);
-  }, [state]);
+  }, [state, family]);
 
   async function copyShareLink() {
     try {
@@ -80,15 +85,16 @@ export default function Calculator() {
     }
   }
 
-  const input: NetSalaryInput = useMemo(
-    () => ({
-      annualIncome: toInt(state.annualIncome),
-      isOver40: state.isOver40,
-    }),
-    [state],
+  const impact = useMemo(
+    () =>
+      familyImpact(
+        { annualIncome: toInt(state.annualIncome), isOver40: state.isOver40 },
+        family,
+      ),
+    [state, family],
   );
 
-  const result = useMemo(() => calculateNetSalary(input), [input]);
+  const result = impact.withFamily;
 
   // E9: 年収入力の妥当性メッセージ（負値・非数字・上限超過を分かりやすく通知）。
   const incomeError = useMemo(
@@ -162,8 +168,20 @@ export default function Calculator() {
             </label>
           </fieldset>
 
+          <FamilyFields family={family} onChange={setFamily} />
+
+          {impact.takeHomeGain > 0 && (
+            <p className="rounded-lg bg-emerald-50 p-3 text-xs text-emerald-800">
+              扶養控除の申告で手取りが{" "}
+              <span className="font-bold tabular-nums">
+                {impact.takeHomeGain.toLocaleString("ja-JP")}円
+              </span>{" "}
+              増えます（扶養なしの場合との差）。
+            </p>
+          )}
+
           <div className="rounded-lg bg-slate-50 p-3 text-xs text-slate-500">
-            会社員（協会けんぽ・一般の事業）で扶養なしの場合の概算です。健康保険料率は都道府県で、各種控除は扶養状況で変わります。
+            会社員（協会けんぽ・一般の事業）の概算です。健康保険料率は都道府県で変わります。扶養控除は上の入力を反映しますが、配偶者控除・社会保険料控除の上乗せ（生命保険料控除など）は含めていません。
           </div>
 
           <div className="flex flex-wrap items-center gap-4">

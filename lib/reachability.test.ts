@@ -37,8 +37,6 @@ const UNCONNECTED: Record<string, string> = {
     '加給年金・振替加算。記事の根拠として使用中。UI への接続は backlog 起票済',
   'lib/tedori/bonus.ts':
     '賞与の手取り。記事の根拠として使用中。UI への接続は backlog 起票済',
-  'lib/tedori/dependents.ts':
-    '扶養控除（G1）。記事の根拠として使用中。UI への接続は backlog 起票済',
 };
 
 const SOURCE_EXTS = ['.ts', '.tsx'];
@@ -120,6 +118,8 @@ describe('未接続モジュールの検出', () => {
       'lib/nenshu-kabe/spouse-deduction.ts',
       'lib/furusato/calculations.ts',
       'lib/ideco/calculations.ts',
+      'lib/tedori/dependents.ts',
+      'lib/tedori/family.ts',
     ]) {
       expect(reached.has(core)).toBe(true);
     }
