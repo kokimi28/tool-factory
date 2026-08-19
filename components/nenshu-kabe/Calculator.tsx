@@ -15,12 +15,17 @@ import { resultToClipboardText } from "@/lib/nenshu-kabe/result-text";
 import CopyResult from "@/components/nenshu-kabe/CopyResult";
 import WallCurveTable from "@/components/nenshu-kabe/WallCurveTable";
 import ScenarioCompare from "@/components/nenshu-kabe/ScenarioCompare";
+import WallJudge from "@/components/nenshu-kabe/WallJudge";
+import { ELIGIBILITY_CHECKED_AT } from "@/lib/nenshu-kabe/eligibility";
 
 const yen = (n: number) => `${Math.round(n).toLocaleString("ja-JP")}円`;
 const man = (n: number) => `${Math.round(n / 10000).toLocaleString("ja-JP")}万円`;
 
 export default function Calculator() {
   const [wall, setWall] = useState<SiWall>(1_300_000);
+  // H3: 判定日。SSR とハイドレーション直後は定数、マウント後に実際の今日へ差し替える
+  // （静的生成のページはビルド時刻で固まるため、描画時に new Date() を使えない）。
+  const [asOf, setAsOf] = useState(ELIGIBILITY_CHECKED_AT);
   const [income, setIncome] = useState("1400000");
   const hydrated = useRef(false);
   const [copied, setCopied] = useState(false);
@@ -30,6 +35,7 @@ export default function Calculator() {
     const p = decodeShareParams(window.location.search);
     if (p.income) setIncome(String(toNumber(p.income)));
     if (p.wall) setWall(codeToWall(p.wall));
+    setAsOf(new Date().toISOString().slice(0, 10));
     hydrated.current = true;
   }, []);
 
@@ -166,6 +172,11 @@ export default function Calculator() {
           （壁から <span className="font-bold">+{yen(reversal.extraIncomeToRecover)}</span>）。
           この間は「働いても手取りが増えない」ゾーンです。
         </p>
+      </div>
+
+      {/* どちらの壁が効くかの判定（H3）＝壁を自分で選ばせない */}
+      <div className="mt-6">
+        <WallJudge asOf={asOf} onJudge={setWall} />
       </div>
 
       {/* 3シナリオ横並び比較（E5）＝本人の手取り＋扶養している側の追加負担 */}
