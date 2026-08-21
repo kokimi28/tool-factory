@@ -50,3 +50,14 @@ components/
 
 - ASP 案件 URL の差し込み・CTA の有効化など収益が発生しうる導線、Vercel Pro 移行・独自ドメイン購入・課金は**オーナー専任の STOP 対象**。エージェントは単独で実行しない。
 - 正本: dev-env `docs/dev-env/tool-factory-consolidation.md` / `portfolio-integration.md`。
+
+## 6. リモート/クラウドセッション運用（claude.ai/code・スマホ発）
+
+`CLAUDE_CODE_REMOTE=true` のとき、claude.ai/code のクラウドコンテナ（Linux）で実行されている。SessionStart hook（`.claude/hooks/session-start.mjs`）が依存導入と環境診断（preflight）を行い、結果をセッション冒頭に出力する。この環境ではローカルの個人設定（`~/.claude/`・ユーザー MCP）は届かない前提で、以下の縮退規約に従う。
+
+- **止まらない**: 検証手段が無いことを理由に作業を中断しない。実装 → 実行可能な検証をすべて実行 → push → draft PR 作成 → CI green まで追走、が完了の定義。
+- **検証はできるものを全部**: `npx tsc --noEmit` → `npm test` → `npm run build` の3点は必ず実行する。実行できなかった検証は PR 本文の「未検証項目」に列挙する（黙って省略しない）。
+- **UI 実機確認の代替**: Playwright MCP が無い環境では、開発サーバーを起動して `node scripts/verify-ui-remote.mjs http://localhost:3000/ <他URL...>` を実行し、スクリーンショット（`.claude/tmp/ui-*.png`）を Read で視覚確認する（同梱 Chromium 使用・依存追加なし）。
+- **secrets 非接触**: このリポにサーバー秘密は無い（公開値のみ）。それでも `.env` 系ファイルの読み書きはしない（値の要求・推測・生成をしない）。
+- **外部疎通の限界**: allowlist 外（`*.vercel.app` 等）への疎通確認は不可（HTTP 000）。デプロイ後確認は CI とオーナーに委ねる。
+- **スマホからのキック**: 起票・依頼の定型は dev-env `docs/prompts/mobile-kick.md` を使う（完了条件込みの1メッセージで渡す）。
